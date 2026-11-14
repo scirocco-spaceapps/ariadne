@@ -3,6 +3,8 @@ import { useMission } from '../app/store'
 import { assetsUrl } from '../lib/config'
 import { aoi } from '../lib/fixtures'
 import { LayerToggle, MapView, fixtureSource, remoteSource } from '../map'
+import { ConditionsPanel } from './ConditionsPanel'
+import { RouteSheet } from './RouteSheet'
 import { SessionControls } from './SessionControls'
 
 /** Console until the N6 layout: the map with its layer toggles, and the session line. */
@@ -13,7 +15,7 @@ export function ConsolePlaceholder() {
   // DEMO uses the SYNTHETIC fixtures; live mode the real AOI on the asset host.
   const source = useMemo(() => (demo ? fixtureSource() : remoteSource(aoi, assetsUrl)), [demo])
   return (
-    <main style={{ display: 'flex', flexDirection: 'column', height: '100vh', margin: 0 }}>
+    <main style={{ display: 'flex', flexDirection: 'column', height: '100vh', margin: 0, background: '#fff', color: '#111', colorScheme: 'light' }}>
       <header style={{ padding: '8px 12px' }}>
         <h1 style={{ margin: 0, fontSize: 20 }}>Ariadne mission console</h1>
         <p data-testid="session-line" style={{ margin: 0 }}>
@@ -29,6 +31,10 @@ export function ConsolePlaceholder() {
         <div style={{ flex: 1, position: 'relative' }}>
           <MapView source={source} />
         </div>
+        <aside className="pn-column" aria-label="Route and conditions">
+          <RouteSheet />
+          <ConditionsPanel />
+        </aside>
       </div>
     </main>
   )
