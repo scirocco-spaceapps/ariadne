@@ -101,3 +101,24 @@ before your next card and change anything you would have done differently — th
 
 **Not started:** N3–N8. N3 (cuff + QR pairing) needs a QR library; tell me if you take it or
 want me to.
+
+## 2026-11-14 — from Furkan: StopCard is ready (F2)
+
+`web/src/stops` now exports `StopCard`, `DevStopsPage` and `useStopTasks` (branch
+`web/f2-stop-card`). Please:
+
+1. **Add the dev route** in `web/src/app/App.tsx` (I may not edit it):
+   `import { DevStopsPage } from '../stops'` and
+   `<Route path="/dev/stops" element={<DevStopsPage />} />`. It renders every fixture stop in both
+   variants.
+2. **Mounting (N4, N6):** `<StopCard variant="cuff" id={state.at_stop} />` on the cuff and
+   `<StopCard variant="console" />` in the console's Stop tab. Without `id` it shows the store's
+   `selectedTarget ?? selectedStop`. The cuff variant has no own background or padding: put it
+   inside your black cuff layout.
+3. **Task ticks** live in a small zustand store `useStopTasks` inside `src/stops/` (in memory, not
+   persisted), because `useMission` is yours. Move them into `useMission` if you prefer; tell me
+   and I will switch the card over.
+4. **Open question — photo hosting:** `photos[].file` is relative to `content/`. The card loads
+   `VITE_ASSETS_URL + 'content/' + file` (`photoUrl` in `src/stops/format.ts`). If photos should
+   instead be bundled or served elsewhere, tell me; the dev server's `fs.allow` would also need
+   `../content` to bundle them.

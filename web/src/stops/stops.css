@@ -1,0 +1,264 @@
+/* Stop cards. Console: light side panel. Cuff: black, high contrast, readable at arm's length,
+   no overflow at 360 px (matches src/cuff/cuff.css). */
+.stop-card {
+  --stop-bg: #fff;
+  --stop-fg: #111;
+  --stop-dim: #555;
+  --stop-line: #ddd;
+  --stop-accent: #b5541c;
+  --stop-warn: #8a5a00;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+  padding: 12px 14px;
+  background: var(--stop-bg);
+  color: var(--stop-fg);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.stop-card *,
+.stop-card *::before,
+.stop-card *::after {
+  box-sizing: border-box;
+}
+.stop-card h2,
+.stop-card h3,
+.stop-card p,
+.stop-card ul,
+.stop-card figure {
+  margin: 0;
+}
+.stop-card h2 {
+  font-size: 18px;
+}
+.stop-card h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--stop-dim);
+  margin-bottom: 4px;
+}
+.stop-card a {
+  color: var(--stop-accent);
+}
+
+.stop-card--console {
+  border: 1px solid var(--stop-line);
+  border-radius: 8px;
+}
+
+.stop-card--cuff {
+  --stop-bg: #000;
+  --stop-fg: #fff;
+  --stop-dim: #b8b8b8;
+  --stop-line: #444;
+  --stop-accent: #ffb27a;
+  --stop-warn: #ffc400;
+  max-width: none;
+  padding: 0;
+  font-size: 18px;
+  gap: 16px;
+}
+.stop-card--cuff h2 {
+  font-size: 24px;
+}
+.stop-card--cuff h3 {
+  font-size: 14px;
+}
+
+.stop-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.stop-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.stop-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.stop-card--cuff .stop-badge {
+  font-size: 14px;
+}
+.stop-badge--target {
+  color: var(--stop-accent);
+}
+.stop-badge--prov {
+  color: var(--stop-dim);
+}
+.stop-badge--synthetic,
+.stop-badge--draft {
+  color: var(--stop-warn);
+}
+.stop-unit {
+  color: var(--stop-dim);
+}
+
+.stop-seen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-left: 3px solid var(--stop-accent);
+  font-weight: 600;
+}
+
+.stop-tasks ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stop-tasks label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+.stop-tasks input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 1px 0 0;
+}
+.stop-tasks input:checked + span {
+  color: var(--stop-dim);
+  text-decoration: line-through;
+}
+.stop-tasks-count {
+  font-weight: 400;
+}
+.stop-card--cuff .stop-tasks label {
+  min-height: 48px;
+  align-items: center;
+  padding: 4px 0;
+}
+.stop-card--cuff .stop-tasks input {
+  width: 32px;
+  height: 32px;
+  margin: 0;
+}
+
+.stop-photo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.stop-photo-frame {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #222;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.stop-photo-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.stop-photo-missing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #b8b8b8;
+  font-size: 14px;
+}
+.stop-photo-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.stop-photo-nav button {
+  min-width: 32px;
+  min-height: 32px;
+  font-size: 18px;
+  cursor: pointer;
+}
+.stop-card--cuff .stop-photo-nav button {
+  min-width: 48px;
+  min-height: 48px;
+  font-size: 24px;
+}
+.stop-photo figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stop-photo-credit {
+  font-weight: 600;
+}
+.stop-photo-meta,
+.stop-photo-caption {
+  color: var(--stop-dim);
+}
+.stop-photo-none {
+  color: var(--stop-dim);
+}
+
+.stop-sources ul {
+  padding-left: 18px;
+}
+
+.stop-errors {
+  padding-left: 18px;
+  color: #c62828;
+  font-size: 12px;
+}
+
+/* Dev page (/dev/stops) */
+.stop-dev {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 16px;
+  background: #f3f3f3;
+  color: #111;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+.stop-dev h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+.stop-dev-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+  margin-top: 16px;
+}
+.stop-dev-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.stop-dev-col > span {
+  font-size: 12px;
+  color: #555;
+}
+.stop-dev-cuff {
+  box-sizing: border-box;
+  width: 360px;
+  max-width: 100%;
+  padding: 16px;
+  background: #000;
+  border-radius: 12px;
+}
