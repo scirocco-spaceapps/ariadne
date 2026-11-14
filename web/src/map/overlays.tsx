@@ -27,7 +27,7 @@ export function NorthArrow() {
 }
 
 /** Return margin under the cursor (Y5): minutes, or null where the way home is too long or blocked. */
-export type CursorMargin = { minutes: number | null; provenance: Provenance }
+export type CursorMargin = { minutes: number | null; provenance: Provenance; storm?: boolean }
 
 export function CursorReadout({ xy, margin }: { xy: XY | null; margin?: CursorMargin | null }) {
   return (
@@ -35,9 +35,13 @@ export function CursorReadout({ xy, margin }: { xy: XY | null; margin?: CursorMa
       <div>{xy ? `x ${xy[0].toFixed(1)} m · y ${xy[1].toFixed(1)} m` : 'x — · y —'}</div>
       {margin && (
         <div className="am-readout-margin" data-testid="margin-readout">
-          {margin.minutes === null
-            ? 'margin here: cannot get back'
-            : `margin here: ${Math.round(margin.minutes)} min`}{' '}
+          {margin.storm
+            ? margin.minutes === null || margin.minutes < 0
+              ? 'cannot get home before the storm'
+              : `storm margin here: ${Math.round(margin.minutes)} min`
+            : margin.minutes === null
+              ? 'margin here: cannot get back'
+              : `margin here: ${Math.round(margin.minutes)} min`}{' '}
           <span className={`am-prov am-prov-${margin.provenance.toLowerCase()}`}>{margin.provenance}</span>
         </div>
       )}

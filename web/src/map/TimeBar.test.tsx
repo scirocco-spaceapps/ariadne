@@ -36,4 +36,14 @@ describe('TimeBar', () => {
     const ticks = screen.getByRole('list', { name: 'Arrivals' }).querySelectorAll('li')
     expect(Array.from(ticks, (li) => li.textContent)).toEqual(['1', '2'])
   })
+
+  it('shows the storm countdown only while an alert is active', () => {
+    const at = (t: number) => fixtures.frames.find((f): f is WsState => f.type === 'state' && f.t_min === t)!
+    const { rerender } = render(<TimeBar route={route} state={at(30)} provenance="Modeled" />)
+    expect(screen.getByTestId('storm-chip').textContent).toBe('Storm in 25 min')
+    rerender(<TimeBar route={route} state={at(38)} provenance="Modeled" />)
+    expect(screen.getByTestId('storm-chip').textContent).toBe('Storm in 17 min')
+    rerender(<TimeBar route={route} state={at(50)} provenance="Modeled" />)
+    expect(screen.queryByTestId('storm-chip')).toBeNull()
+  })
 })

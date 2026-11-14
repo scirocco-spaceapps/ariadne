@@ -5,7 +5,8 @@
 // safe when margin >= R, tight from 0 to R, out below 0 or unreachable. No threshold is hard-coded
 // here: both come from the model.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import type { WsAlert, WsState } from '../lib/types'
 import type { AssetSource } from './assets'
 import { rasterShape, worldToRaster, type SizeM } from './coords'
 
@@ -86,9 +87,72 @@ export function envelopePixels(
   return { data, width: cost.cols, height: cost.rows }
 }
 
-/** The envelope at time t drawn on a fresh offscreen canvas, for a deck.gl BitmapLayer. */
-export function envelopeCanvas(cost: CostRaster, model: EnvelopeModel, t: number): HTMLCanvasElement | null {
-  const { data, width, height } = envelopePixels(cost, model, t)
+// Storm alert (Y6): the envelope becomes "home before the storm". With minutes_left before the storm,
+// a cell is amber when its way home is not longer than that, dimmed otherwise (no reserve here).
+
+export type EnvelopeMode = { kind: 'normal' } | { kind: 'storm'; minutes_left: number }
+
+/** Minutes until the storm arrives (contracts/ws-messages.md): lead_min - (t_min - since_t), >= 0. */
+export function minutesToStorm(lead_min: number, since_t: number, t_min: number): number {
+  return Math.max(0, lead_min - (t_min - since_t))
+}
+
+/** minutesToStorm for an alert object. */
+export function timeToStorm(alert: WsAlert, t_min: number): number {
+  return minutesToStorm(alert.lead_min, alert.since_t, t_min)
+}
+
+/** Storm mode while the state carries an alert, normal otherwise (and without a state). */
+export function envelopeMode(state: WsState | null): EnvelopeMode {
+  return state?.alert ? { kind: 'storm', minutes_left: timeToStorm(state.alert, state.t_min) } : { kind: 'normal' }
+}
+
+/** Minutes to spare walking home from [x, y] before the storm; null outside the AOI or blocked. */
+export function stormMarginAt(cost: CostRaster, x: number, y: number, minutes_left: number): number | null {
+  const cell = worldToRaster([x, y], cost.size_m, cost.px_m)
+  if (!cell) return null
+  const c = cost.data[cell.row * cost.cols + cell.col]
+  return Number.isFinite(c) ? minutes_left - c : null
+}
+
+/** RGBA pixels of the storm envelope: amber where home is reachable before the storm, dim elsewhere. */
+export function stormPixels(
+  cost: CostRaster,
+  minutes_left: number,
+): { data: Uint8ClampedArray<ArrayBuffer>; width: number; height: number } {
+  const n = cost.cols * cost.rows
+  const data = new Uint8ClampedArray(n * 4)
+  const home = [...rgb(ENVELOPE_COLORS.tight), ALPHA.tight]
+  const out = [...rgb(ENVELOPE_COLORS.out), ALPHA.out]
+  for (let i = 0; i < n; i++) {
+    const k = cost.data[i] <= minutes_left ? home : out // NaN -> out
+    const o = i * 4
+    data[o] = k[0]
+    data[o + 1] = k[1]
+    data[o + 2] = k[2]
+    data[o + 3] = k[3]
+  }
+  return { data, width: cost.cols, height: cost.rows }
+}
+
+/** Pixels for the current mode: the normal envelope at t, or the storm envelope. */
+export function envelopeImage(cost: CostRaster, model: EnvelopeModel, t: number, mode: EnvelopeMode) {
+  return mode.kind === 'storm' ? stormPixels(cost, mode.minutes_left) : envelopePixels(cost, model, t)
+}
+
+/**
+ * The envelope drawn on a fresh offscreen canvas, for a deck.gl BitmapLayer: the normal envelope at t,
+ * or the storm envelope when stormMinutesLeft is a number.
+ */
+export function envelopeCanvas(
+  cost: CostRaster,
+  model: EnvelopeModel,
+  t: number,
+  stormMinutesLeft: number | null = null,
+): HTMLCanvasElement | null {
+  const mode: EnvelopeMode =
+    stormMinutesLeft === null ? { kind: 'normal' } : { kind: 'storm', minutes_left: stormMinutesLeft }
+  const { data, width, height } = envelopeImage(cost, model, t, mode)
   const canvas = document.createElement('canvas')
   canvas.width = width
   canvas.height = height
@@ -137,4 +201,22 @@ export function useCostToHome(source: AssetSource): CostRaster | null {
     }
   }, [source])
   return cost && cost.source === source ? cost.raster : null
+}
+
+/**
+ * The envelope image for the map, redrawn only when one of its inputs changes. tq is the time floored
+ * to 0.5 min; stormKey is the time to the storm floored the same way, or -1 without an alert.
+ */
+export function useEnvelopeImage(
+  cost: CostRaster | null,
+  budget_min: number,
+  reserve_min: number,
+  tq: number,
+  stormKey: number,
+): { image: HTMLCanvasElement } | null {
+  return useMemo(() => {
+    if (!cost) return null
+    const image = envelopeCanvas(cost, { budget_min, reserve_min }, tq, stormKey >= 0 ? stormKey : null)
+    return image ? { image } : null
+  }, [cost, budget_min, reserve_min, tq, stormKey])
 }

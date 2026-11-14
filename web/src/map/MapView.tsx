@@ -10,7 +10,14 @@ import type { Provenance, WsState } from '../lib/types'
 import type { AssetSource } from './assets'
 import { buildLayers, layerEntries, NARROW_PX, type LayerId, type MissionLayers } from './buildLayers'
 import { inAoi, type SizeM, type XY } from './coords'
-import { envelopeCanvas, marginAt, quantizeT, useCostToHome } from './envelope'
+import {
+  marginAt,
+  quantizeT,
+  minutesToStorm,
+  stormMarginAt,
+  useCostToHome,
+  useEnvelopeImage,
+} from './envelope'
 import { useLayerRegistry } from './layers'
 import { CursorReadout, NorthArrow, ScaleBar } from './overlays'
 import { usePlanClock } from './planClock'
@@ -34,6 +41,22 @@ const MAX_ZOOM = 4 // 16 screen px per metre
 const DASH_PX = 10 // dash length of the route ahead, screen pixels
 
 type Props = { source: AssetSource; className?: string }
+
+const PULSE_MS = 1200
+
+/** Phase in [0, 1) of the safe-haven pulse, ticking at 10 Hz only while active; 0 otherwise. */
+function usePulse(active: boolean): number {
+  const [phase, setPhase] = useState(0)
+  useEffect(() => {
+    if (!active) return
+    const id = setInterval(() => setPhase((Date.now() % PULSE_MS) / PULSE_MS), 100)
+    return () => {
+      clearInterval(id)
+      setPhase(0)
+    }
+  }, [active])
+  return active ? phase : 0
+}
 
 function fittedState(width: number, height: number, size_m: SizeM): OrthographicViewState {
   const zoom = fitZoom(width, height, size_m)
@@ -84,21 +107,35 @@ export function MapView({ source, className }: Props) {
   )
   const hasMarker = marker !== null
 
-  // Return envelope (Y5): redrawn only when the time moves by at least 0.5 min.
+  // Return envelope (Y5): redrawn only when the time moves by at least 0.5 min. During a storm alert
+  // (Y6) it shows where home is reachable before the storm instead; the mode comes from the current
+  // state alone, so clearing the alert restores the normal envelope.
   const cost = useCostToHome(source)
   const tNow = state ? state.t_min : planT
   const tq = quantizeT(tNow)
+  // Read as primitives from the store, so the React Compiler can keep the memos below.
+  const lead = useMission((s) => s.session.state?.alert?.lead_min)
+  const since = useMission((s) => s.session.state?.alert?.since_t)
+  const alerted = lead !== undefined && since !== undefined
+  const stormLeft = alerted ? minutesToStorm(lead, since, tNow) : 0
+  const stormKey = alerted ? quantizeT(stormLeft) : -1
   const { budget_min, reserve_min } = aoi.model
-  const envelope = useMemo(() => {
-    if (!cost) return null
-    const image = envelopeCanvas(cost, { budget_min, reserve_min }, tq)
-    return image ? { image } : null
-  }, [cost, tq, budget_min, reserve_min])
+  const envelope = useEnvelopeImage(cost, budget_min, reserve_min, tq, stormKey)
   const envelopeProvenance: Provenance = source.synthetic ? 'Simulation' : 'Modeled'
   const cursorMargin =
     cost && cursor
-      ? { minutes: marginAt(cost, { budget_min, reserve_min }, cursor[0], cursor[1], tNow), provenance: envelopeProvenance }
+      ? alerted
+        ? { minutes: stormMarginAt(cost, cursor[0], cursor[1], stormLeft), provenance: envelopeProvenance, storm: true }
+        : { minutes: marginAt(cost, { budget_min, reserve_min }, cursor[0], cursor[1], tNow), provenance: envelopeProvenance }
       : null
+
+  // Storm alert (Y6): the way home as the red thread and a pulse on the safe haven.
+  const pulse = usePulse(alerted)
+  const abortPath = state?.abort_path ?? null
+  const alertLayers = useMemo(
+    () => (alerted ? { path: abortPath ? abortPath.map((p) => [p[0], p[1]] as XY) : null, pulse } : null),
+    [alerted, abortPath, pulse],
+  )
 
   const registered = useLayerRegistry((s) => s.layers)
   const register = useLayerRegistry((s) => s.register)
@@ -113,12 +150,13 @@ export function MapView({ source, className }: Props) {
       astronaut: hasMarker,
       routeProvenance,
       envelope: cost !== null,
+      alert: alerted,
     })
     const ids = entries.map((e) => e.id)
     ownIds.current.filter((id) => !ids.includes(id)).forEach(unregister)
     entries.forEach(register)
     ownIds.current = ids
-  }, [source, data, register, unregister, route, hasMarker, routeProvenance, cost])
+  }, [source, data, register, unregister, route, hasMarker, routeProvenance, cost, alerted])
   useEffect(() => () => ownIds.current.forEach(unregister), [unregister])
 
   // Keep the AOI fitted to the container until the user pans or zooms
@@ -157,9 +195,9 @@ export function MapView({ source, className }: Props) {
   const layers = useMemo(() => {
     if (narrow === null) return []
     const visible = new Set(registered.filter((l) => l.visible).map((l) => l.id))
-    const mission: MissionLayers = { geom, progress_m, marker, numbers, selectedStop, dash_m }
+    const mission: MissionLayers = { geom, progress_m, marker, numbers, selectedStop, dash_m, alert: alertLayers }
     return buildLayers({ source, data, narrow, mission, envelope, isVisible: (id: LayerId) => visible.has(id) })
-  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope])
+  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers])
 
   const onClick = useCallback(
     (info: PickingInfo) => {

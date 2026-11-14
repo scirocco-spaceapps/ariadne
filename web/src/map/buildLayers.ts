@@ -22,6 +22,7 @@ export type LayerId =
   | 'track'
   | 'waypoints'
   | 'route'
+  | 'thread'
   | 'places'
   | 'astronaut'
 
@@ -36,6 +37,7 @@ export const LAYER_ORDER: LayerId[] = [
   'track',
   'waypoints',
   'route',
+  'thread',
   'places',
   'astronaut',
 ]
@@ -43,6 +45,11 @@ export const LAYER_ORDER: LayerId[] = [
 /** Planned route colour (visual brief: --ink #e7efec); the red thread is kept for the way home (Y6). */
 const ROUTE_RGB: Rgba = [231, 239, 236, 255]
 const CASING_RGB: Rgba = [10, 17, 20, 200]
+/** The way home during a storm alert (visual brief: --thread #ff5d6c). */
+const THREAD_RGB: Rgba = [255, 93, 108, 255]
+const HAVEN_RGB: Rgba = [46, 204, 113, 255]
+/** Opacity of the planned route while an alert sends the astronaut home. */
+const ROUTE_ALERT_OPACITY = 0.3
 
 /** What the route and astronaut layers draw (Y4). */
 export type MissionLayers = {
@@ -56,6 +63,8 @@ export type MissionLayers = {
   selectedStop: string | null
   /** Dash length in metres for the part ahead (screen-sized: px x metres per pixel). */
   dash_m: number
+  /** Storm alert (Y6): the way home and the haven pulse phase in [0, 1); null when there is none. */
+  alert?: { path: XY[] | null; pulse: number } | null
 }
 
 /** Which mission layers exist, for the toggles. */
@@ -65,6 +74,8 @@ export type MissionEntries = {
   routeProvenance: Provenance
   /** The cost-to-home raster loaded, so the return envelope can be drawn (Y5). */
   envelope?: boolean
+  /** A storm alert is active (Y6): the thread is listed and the envelope legend switches. */
+  alert?: boolean
 }
 
 /** Below this map width the small ortho is used (fewer pixels, safer on phone GPUs). */
@@ -120,17 +131,30 @@ export function layerEntries(source: AssetSource, data: SiteData, mission?: Miss
   ]
   if (mission?.envelope) {
     const { safe_min, tight_min } = envelopeThresholds(aoi.model)
-    entries.push({
-      id: 'envelope',
-      label: 'Return envelope (time left to walk home)',
-      provenance: prov(source, 'Modeled'),
-      visible: true,
-      legend: [
-        { color: ENVELOPE_COLORS.safe, label: `Back with ≥ ${safe_min} min to spare` },
-        { color: ENVELOPE_COLORS.tight, label: `Back with ${tight_min}–${safe_min} min to spare` },
-        { color: ENVELOPE_COLORS.out, label: 'Cannot get back in time' },
-      ],
-    })
+    entries.push(
+      mission.alert
+        ? {
+            id: 'envelope',
+            label: 'Return envelope: storm alert',
+            provenance: prov(source, 'Modeled'),
+            visible: true,
+            legend: [
+              { color: ENVELOPE_COLORS.tight, label: 'Home before the storm' },
+              { color: ENVELOPE_COLORS.out, label: 'Not before the storm' },
+            ],
+          }
+        : {
+            id: 'envelope',
+            label: 'Return envelope (time left to walk home)',
+            provenance: prov(source, 'Modeled'),
+            visible: true,
+            legend: [
+              { color: ENVELOPE_COLORS.safe, label: `Back with ≥ ${safe_min} min to spare` },
+              { color: ENVELOPE_COLORS.tight, label: `Back with ${tight_min}–${safe_min} min to spare` },
+              { color: ENVELOPE_COLORS.out, label: 'Cannot get back in time' },
+            ],
+          },
+    )
   }
   if (data.geology) {
     entries.push({ id: 'geology', label: 'Geologic units', provenance: prov(source, 'Observed'), visible: true })
@@ -153,6 +177,9 @@ export function layerEntries(source: AssetSource, data: SiteData, mission?: Miss
       provenance: synthetic ? 'Simulation' : mission.routeProvenance,
       visible: true,
     })
+  }
+  if (mission?.alert) {
+    entries.push({ id: 'thread', label: 'Way home before the storm', provenance: 'Simulation', visible: true })
   }
   entries.push({
     id: 'places',
@@ -274,6 +301,7 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
         if (!mission?.geom || mission.geom.legs.length === 0) break
         const { walked, ahead } = splitAt(mission.geom, mission.progress_m)
         const dashed = ahead.flatMap((p) => dashes(p, mission.dash_m, mission.dash_m * 0.75))
+        const opacity = mission.alert ? ROUTE_ALERT_OPACITY : 1
         const path = (pid: string, paths: XY[][], color: Rgba, width: number) =>
           new PathLayer<XY[]>({
             id: pid,
@@ -285,6 +313,7 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
             widthUnits: 'pixels',
             capRounded: true,
             jointRounded: true,
+            opacity,
           })
         out.push(
           path('route-ahead-casing', dashed, CASING_RGB, 5),
@@ -294,8 +323,45 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
         )
         break
       }
+      case 'thread': {
+        const way = mission?.alert?.path
+        if (!way || way.length < 2) break
+        const thread = (tid: string, color: Rgba, width: number) =>
+          new PathLayer<XY[]>({
+            id: tid,
+            data: [way],
+            getPath: (p) => p,
+            positionFormat: 'XY',
+            getColor: color,
+            getWidth: width,
+            widthUnits: 'pixels',
+            capRounded: true,
+            jointRounded: true,
+          })
+        out.push(thread('thread-casing', CASING_RGB, 8), thread('thread', THREAD_RGB, 5))
+        break
+      }
       case 'places': {
         const numbers = mission?.numbers ?? {}
+        if (mission?.alert) {
+          // Pulse ring around the safe haven while an alert sends the astronaut home.
+          const phase = mission.alert.pulse
+          out.push(
+            new ScatterplotLayer<{ xy: XY }>({
+              id: 'haven-pulse',
+              data: [{ xy: [aoi.safe_haven.xy[0], aoi.safe_haven.xy[1]] }],
+              getPosition: (d) => d.xy,
+              getRadius: 10 + 22 * phase,
+              radiusUnits: 'pixels',
+              filled: false,
+              stroked: true,
+              getLineColor: [HAVEN_RGB[0], HAVEN_RGB[1], HAVEN_RGB[2], Math.round(230 * (1 - phase))],
+              lineWidthUnits: 'pixels',
+              getLineWidth: 3,
+              updateTriggers: { getRadius: phase, getLineColor: phase },
+            }),
+          )
+        }
         const selected = mission?.selectedStop ?? null
         const places: Place[] = [
           {
@@ -324,7 +390,7 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
             getPosition: (d) => d.xy,
             getRadius: (d) => (d.haven ? 8 : d.n !== null ? 10 : 6),
             radiusUnits: 'pixels',
-            getFillColor: (d) => (d.haven ? [46, 204, 113, 255] : [251, 191, 36, 255]),
+            getFillColor: (d) => (d.haven ? HAVEN_RGB : [251, 191, 36, 255]),
             stroked: true,
             getLineColor: (d) => (d.selected ? [255, 255, 255, 255] : [17, 22, 29, 255]),
             lineWidthUnits: 'pixels',

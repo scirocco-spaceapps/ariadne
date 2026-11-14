@@ -74,3 +74,15 @@ answered in `docs/notes/furkan.md`. Still open for N4 and N6:
 - Replaces `…T1101Z` (which is what the live host should run now; it still answers `eva_min` 224.03, i.e. the
   older `…T1048Z`). Adds `seen_not_touched_2m.png` and `targets.geojson` (B3, for Y7). Same steps as above;
   check: `/planner/route` returns `eva_min` 219.65 and `/bright-angel/targets.geojson` loads.
+
+## 2026-11-14 — from Yusuf (task Y6): storm helpers for the cuff
+
+- **What landed on the map:** during a storm alert the map draws `abort_path` as the red thread,
+  the envelope shows only where home is reachable before the storm (amber, rest dimmed), the safe
+  haven pulses, the planned route fades and the time bar shows "Storm in N min". On `clear` it all
+  goes back. Tried end to end with your Storm alert / Clear buttons on a local mission-control.
+- **For the cuff (exported from `web/src/map`):** `minutesToStorm(lead_min, since_t, t_min)` and
+  `timeToStorm(alert, t_min)` (the contract formula, floored at 0), `envelopeMode(state)`
+  (`{kind: 'normal'}` or `{kind: 'storm', minutes_left}`), and `stormMarginAt(cost, x, y, minutes_left)`
+  = minutes to spare walking home before the storm, null if blocked.
+- **No action needed** unless you want the cuff to show the storm margin.

@@ -2,6 +2,7 @@
 // the plan; bound to usePlanClock. With a session the bar follows the simulated clock, read-only.
 
 import type { Provenance, RouteResponse, WsState } from '../lib/types'
+import { envelopeMode } from './envelope'
 import { usePlanClock } from './planClock'
 import { arrivalTicks, evaClockLabel } from './route'
 
@@ -15,6 +16,7 @@ export function TimeBar({ route, state, provenance }: Props) {
   const t = live ? state.t_min : Math.min(planT, end)
   const ticks = arrivalTicks(route)
   const prov: Provenance = live ? 'Simulation' : provenance
+  const storm = envelopeMode(state)
 
   return (
     <div className="am-timebar" data-testid="time-bar">
@@ -24,6 +26,11 @@ export function TimeBar({ route, state, provenance }: Props) {
           {evaClockLabel(t)}
         </span>
         <span className={`am-prov am-prov-${prov.toLowerCase()}`}>{prov}</span>
+        {storm.kind === 'storm' && (
+          <span className="am-storm-chip" data-testid="storm-chip" role="status">
+            Storm in {Math.round(storm.minutes_left)} min
+          </span>
+        )}
         <span className="am-timebar-end">of {evaClockLabel(route.totals.eva_min)}</span>
       </div>
       <div className="am-timebar-track">
