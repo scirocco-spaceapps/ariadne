@@ -21,6 +21,15 @@ function ticks(frames: WsServerMessage[]): WsServerMessage[][] {
   return out
 }
 
+/**
+ * Replay position at wall-clock time `nowMs`, in ticks. Locked to the clock, not to page load, so a
+ * console and a paired cuff opened at different times show the same frame. Indexes past the last
+ * group are the pause before the loop restarts.
+ */
+export function demoIndex(nowMs: number, nGroups: number): number {
+  return Math.floor(nowMs / DEMO_TICK_MS) % (nGroups + LOOP_PAUSE_TICKS)
+}
+
 /** Loads the fixtures into the store and starts the replay, looping. Returns a stop function. */
 export function startDemo(): () => void {
   const store = useMission.getState()
@@ -35,13 +44,16 @@ export function startDemo(): () => void {
   store.setSessionId(first && first.type === 'state' ? first.session : 'demo')
   store.setSessionStatus('open')
 
-  let i = 0
+  let last = -1
   const step = () => {
-    const idx = i++ % (groups.length + LOOP_PAUSE_TICKS)
+    const idx = demoIndex(Date.now(), groups.length)
+    if (idx === last) return
+    last = idx
     if (idx >= groups.length) return // hold the last frame for a moment before looping
     for (const f of groups[idx]) useMission.getState().receive(f)
   }
   step()
-  const timer = setInterval(step, DEMO_TICK_MS)
+  // Poll faster than a tick so a frame lands close to its wall-clock boundary on every screen.
+  const timer = setInterval(step, DEMO_TICK_MS / 5)
   return () => clearInterval(timer)
 }
