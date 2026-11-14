@@ -47,6 +47,8 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ${ASSETS_DIR:-../contracts/fixtures}:/srv/assets:ro
+      # Stop photos: the web app loads VITE_ASSETS_URL + "content/" + photos[].file (web/src/stops).
+      - ../content:/srv/content:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:

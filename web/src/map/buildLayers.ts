@@ -8,9 +8,20 @@ import type { AssetSource } from './assets'
 import type { XY } from './coords'
 import { linePaths, pointFeatures, polygonLabelPoint, unitPolygons, type UnitPolygon } from './geo'
 import type { LayerEntry, LegendItem } from './layers'
+import { dashes, splitAt, type RouteGeometry } from './route'
 import type { SiteData } from './useSiteData'
 
-export type LayerId = 'ortho' | 'hillshade' | 'slope' | 'traversability' | 'geology' | 'track' | 'waypoints' | 'places'
+export type LayerId =
+  | 'ortho'
+  | 'hillshade'
+  | 'slope'
+  | 'traversability'
+  | 'geology'
+  | 'track'
+  | 'waypoints'
+  | 'route'
+  | 'places'
+  | 'astronaut'
 
 /** Bottom to top. */
 export const LAYER_ORDER: LayerId[] = [
@@ -21,8 +32,31 @@ export const LAYER_ORDER: LayerId[] = [
   'geology',
   'track',
   'waypoints',
+  'route',
   'places',
+  'astronaut',
 ]
+
+/** Planned route colour (visual brief: --ink #e7efec); the red thread is kept for the way home (Y6). */
+const ROUTE_RGB: Rgba = [231, 239, 236, 255]
+const CASING_RGB: Rgba = [10, 17, 20, 200]
+
+/** What the route and astronaut layers draw (Y4). */
+export type MissionLayers = {
+  geom: RouteGeometry | null
+  /** Metres walked along the route. */
+  progress_m: number
+  /** Astronaut position, AOI metres; null hides the marker. */
+  marker: XY | null
+  /** Route stop numbers { stopId: 1..n }. */
+  numbers: Record<string, number>
+  selectedStop: string | null
+  /** Dash length in metres for the part ahead (screen-sized: px x metres per pixel). */
+  dash_m: number
+}
+
+/** Which mission layers exist, for the toggles. */
+export type MissionEntries = { route: boolean; astronaut: boolean; routeProvenance: Provenance }
 
 /** Below this map width the small ortho is used (fewer pixels, safer on phone GPUs). */
 export const NARROW_PX = 768
@@ -47,7 +81,7 @@ function prov(source: AssetSource, real: Provenance): Provenance {
 }
 
 /** Registry entries for every layer whose data is present. */
-export function layerEntries(source: AssetSource, data: SiteData): LayerEntry[] {
+export function layerEntries(source: AssetSource, data: SiteData, mission?: MissionEntries): LayerEntry[] {
   const { aoi, synthetic } = source
   const legend = (items: { color: string; label: string }[] | undefined): LegendItem[] | undefined =>
     items?.map(({ color, label }) => ({ color, label }))
@@ -89,12 +123,23 @@ export function layerEntries(source: AssetSource, data: SiteData): LayerEntry[] 
   if (data.waypoints) {
     entries.push({ id: 'waypoints', label: 'Rover waypoints', provenance: prov(source, 'Observed'), visible: true })
   }
+  if (mission?.route) {
+    entries.push({
+      id: 'route',
+      label: 'Planned route (dashed ahead, solid walked)',
+      provenance: synthetic ? 'Simulation' : mission.routeProvenance,
+      visible: true,
+    })
+  }
   entries.push({
     id: 'places',
     label: 'Stops and safe haven',
     provenance: synthetic ? 'Simulation' : aoi.placeholder ? 'Assumed' : 'Derived',
     visible: true,
   })
+  if (mission?.astronaut) {
+    entries.push({ id: 'astronaut', label: 'Astronaut position', provenance: 'Simulation', visible: true })
+  }
   return entries.map((e) => ({ ...e, order: order(e.id as LayerId) }))
 }
 
@@ -103,17 +148,19 @@ export function orthoFile(aoi: AssetSource['aoi'], narrow: boolean): string {
   return narrow ? aoi.rasters.ortho_small.file : aoi.rasters.ortho.file
 }
 
-type Place = { xy: XY; name: string; haven: boolean }
+type Label = { xy: XY; name: string }
+type Place = Label & { id: string; haven: boolean; n: number | null; selected: boolean }
 
 export type BuildInput = {
   source: AssetSource
   data: SiteData
   isVisible: (id: LayerId) => boolean
   narrow: boolean
+  mission?: MissionLayers
 }
 
 /** deck.gl layers, bottom to top, for the visible layers whose data is present. */
-export function buildLayers({ source, data, isVisible, narrow }: BuildInput): Layer[] {
+export function buildLayers({ source, data, isVisible, narrow, mission }: BuildInput): Layer[] {
   const { aoi } = source
   const [w, h] = aoi.size_m
   const bounds: [number, number, number, number] = [0, 0, w, h]
@@ -154,7 +201,7 @@ export function buildLayers({ source, data, isVisible, narrow }: BuildInput): La
             'geology-labels',
             polys.flatMap((p) => {
               const xy = polygonLabelPoint(p.rings)
-              return xy ? [{ xy, name: p.name, haven: false }] : []
+              return xy ? [{ xy, name: p.name }] : []
             }),
             11,
           ),
@@ -194,25 +241,105 @@ export function buildLayers({ source, data, isVisible, narrow }: BuildInput): La
           }),
         )
         break
+      case 'route': {
+        if (!mission?.geom || mission.geom.legs.length === 0) break
+        const { walked, ahead } = splitAt(mission.geom, mission.progress_m)
+        const dashed = ahead.flatMap((p) => dashes(p, mission.dash_m, mission.dash_m * 0.75))
+        const path = (pid: string, paths: XY[][], color: Rgba, width: number) =>
+          new PathLayer<XY[]>({
+            id: pid,
+            data: paths,
+            getPath: (p) => p,
+            positionFormat: 'XY',
+            getColor: color,
+            getWidth: width,
+            widthUnits: 'pixels',
+            capRounded: true,
+            jointRounded: true,
+          })
+        out.push(
+          path('route-ahead-casing', dashed, CASING_RGB, 5),
+          path('route-ahead', dashed, ROUTE_RGB, 2.5),
+          path('route-walked-casing', walked, CASING_RGB, 6.5),
+          path('route-walked', walked, ROUTE_RGB, 4),
+        )
+        break
+      }
       case 'places': {
+        const numbers = mission?.numbers ?? {}
+        const selected = mission?.selectedStop ?? null
         const places: Place[] = [
-          { xy: [aoi.safe_haven.xy[0], aoi.safe_haven.xy[1]], name: aoi.safe_haven.name, haven: true },
-          ...aoi.stops.map((s) => ({ xy: [s.xy[0], s.xy[1]] as XY, name: s.name, haven: false })),
+          {
+            id: aoi.safe_haven.id,
+            xy: [aoi.safe_haven.xy[0], aoi.safe_haven.xy[1]],
+            name: aoi.safe_haven.name,
+            haven: true,
+            n: null,
+            selected: false,
+          },
+          ...aoi.stops.map((s) => ({
+            id: s.id,
+            xy: [s.xy[0], s.xy[1]] as XY,
+            name: s.name,
+            haven: false,
+            n: numbers[s.id] ?? null,
+            selected: s.id === selected,
+          })),
         ]
+        const numbered = places.filter((p) => p.n !== null)
         out.push(
           new ScatterplotLayer<Place>({
             id: 'places',
             data: places,
+            pickable: true,
             getPosition: (d) => d.xy,
-            getRadius: (d) => (d.haven ? 8 : 6),
+            getRadius: (d) => (d.haven ? 8 : d.n !== null ? 10 : 6),
             radiusUnits: 'pixels',
             getFillColor: (d) => (d.haven ? [46, 204, 113, 255] : [251, 191, 36, 255]),
             stroked: true,
-            getLineColor: [17, 22, 29, 255],
+            getLineColor: (d) => (d.selected ? [255, 255, 255, 255] : [17, 22, 29, 255]),
             lineWidthUnits: 'pixels',
-            getLineWidth: 2,
+            getLineWidth: (d) => (d.selected ? 4 : 2),
+            updateTriggers: { getLineColor: selected, getLineWidth: selected, getRadius: numbers },
           }),
-          labelLayer('places-labels', places, 13),
+        )
+        if (numbered.length > 0) {
+          out.push(
+            new TextLayer<Place>({
+              id: 'places-numbers',
+              data: numbered,
+              getPosition: (d) => d.xy,
+              getText: (d) => String(d.n),
+              getSize: 12,
+              sizeUnits: 'pixels',
+              getColor: [17, 22, 29, 255],
+              getTextAnchor: 'middle',
+              getAlignmentBaseline: 'center',
+              fontWeight: 700,
+              fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
+            }),
+          )
+        }
+        out.push(labelLayer('places-labels', places, 13, 16))
+        break
+      }
+      case 'astronaut': {
+        if (!mission?.marker) break
+        const me = [{ xy: mission.marker, name: 'Astronaut · Simulation' }]
+        out.push(
+          new ScatterplotLayer<Label>({
+            id: 'astronaut',
+            data: me,
+            getPosition: (d) => d.xy,
+            getRadius: 7,
+            radiusUnits: 'pixels',
+            getFillColor: [255, 255, 255, 255],
+            stroked: true,
+            getLineColor: [217, 168, 119, 255], // --sand
+            lineWidthUnits: 'pixels',
+            getLineWidth: 3,
+          }),
+          new TextLayer<Label>({ ...labelProps(12, 14), id: 'astronaut-label', data: me }),
         )
         break
       }
@@ -222,22 +349,24 @@ export function buildLayers({ source, data, isVisible, narrow }: BuildInput): La
 }
 
 /** Readable text on imagery: light text on a dark box, constant screen size. */
-function labelLayer(id: string, data: Place[], size: number) {
-  return new TextLayer<Place>({
-    id,
-    data,
-    getPosition: (d) => d.xy,
-    getText: (d) => d.name,
+function labelLayer(id: string, data: Label[], size: number, offset = 12) {
+  return new TextLayer<Label>({ ...labelProps(size, offset), id, data })
+}
+
+function labelProps(size: number, offset: number) {
+  return {
+    getPosition: (d: Label) => d.xy,
+    getText: (d: Label) => d.name,
     getSize: size,
-    sizeUnits: 'pixels',
-    getColor: [232, 237, 243, 255],
-    getTextAnchor: 'middle',
-    getAlignmentBaseline: 'bottom',
-    getPixelOffset: [0, -12],
+    sizeUnits: 'pixels' as const,
+    getColor: [232, 237, 243, 255] as Rgba,
+    getTextAnchor: 'middle' as const,
+    getAlignmentBaseline: 'bottom' as const,
+    getPixelOffset: [0, -offset] as [number, number],
     background: true,
-    getBackgroundColor: [17, 22, 29, 215],
-    backgroundPadding: [4, 2],
-    characterSet: 'auto',
+    getBackgroundColor: [17, 22, 29, 215] as Rgba,
+    backgroundPadding: [4, 2] as [number, number],
+    characterSet: 'auto' as const,
     fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
-  })
+  }
 }

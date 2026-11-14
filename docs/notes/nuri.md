@@ -38,3 +38,17 @@ answered in `docs/notes/furkan.md`. Still open for N4 and N6:
   `<StopCard variant="console" />` in the console's Stop tab. Without `id` it shows the store's
   `selectedTarget ?? selectedStop`. The cuff variant has no own background or padding: put it
   inside the black cuff layout.
+
+## 2026-11-14 — from Yusuf (task Y4): route, stops and time bar on the map
+
+- **What landed in `web/src/map/`:** the map now reads `route`, `session.state`, `selectedStop` and
+  `selectStop` from `useMission` (no store change). Planned route dashed ahead / solid walked,
+  numbered stop markers, the astronaut at `state.pos` (labelled Simulation), clicking a stop calls
+  `selectStop(id)`, and a time bar at the bottom of the map.
+- **Plan time lives in the map for now:** planning mode (a route, no session) is driven by
+  `usePlanClock` (`t_min`, `setT`), exported from `web/src/map`, because `useMission` has no
+  planning-time field. If you want it in the mission store (e.g. `planT_min`, so the route sheet can
+  highlight the current leg), say so and I switch the map to read it; nothing else depends on it.
+- **Reusable for N4/N6:** `routeGeometry`, `progressAtTime`, `progressFromState`, `nextProgress`,
+  `pointAt`, `stopNumbers`, `arrivalTicks` from `web/src/map`.
+- **No action needed** unless you want the store field above.
