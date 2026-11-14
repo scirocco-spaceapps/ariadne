@@ -12,6 +12,9 @@ file server on `/srv/assets` with CORS for `WEB_ORIGIN`, plus the repo's `conten
 `.env.example`, `deploy.sh`.
 `.github/workflows/deploy.yml` runs `deploy.sh` over SSH on pushes to main that touch
 `planner/`, `mission-control/` or `infra/`.
+`.github/workflows/web-deploy.yml` publishes `web/` to Vercel production on pushes to main that
+touch `web/`, `contracts/` or `content/` (prebuilt via the Vercel CLI; needs the `VERCEL_TOKEN`
+secret; Actions → web-deploy → Run workflow redeploys by hand).
 
 **Run on the server:** `cp infra/.env.example infra/.env`, fill it in, then `sh infra/deploy.sh`.
 
