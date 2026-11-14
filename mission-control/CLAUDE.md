@@ -9,6 +9,15 @@ WebSocket: `contracts/ws-messages.md`. All simulated state carries `provenance: 
 
 **Run:** `cd mission-control && go run .` (port from `PORT`, default 8080)
 
+**Env:** `PORT` (8080), `WEB_ORIGIN` (CORS allow list, comma-separated; default
+`http://localhost:5173`), `REPLAY_PATH` (state stream new sessions replay until the simulator
+lands; default `../contracts/fixtures/ws-state.jsonl`, mount it in Docker).
+
+**Docker:** `docker build -t ariadne-mission-control mission-control` (context = this folder).
+
+**Layout:** `internal/contract` message shapes, `internal/session` sessions, clock and hub,
+`internal/server` HTTP and WebSocket routes.
+
 **Test:** `cd mission-control && go vet ./... && go test ./...`
 
 **Rules:** a condition part that cannot be fetched is `null` with a reason in `missing`; never fill
