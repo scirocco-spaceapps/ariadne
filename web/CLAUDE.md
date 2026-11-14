@@ -17,7 +17,8 @@
 
 **Run:** `cd web && npm install && npm run dev` (http://localhost:5173; proxies `/api/planner` to
 8000, `/api/mc` and `/ws` to 8080). `npm run dev:lan` also serves on the LAN so a phone on the
-same network or hotspot can open it.
+same network or hotspot can open it. In live mode the dev server also proxies `/bright-angel` and
+`/content` to the local assets host (`infra/funnel.sh`, Caddy on 127.0.0.1:8090).
 
 **Pairing (N3):** the console's "Create session" posts the store's route (the SYNTHETIC fixture
 route until the planner is wired in) to mission-control and puts `?s=<id>` in the URL; "Pair cuff"
