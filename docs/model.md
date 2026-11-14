@@ -69,8 +69,14 @@ The safe haven is a spot where Perseverance parked on sol 1134 (waypoint 52_350)
 unit east of the channel, with a measured rover tilt of 4.5°, below the 15° caution slope. All
 stops are 0.4–1.1 km from it. A straight-line tour haven → stops → haven is about 2.7 km; with 30 %
 detour at 33.3 m/min plus five 20-minute dwells that is roughly 205 min, inside the 300 min left
-after the reserve. Two checks are still open: the haven's slope on the 2 m raster (A3) and the real
-route time on the cost raster (A4).
+after the reserve.
+
+Both checks are now done on the real rasters. The haven's slope on the DEM is 4.9° (rover tilt
+4.5°); every stop sits on a passable cell (Ali Koray, A4). With the 2 m slope as the mean of the 1 m
+slopes (#40), the planner's route haven → five stops → haven is **2.89 km, 119.7 min walking + 100
+min dwell = 219.7 min**, leaving **80.3 min** of the 300 min before the reserve (planner `/route`,
+re-run in `notebooks/validation.ipynb` setup on bundle 20261114T1101Z). The earlier 224 min / 76 min
+came from the maximum slope aggregation and is superseded.
 
 ## Budget check (synthetic)
 
