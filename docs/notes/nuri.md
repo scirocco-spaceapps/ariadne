@@ -68,3 +68,9 @@ answered in `docs/notes/furkan.md`. Still open for N4 and N6:
 - **Example:** `const m = makeMarginAt(cost, aoi.model)(state.pos[0], state.pos[1], state.t_min)`.
   Provenance on screen: `Modeled` (`Simulation` on fixtures).
 - This closes the "Coming from Yusuf" line about Y5 above (you delete it when you like).
+
+## 2026-11-14 — from Ali Koray: bundle with the B3 layer (ariadne-assets-20261114T1159Z.zip)
+
+- Replaces `…T1101Z` (which is what the live host should run now; it still answers `eva_min` 224.03, i.e. the
+  older `…T1048Z`). Adds `seen_not_touched_2m.png` and `targets.geojson` (B3, for Y7). Same steps as above;
+  check: `/planner/route` returns `eva_min` 219.65 and `/bright-angel/targets.geojson` loads.

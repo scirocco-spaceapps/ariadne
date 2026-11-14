@@ -33,6 +33,8 @@ rasterio has no wheel for newer versions yet), then
 7. `scripts/06_variants.py`: `cost_to_home_flat_2m.f32`, the "without the terrain model" variant (task Y9 compares).
 8. `scripts/07_bundle.sh [aoi.json]`: zip of `aoi.json` + `DATA_DIR/<assets_base>` for the live host
    (`~/ariadne-data/bundles/`); the receiver points `ASSETS_DIR` at the unpacked folder.
+9. `scripts/08_publish_science.py [--check]`: checks B3's `notebooks/out/` (seen_not_touched PNG, targets.geojson)
+   against the contract and copies them into `DATA_DIR/<assets_base>`.
 
 **AOI frame:** `scripts/aoi.py` reads `contracts/aoi.json` (proj4, origin, size); no local override.
 
