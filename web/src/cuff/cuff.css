@@ -49,7 +49,10 @@
 .cuff-pill {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: 40px;
+  /* Fits the longest label ("Reconnecting"), so a status change does not move the header. */
+  min-width: 9em;
   padding: 6px 14px;
   border: 2px solid currentColor;
   border-radius: 999px;
@@ -203,6 +206,11 @@ body:has(.cuff) {
   flex-direction: column;
   gap: 6px;
 }
+/* Room for the name and the distance line even at a stop (no line), in the DEMO fallback or
+   while waiting, so the blocks under it do not jump. */
+.cf-next {
+  min-height: 4.75rem;
+}
 .cf-line {
   display: flex;
   flex-wrap: wrap;
@@ -275,7 +283,7 @@ body:has(.cuff) {
 .cf-alert {
   position: fixed;
   inset: 0;
-  /* Under the DEMO DATA badge (z 1000), which must stay visible in DEMO mode. */
+  /* Under the link banner (z 1100). In DEMO it carries its own DEMO DATA badge (.cf-alert-demo). */
   z-index: 900;
   display: flex;
   flex-direction: column;
@@ -285,6 +293,12 @@ body:has(.cuff) {
   background: #ff5d6c;
   color: #1c0306;
   overflow-y: auto;
+}
+/* Top-left corner of the full-screen alert: out of the flow, so it moves nothing. */
+.cf-alert-demo {
+  position: absolute;
+  top: 16px;
+  left: 20px;
 }
 .cf-alert-title {
   margin: 0;
@@ -336,7 +350,16 @@ body:has(.cuff) {
   padding: 0;
 }
 
-/* Room for the fixed DEMO DATA badge (top right) above the status pill. */
-.cuff--demo {
-  padding-top: 44px;
+/* DEMO DATA sits in the header's title slot (no fixed badge on the cuff), so DEMO and the
+   fallback keep the live layout. */
+.cuff-demo {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: #f2a93b;
+  color: #1a1208;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }

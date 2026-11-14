@@ -1,0 +1,40 @@
+/* Link banner (N7): fixed overlay, so it never shifts the layout under it. */
+.link-banner {
+  position: fixed;
+  z-index: 1100;
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  max-width: calc(100vw - 16px);
+  padding: 8px 14px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: rgba(10, 17, 20, 0.92);
+  font: 600 14px/1.35 var(--body, system-ui, sans-serif);
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Console: over the top of the map, just under the 52 px header. */
+.link-banner--console {
+  top: 60px;
+  width: max-content;
+  max-width: min(640px, calc(100vw - 16px));
+}
+
+/* Cuff: along the bottom edge, clear of the margin number at the top. */
+.link-banner--cuff {
+  bottom: 8px;
+  width: calc(100vw - 16px);
+  font-size: 16px;
+}
+
+.link-banner--ok {
+  color: var(--safe, #46c58b);
+}
+.link-banner--warn {
+  color: var(--warn, #f2a93b);
+}
+.link-banner--bad {
+  color: var(--thread, #ff5d6c);
+}

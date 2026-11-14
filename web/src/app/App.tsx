@@ -2,16 +2,21 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { Cuff } from '../cuff'
 import { Console } from '../panels'
 import { DevStopsPage } from '../stops'
-import { useMissionBootstrap, useSessionSocket } from './bootstrap'
+import { useMissionBootstrap, useSessionRecovery, useSessionSocket } from './bootstrap'
 import { DemoBadge } from './DemoBadge'
+import { LinkBanner } from './LinkBanner'
 
 export function App() {
   const { pathname, search } = useLocation()
+  const role = pathname.startsWith('/cuff') ? 'cuff' : 'console'
   useMissionBootstrap(search)
-  useSessionSocket(pathname.startsWith('/cuff') ? 'cuff' : 'console')
+  useSessionSocket(role)
+  useSessionRecovery(role)
   return (
     <>
-      <DemoBadge />
+      {/* The cuff shows its DEMO DATA badge in its own header, so the layout does not move. */}
+      {role === 'console' && <DemoBadge />}
+      <LinkBanner role={role} />
       <Routes>
         <Route path="/" element={<Console />} />
         <Route path="/cuff" element={<Cuff />} />

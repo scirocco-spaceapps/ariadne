@@ -51,7 +51,10 @@ describe('DEMO mode', () => {
     vi.useFakeTimers()
     vi.setSystemTime(0) // the replay is locked to the wall clock
     renderAt('/cuff?demo=1')
-    expect(screen.getByText('DEMO DATA')).toBeTruthy()
+    // One badge, in the cuff's header (no fixed overlay that would need extra top padding).
+    expect(screen.getByText('DEMO DATA').closest('header')).toBeTruthy()
+    expect(screen.getByTestId('cuff-status').textContent).toBe('DEMO replay')
+    expect(screen.queryByTestId('link-banner')).toBeNull()
     const s = useMission.getState()
     expect(s.demo).toBe(true)
     expect(s.route).toEqual(fixtures.route)

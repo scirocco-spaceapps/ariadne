@@ -85,6 +85,8 @@ describe('Cuff', () => {
     renderCuff()
     const alert = screen.getByTestId('cuff-alert')
     expect(alert.textContent).toContain('STORM ALERT')
+    // The full-screen alert covers the header, so in DEMO it carries the badge itself.
+    expect(alert.textContent).toContain('DEMO DATA')
     // lead 25 since t = 30, now 33 → 22:00 to the storm; walk home = cost 10 min.
     expect(screen.getByTestId('alert-storm').textContent).toContain('22:00')
     expect(screen.getByTestId('alert-return').textContent).toContain('10 min')
