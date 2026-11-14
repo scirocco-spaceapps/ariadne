@@ -10,9 +10,16 @@ import (
 )
 
 func main() {
+	cfg := server.DefaultConfig()
+	if v := os.Getenv("WEB_ORIGIN"); v != "" {
+		cfg.WebOrigins = v
+	}
+	if v := os.Getenv("REPLAY_PATH"); v != "" {
+		cfg.ReplayPath = v
+	}
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	log.Fatal(server.New().Listen(":" + port))
+	log.Fatal(server.New(cfg).App.Listen(":" + port))
 }
