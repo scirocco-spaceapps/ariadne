@@ -29,7 +29,12 @@ Uncertainty in consumption is covered by the 60 min reserve, by the suit require
 
 ## How cost is computed
 
-1. Slope per 2 m cell comes from the HiRISE DTM (task A3).
+1. Slope per 2 m cell comes from the HiRISE DTM (task A3): the **mean** of the four 1 m Horn
+   slopes in the cell. Taking the maximum instead picked up DTM noise: with the maximum, 3.1 % of
+   Perseverance's track came out steeper than 20° (median track slope 11.5°, p95 19.2°); the mean
+   lowers track slopes by about 1° (median 10.7°, p95 18.2°) and the no-go share of the track from
+   3.1 % to 1.8 % (Ali Koray, PR #40). The 20° threshold itself stays, since it comes from the suit
+   requirement, not from the data.
 2. Cells steeper than `max_slope_deg` are impassable.
 3. Speed = `walk_speed_flat_m_per_min` x `speed_vs_slope(slope)`, linear interpolation between pairs.
 4. Cell cost = 1 / speed, in minutes per metre.

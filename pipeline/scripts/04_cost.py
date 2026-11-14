@@ -25,7 +25,7 @@ from PIL import Image
 
 from aoi import DATA_DIR, WORK_DIR
 from exportlib import write_f32
-from slopecost import (CAUTION, GO, NOGO, PARAMS_FILE, aggregate_max, classify, colour_classes, colour_slope,
+from slopecost import (CAUTION, GO, NOGO, PARAMS_FILE, aggregate, classify, colour_classes, colour_slope,
                        cost_min_per_m, load_params, slope_horn)
 
 PUBLISHED_AOI = DATA_DIR / "aoi.json"  # written by 03_export.py
@@ -49,7 +49,7 @@ def main() -> int:
         if src.nodata is not None and np.isfinite(src.nodata):
             dem[dem == src.nodata] = np.nan
 
-    slope = aggregate_max(slope_horn(dem, px1), int(round(px2 / px1)))
+    slope = aggregate(slope_horn(dem, px1), int(round(px2 / px1)), "mean")
     cls = classify(slope, m)
     cost = cost_min_per_m(slope, cls, m)
 
@@ -59,7 +59,7 @@ def main() -> int:
     (out / "slope_2m.legend.json").write_text(json.dumps(r["slope"]["legend"], indent=2, ensure_ascii=False),
                                               encoding="utf-8")
     write_f32(out / r["slope_values"]["file"], slope, px2,
-              {"unit": "deg", "provenance": "Derived", "source": "Horn slope of the HiRISE DTM 1 m, max over 2 x 2"})
+              {"unit": "deg", "provenance": "Derived", "source": "Horn slope of the HiRISE DTM 1 m, mean over 2 x 2"})
     Image.fromarray(colour_classes(cls, r["traversability"]["legend"]), "RGBA").save(out / r["traversability"]["file"])
     meta = write_f32(out / "cost_2m.f32", cost, px2,
                      {"unit": "min/m", "provenance": prov, "source": src_note,
