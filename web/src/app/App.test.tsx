@@ -34,6 +34,11 @@ describe('routes', () => {
     expect(useMission.getState().aoi?.id).toBeTruthy()
   })
 
+  it('renders the stop-card dev page at /dev/stops', () => {
+    renderAt('/dev/stops')
+    expect(screen.getByRole('heading', { name: /stop cards \(dev\)/i })).toBeTruthy()
+  })
+
   it('renders the cuff at /cuff and asks for a session without ?s=', () => {
     renderAt('/cuff')
     expect(screen.getByRole('heading', { name: /no session/i })).toBeTruthy()
