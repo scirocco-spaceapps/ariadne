@@ -214,13 +214,25 @@ describe('return envelope (Y5)', () => {
     })
     const env = entries.find((e) => e.id === 'envelope')
     expect(env?.provenance).toBe('Modeled')
+    expect(env?.label).toBe('Return envelope')
     expect(env?.legend?.map((l) => l.label)).toEqual([
-      'Back with ≥ 30 min to spare',
-      'Back with 0–30 min to spare',
-      'Cannot get back in time',
+      'Home with the 30 min reserve and 30+ min to spare',
+      'Home with the reserve, under 30 min to spare',
+      'Would eat into the reserve, or no way home',
     ])
     const synth = layerEntries(source(true), FULL, { route: false, astronaut: false, routeProvenance: 'Modeled', envelope: true })
     expect(synth.find((e) => e.id === 'envelope')?.provenance).toBe('Simulation')
+  })
+
+  it('names the flat-ground variant while the comparison is on (Y9)', () => {
+    const entries = layerEntries(source(false), FULL, {
+      route: false,
+      astronaut: false,
+      routeProvenance: 'Modeled',
+      envelope: true,
+      flat: true,
+    })
+    expect(entries.find((e) => e.id === 'envelope')?.label).toBe('Return envelope (flat ground, no terrain model)')
   })
 })
 
@@ -263,7 +275,7 @@ describe('storm alert (Y6)', () => {
     expect(on.find((e) => e.id === 'thread')?.provenance).toBe('Simulation')
     expect(on.find((e) => e.id === 'envelope')?.legend?.map((l) => l.label)).toEqual([
       'Home before the storm',
-      'Not before the storm',
+      'Not home before the storm',
     ])
     const off = entries(false)
     expect(off.find((e) => e.id === 'thread')).toBeUndefined()

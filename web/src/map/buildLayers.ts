@@ -8,6 +8,7 @@ import type { AssetSource } from './assets'
 import type { XY } from './coords'
 import { linePaths, pointFeatures, polygonLabelPoint, unitPolygons, type UnitPolygon } from './geo'
 import { ENVELOPE_COLORS, envelopeThresholds } from './envelope'
+import { placeLabels, placementProps, type Placement } from './labels'
 import type { LayerEntry, LegendItem } from './layers'
 import { dashes, splitAt, type RouteGeometry } from './route'
 import type { SiteData } from './useSiteData'
@@ -49,8 +50,11 @@ export const LAYER_ORDER: LayerId[] = [
 /** Layers drawn as part of another layer's toggle: the targets belong to "Seen, not touched". */
 const TOGGLED_BY: Partial<Record<LayerId, LayerId>> = { targets: 'seen' }
 
-/** Seen-not-touched colour of the B3 raster (rgba(255, 140, 0, 200)). */
-const SEEN_HEX = '#ff8c00'
+// The B3 raster is orange (rgba(255, 140, 0, 200)), too close to the envelope's amber on a
+// projector. The map greys it and tints it violet: luminance of #ff8c00 is about 0.6, times
+// SEEN_TINT gives SEEN_HEX, the legend swatch.
+const SEEN_TINT: [number, number, number] = [255, 110, 255]
+const SEEN_HEX = '#9a439a'
 const SEEN_RGB: Rgba = [255, 140, 0, 255]
 
 /** Planned route colour (visual brief: --ink #e7efec); the red thread is kept for the way home (Y6). */
@@ -89,6 +93,8 @@ export type MissionEntries = {
   envelope?: boolean
   /** A storm alert is active (Y6): the thread is listed and the envelope legend switches. */
   alert?: boolean
+  /** The envelope is drawn from the flat-ground variant (Y9 comparison). */
+  flat?: boolean
 }
 
 /** Below this map width the small ortho is used (fewer pixels, safer on phone GPUs). */
@@ -143,28 +149,30 @@ export function layerEntries(source: AssetSource, data: SiteData, mission?: Miss
     },
   ]
   if (mission?.envelope) {
-    const { safe_min, tight_min } = envelopeThresholds(aoi.model)
+    const { safe_min } = envelopeThresholds(aoi.model)
+    const reserve = aoi.model.reserve_min
+    const variant = mission.flat ? ' (flat ground, no terrain model)' : ''
     entries.push(
       mission.alert
         ? {
             id: 'envelope',
-            label: 'Return envelope: storm alert',
+            label: `Return envelope: storm alert${variant}`,
             provenance: prov(source, 'Modeled'),
             visible: true,
             legend: [
               { color: ENVELOPE_COLORS.tight, label: 'Home before the storm' },
-              { color: ENVELOPE_COLORS.out, label: 'Not before the storm' },
+              { color: ENVELOPE_COLORS.out, label: 'Not home before the storm' },
             ],
           }
         : {
             id: 'envelope',
-            label: 'Return envelope (time left to walk home)',
+            label: `Return envelope${variant}`,
             provenance: prov(source, 'Modeled'),
             visible: true,
             legend: [
-              { color: ENVELOPE_COLORS.safe, label: `Back with ≥ ${safe_min} min to spare` },
-              { color: ENVELOPE_COLORS.tight, label: `Back with ${tight_min}–${safe_min} min to spare` },
-              { color: ENVELOPE_COLORS.out, label: 'Cannot get back in time' },
+              { color: ENVELOPE_COLORS.safe, label: `Home with the ${reserve} min reserve and ${safe_min}+ min to spare` },
+              { color: ENVELOPE_COLORS.tight, label: `Home with the reserve, under ${safe_min} min to spare` },
+              { color: ENVELOPE_COLORS.out, label: 'Would eat into the reserve, or no way home' },
             ],
           },
     )
@@ -245,10 +253,12 @@ export type BuildInput = {
   mission?: MissionLayers
   /** The return envelope at the current time, drawn on an offscreen canvas (Y5). */
   envelope?: { image: HTMLCanvasElement } | null
+  /** Screen pixels per metre; when given, place-name labels are moved so they do not overlap (Y9). */
+  ppm?: number
 }
 
 /** deck.gl layers, bottom to top, for the visible layers whose data is present. */
-export function buildLayers({ source, data, isVisible, narrow, mission, envelope }: BuildInput): Layer[] {
+export function buildLayers({ source, data, isVisible, narrow, mission, envelope, ppm }: BuildInput): Layer[] {
   const { aoi } = source
   const [w, h] = aoi.size_m
   const bounds: [number, number, number, number] = [0, 0, w, h]
@@ -278,7 +288,18 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
         break
       case 'seen': {
         const ref = aoi.rasters.seen_not_touched
-        if (data.seen && ref) out.push(bitmap('seen', ref.file, 0.55))
+        if (data.seen && ref) {
+          out.push(
+            new BitmapLayer({
+              id: 'seen',
+              image: source.url(ref.file),
+              bounds,
+              opacity: 0.8,
+              desaturate: 1,
+              tintColor: SEEN_TINT,
+            }),
+          )
+        }
         break
       }
       case 'targets': {
@@ -307,7 +328,7 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
           }),
         )
         const picked = targets.filter((t) => t.selected)
-        if (picked.length > 0) out.push(labelLayer('targets-label', picked, 12, 14))
+        if (picked.length > 0) out.push(labelLayer('targets-label', picked, 13, 14, ppm))
         break
       }
       case 'geology': {
@@ -329,7 +350,9 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
               const xy = polygonLabelPoint(p.rings)
               return xy ? [{ xy, name: p.name }] : []
             }),
-            11,
+            12,
+            12,
+            ppm,
           ),
         )
         break
@@ -475,7 +498,7 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
               data: numbered,
               getPosition: (d) => d.xy,
               getText: (d) => String(d.n),
-              getSize: 12,
+              getSize: 13,
               sizeUnits: 'pixels',
               getColor: [17, 22, 29, 255],
               getTextAnchor: 'middle',
@@ -485,7 +508,7 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
             }),
           )
         }
-        out.push(labelLayer('places-labels', places, 13, 16))
+        out.push(labelLayer('places-labels', places, 15, 16, ppm))
         break
       }
       case 'astronaut': {
@@ -504,7 +527,14 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
             lineWidthUnits: 'pixels',
             getLineWidth: 3,
           }),
-          new TextLayer<Label>({ ...labelProps(12, 14), id: 'astronaut-label', data: me }),
+          // Below the marker: at the start the astronaut stands on the safe haven, whose name is above.
+          new TextLayer<Label>({
+            ...labelProps(13, 14),
+            id: 'astronaut-label',
+            data: me,
+            getAlignmentBaseline: 'top',
+            getPixelOffset: [0, 14],
+          }),
         )
         break
       }
@@ -513,10 +543,23 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
   return out
 }
 
-/** Readable text on imagery: light text on a dark box, constant screen size. */
-function labelLayer(id: string, data: Label[], size: number, offset = 12) {
-  return new TextLayer<Label>({ ...labelProps(size, offset), id, data })
+/**
+ * Readable text on imagery: light text on a dark box, constant screen size. With ppm (pixels per
+ * metre) the labels are placed so they do not overlap at the current zoom.
+ */
+function labelLayer(id: string, data: Label[], size: number, offset = 12, ppm?: number) {
+  if (!ppm) return new TextLayer<Label>({ ...labelProps(size, offset), id, data })
+  return new TextLayer<PlacedLabel>({
+    ...labelProps(size, offset),
+    id,
+    data: placeLabels(data, ppm, size, offset),
+    getTextAnchor: (d) => placementProps(d.placement, offset).anchor,
+    getAlignmentBaseline: (d) => placementProps(d.placement, offset).baseline,
+    getPixelOffset: (d) => [...placementProps(d.placement, offset).pixelOffset] as [number, number],
+  })
 }
+
+type PlacedLabel = Label & { placement: Placement }
 
 function labelProps(size: number, offset: number) {
   return {
@@ -529,9 +572,10 @@ function labelProps(size: number, offset: number) {
     getAlignmentBaseline: 'bottom' as const,
     getPixelOffset: [0, -offset] as [number, number],
     background: true,
-    getBackgroundColor: [17, 22, 29, 215] as Rgba,
+    getBackgroundColor: [17, 22, 29, 235] as Rgba,
     backgroundPadding: [4, 2] as [number, number],
     characterSet: 'auto' as const,
     fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
+    fontWeight: 600,
   }
 }
