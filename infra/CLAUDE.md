@@ -18,6 +18,13 @@ file server on `/srv/assets` with CORS for `WEB_ORIGIN`), `.env.example`, `deplo
 trust it or use the loopback ports 8000 and 8080) and the assets are `contracts/fixtures/`
 (SYNTHETIC).
 
+**Laptop hosting until the real server (free):** `cp infra/laptop.env.example infra/.env.laptop`,
+fill in `NASA_API_KEY`, then `sh infra/funnel.sh` (`sh infra/funnel.sh down` to stop). It runs the
+stack with `docker-compose.laptop.yml` (loopback ports only) and exposes it with Tailscale Funnel:
+mission-control on `https://<node>.ts.net:8443`, assets on `:10000/`, planner on `:10000/planner`.
+Port 443 is not used: a local k3s Traefik takes it. One-time setup: Funnel enabled for the node in
+the Tailscale admin console and `sudo tailscale set --operator=$USER`. The laptop must stay awake.
+
 **Test:** `docker compose -f infra/docker-compose.yml config -q` (syntax), then `/health` on
 both hosts and a `wss://<MC_HOST>/ws` connection.
 

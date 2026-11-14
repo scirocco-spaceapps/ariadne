@@ -14,6 +14,7 @@ Fixture AOI: 500 x 400 m (`../aoi.json`), same keys and pixel sizes as `contract
 | `slope_2m.png` | 250 x 200 | RGB, coloured by the `slope.legend` bins |
 | `traversability_2m.png` | 250 x 200 | RGB, coloured by the `traversability.legend` classes; fixture thresholds go < 15° ≤ caution < 25° ≤ no-go (Assumed) |
 | `cost_to_home_2m.f32` | 250 x 200 | straight-line distance to the safe haven / 50 m·min⁻¹, minutes |
+| `cost_2m.f32` | 250 x 200 | planner input, outside the contract: 1/50 min·m⁻¹ everywhere, NaN (impassable) where the DEM slope ≥ 25° |
 | `slope_2m.f32` | 250 x 200 | slope of the DEM in degrees (optional `slope_values` entry) |
 | `track.geojson` | 7 segments | SYNTHETIC rover traverse, sols 1200–1206, AOI metres |
 | `waypoints.geojson` | 7 points | SYNTHETIC rover stops with sol, site, drive |
