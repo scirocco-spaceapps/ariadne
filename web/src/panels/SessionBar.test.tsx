@@ -102,6 +102,8 @@ describe('SessionBar', () => {
     )
     renderBar()
     expect((screen.getByRole('button', { name: /Start/ }) as HTMLButtonElement).disabled).toBe(true)
+    // No route yet: no end time (the fixture's 48 min must not leak into the live console).
+    expect(screen.getByTestId('bar-end').textContent).toBe('T+ —')
 
     fireEvent.click(screen.getByRole('button', { name: 'Create session' }))
     await waitFor(() => expect(useMission.getState().session.id).toBe('sess-9'))
@@ -111,6 +113,7 @@ describe('SessionBar', () => {
       { route: planned, budget_min: 240, reserve_min: 30, dwell_min: aoi.model.dwell_min },
     ])
     await waitFor(() => expect(search).toBe('?s=sess-9'))
+    expect(screen.getByTestId('bar-end').textContent).toBe('T+ 0:48')
   })
 
   it('uses an already planned route without asking the planner again', async () => {

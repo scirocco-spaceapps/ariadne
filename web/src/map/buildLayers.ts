@@ -18,11 +18,13 @@ export type LayerId =
   | 'slope'
   | 'traversability'
   | 'envelope'
+  | 'seen'
   | 'geology'
   | 'track'
   | 'waypoints'
   | 'route'
   | 'thread'
+  | 'targets'
   | 'places'
   | 'astronaut'
 
@@ -33,14 +35,23 @@ export const LAYER_ORDER: LayerId[] = [
   'slope',
   'traversability',
   'envelope',
+  'seen',
   'geology',
   'track',
   'waypoints',
   'route',
   'thread',
+  'targets',
   'places',
   'astronaut',
 ]
+
+/** Layers drawn as part of another layer's toggle: the targets belong to "Seen, not touched". */
+const TOGGLED_BY: Partial<Record<LayerId, LayerId>> = { targets: 'seen' }
+
+/** Seen-not-touched colour of the B3 raster (rgba(255, 140, 0, 200)). */
+const SEEN_HEX = '#ff8c00'
+const SEEN_RGB: Rgba = [255, 140, 0, 255]
 
 /** Planned route colour (visual brief: --ink #e7efec); the red thread is kept for the way home (Y6). */
 const ROUTE_RGB: Rgba = [231, 239, 236, 255]
@@ -65,6 +76,8 @@ export type MissionLayers = {
   dash_m: number
   /** Storm alert (Y6): the way home and the haven pulse phase in [0, 1); null when there is none. */
   alert?: { path: XY[] | null; pulse: number } | null
+  /** Selected B3 target id (Y7). */
+  selectedTarget?: string | null
 }
 
 /** Which mission layers exist, for the toggles. */
@@ -156,6 +169,18 @@ export function layerEntries(source: AssetSource, data: SiteData, mission?: Miss
           },
     )
   }
+  if (data.seen || data.targets) {
+    entries.push({
+      id: 'seen',
+      label: 'Seen, not touched (rover viewsheds)',
+      provenance: prov(source, 'Derived'),
+      visible: true,
+      legend: [
+        ...(data.seen ? [{ color: SEEN_HEX, label: "Seen by the rover's cameras, never driven to" }] : []),
+        ...(data.targets ? [{ color: '#11161d', label: 'Target the rover saw (click for its card)' }] : []),
+      ],
+    })
+  }
   if (data.geology) {
     entries.push({ id: 'geology', label: 'Geologic units', provenance: prov(source, 'Observed'), visible: true })
   }
@@ -199,6 +224,17 @@ export function orthoFile(aoi: AssetSource['aoi'], narrow: boolean): string {
 }
 
 type Label = { xy: XY; name: string }
+type Target = Label & { id: string; selected: boolean }
+
+/** "target-cheyava-falls" -> "Target · Cheyava Falls · sol 1182". */
+export function targetLabel(id: string, sol: number | null): string {
+  const words = id
+    .replace(/^target-/, '')
+    .split('-')
+    .filter((w) => w !== '')
+    .map((w) => w[0].toUpperCase() + w.slice(1))
+  return ['Target', words.join(' ') || id, sol !== null ? `sol ${sol}` : null].filter(Boolean).join(' · ')
+}
 type Place = Label & { id: string; haven: boolean; n: number | null; selected: boolean }
 
 export type BuildInput = {
@@ -222,7 +258,7 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
     new BitmapLayer({ id, image: source.url(file), bounds, opacity })
 
   for (const id of LAYER_ORDER) {
-    if (!isVisible(id)) continue
+    if (!isVisible(TOGGLED_BY[id] ?? id)) continue
     switch (id) {
       case 'ortho':
         out.push(bitmap('ortho', orthoFile(aoi, narrow)))
@@ -240,6 +276,40 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
         if (!envelope) break
         out.push(new BitmapLayer({ id: 'envelope', image: envelope.image, bounds }))
         break
+      case 'seen': {
+        const ref = aoi.rasters.seen_not_touched
+        if (data.seen && ref) out.push(bitmap('seen', ref.file, 0.55))
+        break
+      }
+      case 'targets': {
+        if (!data.targets) break
+        const selected = mission?.selectedTarget ?? null
+        const targets: Target[] = pointFeatures(data.targets).flatMap((p) => {
+          const id = p.properties.id
+          if (typeof id !== 'string') return []
+          const sol = typeof p.properties.sol === 'number' ? p.properties.sol : null
+          return [{ id, xy: p.xy, name: targetLabel(id, sol), selected: id === selected }]
+        })
+        out.push(
+          new ScatterplotLayer<Target>({
+            id: 'targets',
+            data: targets,
+            pickable: true,
+            getPosition: (d) => d.xy,
+            getRadius: 7,
+            radiusUnits: 'pixels',
+            getFillColor: [17, 22, 29, 235],
+            stroked: true,
+            getLineColor: (d) => (d.selected ? SEEN_RGB : [255, 255, 255, 255]),
+            lineWidthUnits: 'pixels',
+            getLineWidth: (d) => (d.selected ? 4 : 2.5),
+            updateTriggers: { getLineColor: selected, getLineWidth: selected },
+          }),
+        )
+        const picked = targets.filter((t) => t.selected)
+        if (picked.length > 0) out.push(labelLayer('targets-label', picked, 12, 14))
+        break
+      }
       case 'geology': {
         if (!data.geology) break
         const polys = unitPolygons(data.geology)
