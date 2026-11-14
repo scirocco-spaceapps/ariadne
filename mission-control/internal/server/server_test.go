@@ -16,9 +16,7 @@ import (
 
 func testServer(t *testing.T) *Server {
 	t.Helper()
-	cfg := DefaultConfig()
-	cfg.ReplayPath = "../../../contracts/fixtures/ws-state.jsonl"
-	s := New(cfg)
+	s := New(DefaultConfig())
 	t.Cleanup(s.Sessions.Close)
 	return s
 }
@@ -150,6 +148,10 @@ func TestTwoClientsReceiveIdenticalState(t *testing.T) {
 			t.Fatalf("first frame = %+v, err %v", st, err)
 		}
 	}
+	if code, body := post(t, s, "/sessions/"+id+"/control", []byte(`{"action":"start","speed":1}`)); code != 200 {
+		t.Fatalf("start: %d %s", code, body)
+	}
+	var lastT float64
 	for i := 0; i < 3; i++ {
 		_, a, err := console.ReadMessage()
 		if err != nil {
@@ -162,6 +164,53 @@ func TestTwoClientsReceiveIdenticalState(t *testing.T) {
 		if !bytes.Equal(a, b) {
 			t.Fatalf("broadcast %d differs:\nconsole %s\ncuff    %s", i, a, b)
 		}
+		var st contract.State
+		_ = json.Unmarshal(a, &st)
+		if !st.Running || st.TMin < lastT {
+			t.Fatalf("broadcast %d: running %v t %v after %v", i, st.Running, st.TMin, lastT)
+		}
+		lastT = st.TMin
+	}
+	if lastT <= 0 {
+		t.Fatal("clock did not advance")
+	}
+}
+
+func TestControl(t *testing.T) {
+	s := testServer(t)
+	id := createFixtureSession(t, s)
+	ctl := "/sessions/" + id + "/control"
+	tests := []struct {
+		name, path, body string
+		want             int
+		running          bool
+		tMin             float64
+	}{
+		{"unknown session", "/sessions/nope/control", `{"action":"start"}`, 404, false, 0},
+		{"bad action", ctl, `{"action":"fly"}`, 400, false, 0},
+		{"seek without t_min", ctl, `{"action":"seek"}`, 400, false, 0},
+		{"zero speed", ctl, `{"action":"start","speed":0}`, 400, false, 0},
+		{"seek", ctl, `{"action":"seek","t_min":12}`, 200, false, 12},
+		{"start", ctl, `{"action":"start","speed":0.001}`, 200, true, 12},
+		{"pause", ctl, `{"action":"pause"}`, 200, false, 12},
+		{"seek past end stops", ctl, `{"action":"seek","t_min":500}`, 200, false, 48},
+		{"start at end stays stopped", ctl, `{"action":"start"}`, 200, false, 48},
+		{"reset", ctl, `{"action":"reset"}`, 200, false, 0},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			code, body := post(t, s, tc.path, []byte(tc.body))
+			if code != tc.want {
+				t.Fatalf("status = %d (%s), want %d", code, body, tc.want)
+			}
+			if code != 200 {
+				return
+			}
+			st := s.Sessions.Get(id).State()
+			if st.Running != tc.running || st.TMin < tc.tMin || st.TMin > tc.tMin+0.01 {
+				t.Fatalf("state running %v t %v, want %v %v", st.Running, st.TMin, tc.running, tc.tMin)
+			}
+		})
 	}
 }
 

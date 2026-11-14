@@ -10,12 +10,12 @@ WebSocket: `contracts/ws-messages.md`. All simulated state carries `provenance: 
 **Run:** `cd mission-control && go run .` (port from `PORT`, default 8080)
 
 **Env:** `PORT` (8080), `WEB_ORIGIN` (CORS allow list, comma-separated; default
-`http://localhost:5173`), `REPLAY_PATH` (state stream new sessions replay until the simulator
-lands; default `../contracts/fixtures/ws-state.jsonl`, mount it in Docker).
+`http://localhost:5173`).
 
 **Docker:** `docker build -t ariadne-mission-control mission-control` (context = this folder).
 
 **Layout:** `internal/contract` message shapes, `internal/session` sessions, clock and hub,
+`internal/sim` the astronaut walking the route timeline,
 `internal/server` HTTP and WebSocket routes.
 
 **Test:** `cd mission-control && go vet ./... && go test ./...`
