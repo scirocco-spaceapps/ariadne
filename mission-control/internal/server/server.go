@@ -7,12 +7,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 
+	"github.com/ozyusuf/ariadne/mission-control/internal/conditions"
 	"github.com/ozyusuf/ariadne/mission-control/internal/contract"
 	"github.com/ozyusuf/ariadne/mission-control/internal/planner"
 	"github.com/ozyusuf/ariadne/mission-control/internal/session"
@@ -31,12 +33,22 @@ type Config struct {
 	WebOrigins string
 	// PlannerURL is the planner base URL for POST /abort (PLANNER_URL); empty skips the call.
 	PlannerURL string
+	// ParamsPath is model/params.json (MODEL_PARAMS_PATH); MEDAPath is content/conditions/meda.json (MEDA_PATH).
+	ParamsPath string
+	MEDAPath   string
+	// NASAAPIKey is the api.nasa.gov key for DONKI (NASA_API_KEY); empty uses the rate-limited DEMO_KEY.
+	NASAAPIKey string
+	// DONKIBaseURL overrides the DONKI endpoint (tests).
+	DONKIBaseURL string
 }
 
 // DefaultConfig works from the mission-control folder of a repo checkout.
 func DefaultConfig() Config {
 	return Config{
-		WebOrigins: "http://localhost:5173",
+		WebOrigins:   "http://localhost:5173",
+		ParamsPath:   "../model/params.json",
+		MEDAPath:     "../content/conditions/meda.json",
+		DONKIBaseURL: conditions.DONKIBaseURL,
 	}
 }
 
@@ -54,7 +66,8 @@ type Server struct {
 	Planner  interface {
 		Abort(ctx context.Context, from contract.XY) ([]contract.XY, float64, error)
 	}
-	cfg Config
+	Conditions *conditions.Service
+	cfg        Config
 }
 
 // New returns the server with all routes registered.
@@ -65,9 +78,22 @@ func New(cfg Config) *Server {
 		Planner:  planner.New(cfg.PlannerURL),
 		cfg:      cfg,
 	}
+	key := cfg.NASAAPIKey
+	if key == "" {
+		log.Print("NASA_API_KEY is not set; DONKI uses DEMO_KEY (30 requests per hour)")
+		key = "DEMO_KEY"
+	}
+	s.Conditions = conditions.New(conditions.Config{
+		ParamsPath: cfg.ParamsPath,
+		MEDAPath:   cfg.MEDAPath,
+		DONKI:      &conditions.DONKI{BaseURL: cfg.DONKIBaseURL, APIKey: key, HTTP: &http.Client{Timeout: 10 * time.Second}},
+	})
 	s.App.Use(cors.New(cors.Config{AllowOrigins: cfg.WebOrigins}))
 	s.App.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(Health{Status: "ok", Service: "mission-control"})
+	})
+	s.App.Get("/conditions", func(c *fiber.Ctx) error {
+		return c.JSON(s.Conditions.Get(c.Context()))
 	})
 	s.App.Post("/sessions", s.createSession)
 	s.App.Post("/sessions/:id/control", s.controlSession)
