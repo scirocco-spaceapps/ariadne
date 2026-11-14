@@ -1,0 +1,69 @@
+name: web-deploy
+
+# Publishes web/ to Vercel production (https://ariadne-gilt-tau.vercel.app) when main changes
+# something the bundle is built from. The Vercel project is not Git-connected: the Hobby plan does
+# not deploy other people's commits from a private org repo, so CI builds here and uploads the
+# prebuilt output, the same as a manual `vercel deploy --prebuilt --prod`.
+# The VITE_* production values come from the Vercel project's env (`vercel pull`).
+# Secret (repo settings → Secrets and variables → Actions):
+#   VERCEL_TOKEN (a token from vercel.com/account/tokens with access to the nuriokumus-projects team).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      # web imports contracts/fixtures and bundles content/stops/*.json at build time.
+      - "contracts/**"
+      - "content/**"
+      - ".github/workflows/web-deploy.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: web-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      # IDs, not credentials: the Vercel team and the ariadne project.
+      VERCEL_ORG_ID: team_L1cY2XEusxkcCCZICw9WDRJ8
+      VERCEL_PROJECT_ID: prj_9Yc7fDkRa1Uf2zd1ixrRFbgSRLcD
+    steps:
+      - name: Check for VERCEL_TOKEN
+        working-directory: .
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::warning::VERCEL_TOKEN is not set; skipping the Vercel deploy."
+          fi
+      - uses: actions/checkout@v4
+        if: env.VERCEL_TOKEN != ''
+      - uses: actions/setup-node@v4
+        if: env.VERCEL_TOKEN != ''
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - if: env.VERCEL_TOKEN != ''
+        run: npm ci
+      # Do not publish a main that fails the web check.
+      - if: env.VERCEL_TOKEN != ''
+        run: npm run check
+      - name: Pull Vercel production settings and env
+        if: env.VERCEL_TOKEN != ''
+        run: npx --yes vercel@65.16.0 pull --yes --environment=production --token="$VERCEL_TOKEN"
+      - name: Build
+        if: env.VERCEL_TOKEN != ''
+        run: npx --yes vercel@65.16.0 build --prod --yes --token="$VERCEL_TOKEN"
+      - name: Deploy to production
+        if: env.VERCEL_TOKEN != ''
+        run: |
+          npx --yes vercel@65.16.0 deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"
+          echo "Deployed main @ ${GITHUB_SHA::7} to https://ariadne-gilt-tau.vercel.app" >> "$GITHUB_STEP_SUMMARY"
