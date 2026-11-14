@@ -25,6 +25,8 @@ rasterio has no wheel for newer versions yet), then
 4. `scripts/03_export.py`: web assets to `DATA_DIR/<assets_base>` plus `DATA_DIR/aoi.json` (the planner's AOI);
    `--check` re-checks sizes, sidecars and GeoJSON schemas. `scripts/serve_assets.py` serves `DATA_DIR`
    with CORS on :8001 until the assets host is up (`VITE_ASSETS_URL=http://localhost:8001/`).
+5. `scripts/04_cost.py [--params FILE]`: slope and traversability PNGs, `slope_2m.f32`, `cost_2m.f32` from
+   `model/params.json` (stops with a clear message while B1 values are null; a `--params` dev file is Assumed).
 
 **AOI frame:** `scripts/aoi.py` reads `contracts/aoi.json`; `aoi_frame.json` overrides `origin_lonlat`
 until the real origin is in the contract.
