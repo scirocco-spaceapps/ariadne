@@ -1,12 +1,58 @@
 {
-  "_comment": "Walk model parameters. Fill every value with a source; a value without one is Assumed and gets a row in docs/DATA_SOURCES.md. Owner: Bunyamin.",
-  "max_slope_deg": { "value": null, "unit": "deg", "provenance": null, "source": null },
-  "caution_slope_deg": { "value": null, "unit": "deg", "provenance": null, "source": null },
-  "walk_speed_flat_m_per_min": { "value": null, "unit": "m/min", "provenance": null, "source": null },
-  "speed_vs_slope": { "value": null, "unit": "list of [slope_deg, speed_factor] pairs, ascending slope, factor 1.0 at 0 deg, linear interpolation between pairs", "provenance": null, "source": null },
-  "dwell_min": { "value": null, "unit": "min", "provenance": null, "source": null },
-  "budget_min": { "value": null, "unit": "min", "provenance": null, "source": null },
-  "reserve_min": { "value": null, "unit": "min", "provenance": null, "source": null },
-  "radiation_dose_rate": { "value": null, "unit": "uGy/day", "provenance": null, "source": null, "measured_at": null },
-  "observer_height_m": { "value": null, "unit": "m", "provenance": null, "source": null }
+  "_comment": "Walk model parameters. Fill every value with a source; a value without one is Assumed and gets a row in docs/DATA_SOURCES.md. Owner: Bunyamin. Method and limitations: docs/model.md.",
+  "max_slope_deg": {
+    "value": 20,
+    "unit": "deg",
+    "provenance": "Assumed",
+    "source": "Lunar suit requirement adopted for Mars: 'Astronaut in suit must be able to walk up, down, across a 20-degree slope' (xEVA System Requirements Document, Attachment J-02, 80JSC021R0006, NASA 2021), as quoted in Scoville, Artemis III EVA Mission Capability for de Gerlache-Shackleton Ridge, NTRS 20210026296. https://ntrs.nasa.gov/citations/20210026296"
+  },
+  "caution_slope_deg": {
+    "value": 15,
+    "unit": "deg",
+    "provenance": "Assumed",
+    "source": "Team choice (Bunyamin, 2026-11-14), no published source; midway between level ground and max_slope_deg."
+  },
+  "walk_speed_flat_m_per_min": {
+    "value": 33.3,
+    "unit": "m/min",
+    "provenance": "Assumed",
+    "source": "Lunar EVA planning rate 'Walking rate = 2km/hr' (Del Greco et al. 2021, Artemis III EVA Distance Trade), as quoted in Scoville, NTRS 20210026296. https://ntrs.nasa.gov/citations/20210026296. 2 km/h = 33.3 m/min; adopted for Mars without change."
+  },
+  "speed_vs_slope": {
+    "value": [[0, 1.0], [5, 0.736], [10, 0.539], [15, 0.391], [20, 0.28]],
+    "unit": "list of [slope_deg, speed_factor] pairs, ascending slope, factor 1.0 at 0 deg, linear interpolation between pairs",
+    "provenance": "Modeled",
+    "source": "Shape of Tobler's hiking function, factor = exp(-3.5 * tan(slope)), normalised to 1.0 at 0 deg and made symmetric in slope (Tobler 1993, Three presentations on geographical analysis and modeling, NCGIA Technical Report 93-1). Earth, unsuited walking; citation not yet checked against the original."
+  },
+  "dwell_min": {
+    "value": 20,
+    "unit": "min",
+    "provenance": "Derived",
+    "source": "Median time at the nine Apollo 15 geology stations (12-65 min, median 21 min, rounded to 20), computed from arrival and departure times in the Apollo 15 Activities Timeline, Washington University in St. Louis Lunar Orbital Data Explorer. https://an.rsl.wustl.edu/apollo/data/A15/pages/time/time.html"
+  },
+  "budget_min": {
+    "value": 360,
+    "unit": "min",
+    "provenance": "Assumed",
+    "source": "Planned EVA duration, not the suit limit. 6 h = nominal EVA excursion '6 hours +/- 2 hours' (Artemis III Science Definition Team Report, NASA/SP-20205009602, quoted in Scoville, NTRS 20210026296) and the 6-hour case of the Mars PLSS design EVA times 'Primary EVA Time: 2, 4, 6, & 8 hours' (Oliver et al., ICES 2026, NTRS 20260005204). Below the lunar suit requirement of at least 8 hours of EVA operation (xEVA SRD, quoted in Scoville). https://ntrs.nasa.gov/citations/20210026296 https://ntrs.nasa.gov/citations/20260005204"
+  },
+  "reserve_min": {
+    "value": 60,
+    "unit": "min",
+    "provenance": "Assumed",
+    "source": "Secondary (contingency) life support sized for '1 hour with 4-, 6-, and 8-hour EVAs' (Oliver et al., ICES 2026, NTRS 20260005204); xEVA requirement '1 hour of contingency capability' (Scoville, NTRS 20210026296). Used here as the walk-home reserve."
+  },
+  "radiation_dose_rate": {
+    "value": 210,
+    "unit": "uGy/day",
+    "provenance": "Modeled",
+    "source": "MSL RAD GCR absorbed dose rate 0.210 +/- 0.040 mGy/day at Gale crater (Hassler et al. 2014, Mars' surface radiation environment measured with the Mars Science Laboratory's Curiosity rover, Science 343, 1244797). Applied to Jezero as a model value; no surface measurement at Jezero.",
+    "measured_at": "Gale crater, MSL RAD, 2012-08-07 to 2013-06-01"
+  },
+  "observer_height_m": {
+    "value": 2.0,
+    "unit": "m",
+    "provenance": "Observed",
+    "source": "Mastcam-Z cameras 'on a camera plate ~2 m above the surface' (Bell et al. 2021, The Mars 2020 Perseverance Rover Mast Camera Zoom (Mastcam-Z), Space Science Reviews 217:24, doi:10.1007/s11214-020-00755-x)."
+  }
 }
