@@ -3,8 +3,7 @@
 Reads  $ARIADNE_WORK/ortho_25cm.tif, dem_1m.tif, track.geojson, waypoints.geojson (A1).
 Writes $DATA_DIR/<assets_base>: ortho_50cm.jpg, ortho_1m.jpg, dem_4m.f32 (+ .json sidecar),
        hillshade_2m.png, track.geojson, waypoints.geojson, dem_1m.tif;
-       and $DATA_DIR/aoi.json: contracts/aoi.json with the pipeline frame's origin_lonlat, the file
-       the planner reads (AOI_PATH default).
+       and $DATA_DIR/aoi.json: a copy of contracts/aoi.json, the file the planner reads (AOI_PATH default).
 
 Run:   python pipeline/scripts/03_export.py          # export, then check
        python pipeline/scripts/03_export.py --check  # only check what is published
@@ -22,7 +21,7 @@ import rasterio
 from PIL import Image
 from rasterio.enums import Resampling
 
-from aoi import CONTRACT_AOI, DATA_DIR, WORK_DIR, load_frame
+from aoi import CONTRACT_AOI, DATA_DIR, WORK_DIR
 from exportlib import block_reduce, check_f32, check_image, hillshade, write_f32
 
 JPEG_QUALITY = 85
@@ -31,10 +30,8 @@ SOURCE_ORTHO = "USGS Mars 2020 TRN HiRISE orthomosaic (JEZ_hirise_soc_006 25 cm)
 
 
 def published_aoi() -> dict:
-    """contracts/aoi.json with the pipeline frame's origin (identical once the contract has it)."""
-    aoi = json.loads(CONTRACT_AOI.read_text(encoding="utf-8"))
-    aoi["origin_lonlat"] = list(load_frame().origin_lonlat)
-    return aoi
+    """The contract as published next to the assets."""
+    return json.loads(CONTRACT_AOI.read_text(encoding="utf-8"))
 
 
 def export(aoi: dict) -> None:
