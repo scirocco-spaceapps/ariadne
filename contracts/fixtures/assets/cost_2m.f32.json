@@ -1,0 +1,15 @@
+{
+  "synthetic": true,
+  "label": "SYNTHETIC",
+  "width": 250,
+  "height": 200,
+  "px_m": 2,
+  "min": 0.02,
+  "max": 0.02,
+  "dtype": "float32",
+  "byte_order": "little",
+  "layout": "row-major, row 0 = north edge, no header",
+  "unit": "min/m",
+  "formula": "1/50 where slope < 25 deg, NaN (no-go) where slope >= 25 deg",
+  "provenance": "Simulation"
+}
