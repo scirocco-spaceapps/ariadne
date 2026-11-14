@@ -78,7 +78,7 @@ never drove to. Four targets on it have their own cards.
 When the operator raises a storm alert, the console draws the way home ("the thread"), and the
 cuff switches to "Follow the thread home". In the demo the astronaut reaches the safe haven before
 the all-clear, and the walk ends there. (In a live session, if the astronaut is not home yet when
-the all-clear comes, the plan resumes toward the next stop.)
+the all-clear comes, the walk returns to the plan where it left it.)
 
 Live site: https://ariadne-gilt-tau.vercel.app. Its services run on a cloud server that stays up
 through judging.
@@ -203,7 +203,7 @@ debug, and to draft the docs, the stop cards, this page and the video script. Th
 visual brief were drafted with it. A team member approved each plan and checked each result. We
 logged one line per task in `docs/ai-use/`, and every AI-assisted commit names Claude as
 co-author. We used no AI-generated images. AI produced no measurements: every value comes from a
-cited source or is marked Assumed. Some checks are still open: three citations in the walk model
+cited source or is marked Assumed. Some checks are still open: four citations in the walk model (Tobler, Hassler, Bell, Apollo 15)
 have not been checked against the originals yet, and some tests (a race-detector run, the cuff on
 a real phone at arm's length) were not done.
 

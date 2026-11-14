@@ -14,9 +14,11 @@ Owner: Furkan. Task F5. English.
 - Screen captures only. No people on screen, so no one under 18 on screen.
 - No NASA logos or mission patches, no AI-generated images. Every photo on screen shows its credit
   line.
-- Say only what a shot shows. The e2e video is **SYNTHETIC** demo data. It is never presented as
-  real data: the "DEMO DATA" badge stays in frame and the caption says so. The storm alert is a
-  **simulated** alert. Never call it a forecast or a real storm.
+- Say only what a shot shows. All shots are screen captures of the **live site** on real assets
+  (HiRISE map, real stops, Perseverance photos). The astronaut's walk and the storm alert are a
+  **simulation**: the "Simulation" badges stay in frame, and the storm shot carries the caption
+  "Simulated storm alert". Never call it a forecast or a real storm. The synthetic DEMO replay
+  (`?demo=1`, e2e test) is not used in the video.
 
 How the numbers below were made: words = whitespace-separated tokens, so "walking-scale" is one
 word. Seconds are an estimate at 2.5 words/s (150 words/min) plus a 0.4 s pause between sentences.
@@ -97,34 +99,30 @@ A 32 s take with cut 1 comes to about 29.6 s; with cuts 1 and 2, about 28.4 s.
 
 ## Shot list (Variant A)
 
-The final video is 1920 x 1080. e2e shots come from the F4 test `e2e/tests/demo90.spec.ts` in DEMO
-mode. To make them, run `cd e2e && npm test`. The output goes to
-`e2e/test-results/demo90-demo90-console-and-cuff-through-a-storm-alert-chromium/`:
+The final video is 1920 x 1080, with English subtitles (the locked script). All clips were recorded
+on 2026-11-14 from the production site `https://ariadne-gilt-tau.vercel.app` (services and assets on
+the Hetzner server). They are kept outside the repo, in the team's video folder:
 
-- console video: `video-console/*.webm` (1440 x 900)
-- cuff video: `video-cuff/*.webm` (390 x 844)
-- screenshots for each phase: `01-running`, `02-alert`, `02b-home`, `03-clear` (`-console.png`,
-  `-cuff.png`)
+- `R1_harita_rota.mp4`: HiRISE map; Fit AOI at about 0:07, **Plan route** at about 0:11 (screen
+  recording, 1920 x 1200).
+- `R2_durak_karti.mp4`: STOP tab on `bright-angel`; photo and credit fully in view at about
+  0:13–0:16.
+- `S_firtina_konsol_ve_bilek.mp4`: one live session, console with the cuff (phone size) laid over
+  its right side, 1920 x 1080, 25 s. Layers: HiRISE orthoimage and hillshade on, return envelope
+  and viewsheds off; speed 3 min/s. **Start** at 0:02, **Storm alert** at 0:10, astronaut home
+  before **Clear** at 0:21. Also kept as console-only and cuff-only files.
 
-Video timestamps change from run to run, so each clip is located by the **session clock** on
-screen (`T+ m:ss`). Fixture times: storm alert at T+0:30, home at T+0:38, clear at T+0:50.
-
-Real-data shots (R1, R2) are **TO RECORD**. They are not in the e2e video, which has synthetic data
-only. Record them from the console running on real assets: production
-`https://ariadne-gilt-tau.vercel.app`, or a local web app with `VITE_ASSETS_URL` on the real
-bundle. Early on 2026-11-14 the HiRISE image did not render because the assets host (then a team
-laptop) was offline. The assets now run on the Hetzner server, and on 2026-11-14 the production
-console showed the HiRISE layer, so record from production.
+The first e2e test output (`e2e/test-results/`, DEMO mode, SYNTHETIC) is not used in the video.
 
 | Sentence | Shot | Source | On screen | Caption / credit |
 |---|---|---|---|---|
-| A1 We’re Team Scirocco. | S1 | e2e console video, first 2 s (console loads) | Header "ARIADNE MISSION CONSOLE · Bright Angel · Jezero crater", "DEMO DATA" badge | Text overlay "Team Scirocco · NASA Space Apps 2026" (text only, no logo) |
-| A2 Every Mars walk needs a way back. | S2 | e2e console video around T+0:05 (= `01-running-console.png`) | Astronaut leaving the safe haven on the planned route; return-envelope legend "Back with ≥ 30 min to spare" | "Synthetic demo data" |
-| A3 This is Ariadne: a thread home from every step. | S3 | e2e console + cuff side by side around T+0:05 (= `01-running-console.png` + `01-running-cuff.png`) | Same clock on both screens; cuff "MARGIN TO HOME +201 min · Safe to continue" | Title "Ariadne" over the shot; "Synthetic demo data" |
-| A4 Built on NASA HiRISE images and terrain of Jezero crater, … | R1 — **TO RECORD**, about 4.5 s | Real-data console: layers Orthoimage MRO HiRISE (Observed) and Hillshade from DEM (Derived) on, Fit AOI, then **Plan route** with the five stops (Mount Washburn, Tuff Cliff, Bright Angel, Cheyava Falls, Masonic Temple) | HiRISE map of Bright Angel with the route drawn and the leg table filled in | HiRISE credit as filled in `REFERENCES.md`. That row is still TBD: fill it before the video is cut |
-| A4 … it plans a route through stops Perseverance studied. | R2 — **TO RECORD**, about 2.5 s | Real-data console, STOP tab on `bright-angel` | Stop card with Perseverance photo `bright-angel_1.jpg` and its credit line | "NASA/JPL-Caltech/ASU" (in the card) |
-| A5 When a storm alert comes in, both screens show the way home. | S4 | e2e console + cuff side by side, T+0:30 → T+0:33 (= `02-alert-console.png` + `02-alert-cuff.png`) | Console: red strip "STORM ALERT · time to storm", red thread "Way home before the storm". Cuff: "STORM ALERT · Follow the thread home" | "Simulated storm alert · synthetic demo data" |
-| A6 Tomorrow, it could guide crews on the Moon and Mars, one safe step at a time. | S5 → end card | e2e console + cuff T+0:38 (= `02b-home-*`), then T+0:50+ (= `03-clear-cuff.png`) | Astronaut reaches the safe haven; after the clear the cuff shows "Safe to continue · Home: the walk is done." End card for the last ~2 s: text "Ariadne · team Scirocco" | "Synthetic demo data" on S5; end card is text only |
+| A1 We’re Team Scirocco. | S1 | storm clip 0:00–0:02 | Header "ARIADNE MISSION CONSOLE · Bright Angel · Jezero crater", session "Connected", HiRISE map with the planned route | Text overlay "Team Scirocco · NASA Space Apps 2026" (text only, no logo) |
+| A2 Every Mars walk needs a way back. | S2 | storm clip 0:02–0:05 | **Start**: the astronaut leaves the safe haven on the planned route | — |
+| A3 This is Ariadne: a thread home from every step. | S3 | storm clip 0:05–0:09 | Same clock on both screens; cuff "MARGIN TO HOME · Safe to continue" (Modeled) | Title "Ariadne" over the shot |
+| A4 Built on NASA HiRISE images and terrain of Jezero crater, … | R1, about 4.5 s | `R1_harita_rota.mp4` 0:06–0:14 | HiRISE map of Bright Angel (layers "Orthoimage, MRO HiRISE", Observed, and "Hillshade (from DEM)", Derived); Fit AOI, then the route through the five stops and the leg table | "Image: NASA/JPL/University of Arizona" (HiRISE credit, `REFERENCES.md`) |
+| A4 … it plans a route through stops Perseverance studied. | R2, about 2.5 s | `R2_durak_karti.mp4` 0:13–0:16 | Stop card for Bright Angel: science question, tasks, Perseverance photo `bright-angel_1.jpg` | "NASA/JPL-Caltech/ASU" (in the card) |
+| A5 When a storm alert comes in, both screens show the way home. | S4 | storm clip 0:10–0:15 | Console: red strip "STORM ALERT · time to storm", red thread "Way home before the storm" from Mount Washburn to the safe haven. Cuff: "STORM ALERT · Follow the thread home", time to storm, walk home | "Simulated storm alert" |
+| A6 Tomorrow, it could guide crews on the Moon and Mars, one safe step at a time. | S5 → end card | storm clip 0:15–0:24 | The astronaut follows the thread to the safe haven; **Clear** at 0:21 turns both screens back to normal. End card for the last ~2 s: text "Ariadne · team Scirocco" | End card is text only |
 
 ## Claim check (Variant A)
 
@@ -135,21 +133,25 @@ console showed the HiRISE layer, so record from production.
 | NASA HiRISE terrain | R1 (layer "Hillshade (from DEM)", Derived) | `DATA_SOURCES.md` rows `dem_4m.f32` / `hillshade_2m.png` (USGS HiRISE DTM 1 m) |
 | plans a route through stops | R1 (Plan route, leg table) | `DATA_SOURCES.md` planned-walk row (planner /route), Modeled |
 | stops Perseverance studied | R2 (stop card with Perseverance photo) | `DATA_SOURCES.md` stop-position row (M20_waypoints.json, sols 1162–1231); `REFERENCES.md` stop photos |
-| a thread home from every step | S3 (cuff margin to home); S2 (return-envelope legend) | Return envelope = `cost_to_home_2m.f32`, Modeled. Shown here on synthetic data |
-| storm alert reaches both screens | S4 | F4 e2e test asserts it on both contexts. Alert is simulated (fixture `ws-state.jsonl`) |
+| a thread home from every step | S3 (cuff "MARGIN TO HOME", Modeled) | Margin = `cost_to_home_2m.f32` at the astronaut's position, Modeled |
+| storm alert reaches both screens | S4 | Live session; the F4 e2e test also asserts it on both screens. The alert is simulated, raised by the operator |
 | both screens show the way home | S4: console red thread; cuff "Follow the thread home" and walk-home minutes (the cuff shows no map) | F4 e2e test (red-thread pixel check) |
 | could guide crews on the Moon and Mars | — (future, said as "could") | Not a demo claim |
 
 Not claimed anywhere in the script: a live or forecast storm (DONKI), live weather, partner data,
-or any number from the synthetic fixture.
+or any number from the synthetic DEMO fixture.
 
 ## Before the cut
 
-- [ ] Read-aloud time ≤ 30 s, end card included
-- [ ] ≤ 70 words (A: 65)
-- [ ] No person on screen; voice only
+- [x] Read-aloud time ≤ 30 s, end card included (27–28 s)
+- [x] ≤ 70 words (A: 65)
+- [ ] Total length ≤ 30 s after the edit
+- [ ] English subtitles match the locked script word for word
+- [ ] No person on screen
 - [ ] No NASA logo or mission patch anywhere, including browser tabs and favicons in the capture
-- [ ] "DEMO DATA" badge visible and "Synthetic demo data" caption on S1–S5
-- [ ] R1 and R2 recorded on real assets; credit lines on screen (HiRISE credit filled in
-      `REFERENCES.md`, photo credit "NASA/JPL-Caltech/ASU")
+- [ ] "Simulated storm alert" caption on S4; the "Simulation" badges visible
+- [x] R1 and R2 recorded on real assets (2026-11-14)
+- [ ] Credit lines on screen: HiRISE "Image: NASA/JPL/University of Arizona" on R1, photo credit
+      "NASA/JPL-Caltech/ASU" in the card on R2
+- [ ] Clip audio muted
 - [ ] No AI-generated images
