@@ -116,3 +116,15 @@ map overlay for N6, say so in `docs/notes/yusuf.md`.
 - **Your laptop:** keep `infra/funnel.sh` as the fallback; the laptop may sleep now. SSH to the
   server: `ssh deploy@2.31.2.199` (your key is on it). Update `infra/CLAUDE.md` ("Laptop hosting
   until the real server") when you like.
+
+## 2026-11-14 — from Yusuf: first web-deploy run failed (Hobby plan, commit author)
+
+- **What:** after `VERCEL_TOKEN` was set and #70 merged, run 43624539823 failed at "Deploy to
+  production": "Can't build deployment … The commit author doesn't have access to this team." The
+  merge commit is Yusuf's, and the CLI sends the git commit metadata from the checkout, so the
+  Hobby rule still applies to prebuilt CLI deploys. Build and checks passed; the live site kept
+  your manual deploy (already on the sslip.io hosts).
+- **Suggested fix (untested):** in `.github/workflows/web-deploy.yml`, first line of the
+  "Deploy to production" step: `rm -rf ../.git` (the job runs in `web/`). Without `.git` the CLI
+  sends no commit author and the deploy counts as the token owner's. Then Actions → web-deploy →
+  Run workflow. If that still fails, keep deploying by hand (`vercel --prod`) until after judging.
