@@ -13,16 +13,3 @@ Delete each note in the PR that handles it.
   (`/cuff?s=<id>&stops=a,b,c&home=1`) and the cuff asks the planner for the same route. That breaks
   if the planner data changes between the console's plan and the cuff's.
 - **Priority:** LATER; the workaround is fine for the demo.
-
-## 2026-11-14 — from Furkan (task F6): DONKI and MSL RAD rows for DATA_SOURCES.md
-
-- **What:** `docs/DATA_SOURCES.md` has no row for the DONKI WSA-ENLIL space-weather part that
-  mission-control serves (`internal/conditions/conditions.go`, source URL
-  `https://kauai.ccmc.gsfc.nasa.gov/DONKI/`, provenance Modeled, mode live). The
-  `radiation_dose_rate` row (Hassler et al. 2014) has no URL.
-- **Why:** the project page (`docs/submission/page.md`, NASA Data) lists both with URL "TBD"; every
-  value shown to a user needs a DATA_SOURCES row. You took over Mazlum's card, so this is yours (or
-  Bunyamin's for the RAD URL).
-- **Also:** the Project link on the form is the repo, so it must be public before submission (Y8).
-- **Update (F6 review):** Bunyamin confirmed the MSL RAD DOI, https://doi.org/10.1126/science.1244797;
-  the `radiation_dose_rate` DATA_SOURCES row can carry it. DONKI still has no row.
