@@ -70,6 +70,41 @@ export function legRequests(stops: string[]): string[][] {
   return out
 }
 
+/**
+ * At most this many leg requests in flight. The planner gives up after 5 s per request (422
+ * "planning took longer than 5 s"); on the 2-vCPU server, 15 at once pushed some past that, while 3
+ * at once finished all 15 in about 6 s with the slowest request near 2 s.
+ */
+export const LEG_CONCURRENCY = 3
+
+/**
+ * `fn` over `items` with at most `limit` calls in flight, results in input order. A failed call is
+ * tried once more (a planner timeout under load); a second failure or an aborted signal rejects.
+ */
+export async function mapLimit<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+  signal?: AbortSignal,
+): Promise<R[]> {
+  const out = new Array<R>(items.length)
+  let next = 0
+  const worker = async () => {
+    while (next < items.length) {
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
+      const i = next++
+      try {
+        out[i] = await fn(items[i])
+      } catch (err) {
+        if (signal?.aborted) throw err
+        out[i] = await fn(items[i])
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
+  return out
+}
+
 export type LegTable = { status: 'off' | 'loading' | 'ready' | 'error'; legs: Legs | null }
 
 function useLegTable(route: RouteResponse | null, enabled: boolean): LegTable {
@@ -79,10 +114,11 @@ function useLegTable(route: RouteResponse | null, enabled: boolean): LegTable {
     if (!key) return
     const ctl = new AbortController()
     const stops = key.split(',')
-    Promise.all(
-      legRequests(stops).map((s) =>
-        planner.route({ stops: s, return_home: true }, ctl.signal).then((route) => ({ stops: s, route })),
-      ),
+    mapLimit(
+      legRequests(stops),
+      LEG_CONCURRENCY,
+      (s) => planner.route({ stops: s, return_home: true }, ctl.signal).then((route) => ({ stops: s, route })),
+      ctl.signal,
     )
       .then((rs) => setTable({ key, t: { status: 'ready', legs: legTableFromResponses(rs) } }))
       .catch(() => {
