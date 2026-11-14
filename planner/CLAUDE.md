@@ -20,7 +20,8 @@ uvicorn app.main:app --reload --port 8000
 `DATA_DIR/<assets_base>`, `cost_2m.f32` (required, min/m, NaN = impassable; written by
 pipeline `04_cost.py`), `dem_4m.f32` (required) and `slope_2m.f32` (optional). If a file is missing,
 `/health` still answers and `/route` and `/abort` return 422 with the reason. Local run with
-real assets: `DATA_DIR=~/ariadne-data/assets uvicorn app.main:app --port 8000`.
+real assets: `DATA_DIR=~/ariadne-data/assets uvicorn app.main:app --port 8000`. Requests longer than
+`PLANNER_TIMEOUT_S` (default 5 s) or routes with more than 30 stops answer 422.
 
 **Rules:** read rasters per `contracts/aoi.json`; until real data lands use `contracts/fixtures/`.
 Coordinates in and out are local metres `[x, y]`, never lon/lat.
