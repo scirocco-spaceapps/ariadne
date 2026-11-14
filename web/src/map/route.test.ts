@@ -16,8 +16,10 @@ import {
   projectOnPath,
   routeGeometry,
   splitAt,
+  selectFromPick,
   stopIdFromPick,
   stopNumbers,
+  targetIdFromPick,
   type Progress,
 } from './route'
 
@@ -138,5 +140,33 @@ describe('selecting a stop', () => {
     const id = stopIdFromPick({ layer, object: { id: 's1', haven: false } })
     if (id) useMission.getState().selectStop(id)
     expect(useMission.getState().selectedStop).toBe('s1')
+  })
+})
+
+describe('selecting a target (Y7)', () => {
+  const targets = { id: 'targets' } as never
+  const places = { id: 'places' } as never
+  const actions = () => {
+    const { selectStop, selectTarget } = useMission.getState()
+    return { selectStop, selectTarget }
+  }
+
+  it('maps a click on a target marker to its id', () => {
+    expect(targetIdFromPick({ layer: targets, object: { id: 'target-cheyava-falls' } })).toBe('target-cheyava-falls')
+    expect(targetIdFromPick({ layer: places, object: { id: 's1' } })).toBeNull()
+    expect(targetIdFromPick({ layer: targets, object: undefined })).toBeNull()
+  })
+
+  it('sets selectedTarget on a target and clears it again when a stop is picked', () => {
+    useMission.getState().reset()
+    expect(selectFromPick({ layer: targets, object: { id: 'target-closest-pass' } }, actions())).toBe(true)
+    expect(useMission.getState().selectedTarget).toBe('target-closest-pass')
+
+    expect(selectFromPick({ layer: places, object: { id: 's2', haven: false } }, actions())).toBe(true)
+    expect(useMission.getState().selectedTarget).toBeNull()
+    expect(useMission.getState().selectedStop).toBe('s2')
+
+    expect(selectFromPick({ layer: null, object: undefined }, actions())).toBe(false)
+    expect(useMission.getState().selectedStop).toBe('s2')
   })
 })

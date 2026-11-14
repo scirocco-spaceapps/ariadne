@@ -1,8 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import type { Aoi, GeologyCollection, TrackCollection, WaypointCollection } from '../lib/types'
+import type { Aoi, GeologyCollection, TargetCollection, TrackCollection, WaypointCollection } from '../lib/types'
 import type { AssetSource } from './assets'
 import { fixtures } from '../lib/fixtures'
-import { buildLayers, LAYER_ORDER, layerEntries, orthoFile, type LayerId, type MissionLayers } from './buildLayers'
+import {
+  buildLayers,
+  LAYER_ORDER,
+  layerEntries,
+  orthoFile,
+  targetLabel,
+  type LayerId,
+  type MissionLayers,
+} from './buildLayers'
 import { routeGeometry, stopNumbers } from './route'
 import { EMPTY_SITE, type SiteData } from './useSiteData'
 
@@ -59,7 +67,7 @@ const geology: GeologyCollection = {
     },
   ],
 }
-const FULL: SiteData = { track, waypoints, geology }
+const FULL: SiteData = { track, waypoints, geology, targets: null, seen: false }
 const all = () => true
 
 describe('buildLayers', () => {
@@ -104,7 +112,8 @@ describe('buildLayers', () => {
 describe('layerEntries', () => {
   it('lists only layers with data, in stacking order', () => {
     const ids = layerEntries(source(false), { ...FULL, geology: null }).map((e) => e.id)
-    expect(ids).toEqual(LAYER_ORDER.filter((id) => !['geology', 'route', 'astronaut', 'envelope', 'thread'].includes(id)))
+    const absent = ['geology', 'route', 'astronaut', 'envelope', 'thread', 'seen', 'targets']
+    expect(ids).toEqual(LAYER_ORDER.filter((id) => !absent.includes(id)))
   })
 
   it('labels SYNTHETIC data as Simulation and placeholder places as Assumed', () => {
@@ -259,5 +268,91 @@ describe('storm alert (Y6)', () => {
     const off = entries(false)
     expect(off.find((e) => e.id === 'thread')).toBeUndefined()
     expect(off.find((e) => e.id === 'envelope')?.legend).toHaveLength(3)
+  })
+})
+
+describe('seen, not touched (Y7)', () => {
+  const targets: TargetCollection = {
+    type: 'FeatureCollection',
+    provenance: 'Derived',
+    source: 't',
+    features: [
+      {
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [100, 100] },
+        properties: { id: 'target-cheyava-falls', area_m2: 2444, distance_m: 63.8, sol: 1182 },
+      },
+      {
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [200, 150] },
+        properties: { id: 'target-closest-pass', area_m2: 1672, distance_m: 24.4, sol: 1158 },
+      },
+    ],
+  }
+  const withSeen = (src: AssetSource): AssetSource => ({
+    ...src,
+    aoi: { ...src.aoi, rasters: { ...src.aoi.rasters, seen_not_touched: { file: 'seen_not_touched_2m.png', px_m: 2 } } },
+  })
+  const SEEN: SiteData = { ...FULL, targets, seen: true }
+  const mission = (selectedTarget: string | null): MissionLayers => ({
+    geom: null,
+    progress_m: 0,
+    marker: null,
+    numbers: {},
+    selectedStop: null,
+    dash_m: 10,
+    selectedTarget,
+  })
+  const build = (src: AssetSource, data: SiteData, extra: Partial<Parameters<typeof buildLayers>[0]> = {}) =>
+    buildLayers({ source: src, data, isVisible: all, narrow: false, ...extra })
+
+  it('draws the raster above the rasters and the targets just under the stops', () => {
+    const ids = build(withSeen(source(false)), SEEN).map((l) => l.id)
+    expect(ids.indexOf('seen')).toBe(ids.indexOf('traversability') + 1)
+    expect(ids.indexOf('seen')).toBeLessThan(ids.indexOf('geology'))
+    expect(ids.indexOf('targets')).toBe(ids.indexOf('places') - 1)
+  })
+
+  it('makes targets clickable and labels only the selected one', () => {
+    const ls = build(withSeen(source(false)), SEEN, { mission: mission('target-closest-pass') })
+    const byId = Object.fromEntries(ls.map((l) => [l.id, l]))
+    expect(byId['targets'].props.pickable).toBe(true)
+    const data = byId['targets'].props.data as { id: string; selected: boolean }[]
+    expect(data.map((d) => [d.id, d.selected])).toEqual([
+      ['target-cheyava-falls', false],
+      ['target-closest-pass', true],
+    ])
+    expect((byId['targets-label'].props.data as { name: string }[])[0].name).toBe('Target · Closest Pass · sol 1158')
+  })
+
+  it('toggles raster and targets together under one entry', () => {
+    const shown = new Set<LayerId>(['ortho', 'places'])
+    const ids = build(withSeen(source(false)), SEEN, { isVisible: (id: LayerId) => shown.has(id) }).map((l) => l.id)
+    expect(ids).not.toContain('seen')
+    expect(ids).not.toContain('targets')
+    const entries = layerEntries(withSeen(source(false)), SEEN)
+    expect(entries.filter((e) => e.id === 'seen' || e.id === 'targets').map((e) => e.id)).toEqual(['seen'])
+    expect(entries.find((e) => e.id === 'seen')?.provenance).toBe('Derived')
+    expect(layerEntries(withSeen(source(true)), SEEN).find((e) => e.id === 'seen')?.provenance).toBe('Simulation')
+  })
+
+  it('hides the toggle and draws nothing when both assets are missing', () => {
+    expect(layerEntries(source(false), FULL).find((e) => e.id === 'seen')).toBeUndefined()
+    const ids = build(source(false), FULL).map((l) => l.id)
+    expect(ids).not.toContain('seen')
+    expect(ids).not.toContain('targets')
+  })
+
+  it('still shows the targets when only the raster is missing', () => {
+    const data: SiteData = { ...FULL, targets, seen: false }
+    const ids = build(withSeen(source(false)), data).map((l) => l.id)
+    expect(ids).toContain('targets')
+    expect(ids).not.toContain('seen')
+    expect(layerEntries(withSeen(source(false)), data).find((e) => e.id === 'seen')?.legend).toHaveLength(1)
+  })
+
+  it('names targets from their id', () => {
+    expect(targetLabel('target-cheyava-falls', 1182)).toBe('Target · Cheyava Falls · sol 1182')
+    expect(targetLabel('t1', null)).toBe('Target · T1')
   })
 })

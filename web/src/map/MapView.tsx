@@ -26,7 +26,7 @@ import {
   pointAt,
   progressAtTime,
   routeGeometry,
-  stopIdFromPick,
+  selectFromPick,
   stopNumbers,
   type Progress,
   type RouteGeometry,
@@ -83,6 +83,8 @@ export function MapView({ source, className }: Props) {
   const state = useMission((s) => s.session.state)
   const selectedStop = useMission((s) => s.selectedStop)
   const selectStop = useMission((s) => s.selectStop)
+  const selectedTarget = useMission((s) => s.selectedTarget)
+  const selectTarget = useMission((s) => s.selectTarget)
   const planT = usePlanClock((s) => s.t_min)
   const geom = useMemo(() => (route ? routeGeometry(route) : null), [route])
   const numbers = useMemo(() => (route ? stopNumbers(route) : {}), [route])
@@ -195,16 +197,16 @@ export function MapView({ source, className }: Props) {
   const layers = useMemo(() => {
     if (narrow === null) return []
     const visible = new Set(registered.filter((l) => l.visible).map((l) => l.id))
-    const mission: MissionLayers = { geom, progress_m, marker, numbers, selectedStop, dash_m, alert: alertLayers }
+    const mission: MissionLayers = { geom, progress_m, marker, numbers, selectedStop, dash_m, alert: alertLayers, selectedTarget }
     return buildLayers({ source, data, narrow, mission, envelope, isVisible: (id: LayerId) => visible.has(id) })
-  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers])
+  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers, selectedTarget])
 
+  // The stop card shows a selected target before a selected stop, so picking a stop clears the target.
   const onClick = useCallback(
     (info: PickingInfo) => {
-      const id = stopIdFromPick(info)
-      if (id) selectStop(id)
+      selectFromPick(info, { selectStop, selectTarget })
     },
-    [selectStop],
+    [selectStop, selectTarget],
   )
 
   return (
