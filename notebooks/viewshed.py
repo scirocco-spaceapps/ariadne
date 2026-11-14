@@ -235,6 +235,15 @@ class Result:
     used: list[dict]         # waypoints with a viewshed
 
 
+def _rmc(w: dict) -> str | None:
+    """Rover site_drive id (as in M20_waypoints.json RMC) from rmc, RMC or site and drive."""
+    if w.get("rmc") or w.get("RMC"):
+        return w.get("rmc") or w.get("RMC")
+    if w.get("site") is not None and w.get("drive") is not None:
+        return f'{w["site"]}_{w["drive"]}'
+    return None
+
+
 def tile_index(shape: tuple[int, int], px: float, tile_m: float = TILE_M) -> np.ndarray:
     """Tile number (1-based, row-major) of every cell of a grid with pixel size px."""
     k = max(1, int(round(tile_m / px)))
@@ -291,9 +300,27 @@ def seen_not_touched(grid: Grid, waypoints: list[dict], track: list[np.ndarray],
     seen_from = []
     for t in cand:
         for w in views.get(t["tile"], []):
-            seen_from.append({"target": t["id"], "sol": w.get("sol"), "rmc": w.get("rmc") or w.get("RMC"),
+            seen_from.append({"target": t["id"], "sol": w.get("sol"), "rmc": _rmc(w),
                               "distance_m": round(math.hypot(t["x"] - w["x"], t["y"] - w["y"]), 1)})
     return Result(count, closest, touched, snt2, tiles2, cand, seen_from, used)
+
+
+def choose(res: Result, picks: dict[str, tuple[float, float]], tol_m: float = 30.0) -> Result:
+    """Keep only the chosen targets, renamed to stable ids.
+
+    picks maps a stable id to the (x, y) of the chosen candidate; the candidate whose point is
+    nearest (within tol_m) gets that id. Matching by position keeps ids stable when the ranking
+    changes on a re-run. Raises if a pick has no candidate nearby.
+    """
+    chosen, rename = [], {}
+    for new_id, (x, y) in picks.items():
+        best = min(res.targets, key=lambda t: math.hypot(t["x"] - x, t["y"] - y), default=None)
+        if best is None or math.hypot(best["x"] - x, best["y"] - y) > tol_m:
+            raise ValueError(f"no candidate within {tol_m} m of {new_id} at ({x}, {y})")
+        rename[best["id"]] = new_id
+        chosen.append({**best, "candidate_id": best["id"], "id": new_id})
+    seen = [{**s, "target": rename[s["target"]]} for s in res.seen_from if s["target"] in rename]
+    return Result(res.count, res.closest, res.touched, res.snt2, res.tiles2, chosen, seen, res.used)
 
 
 def reachable(targets: list[dict], cost_to_home: np.ndarray | None, px: float, size_y: float) -> list[dict]:
@@ -310,6 +337,16 @@ def reachable(targets: list[dict], cost_to_home: np.ndarray | None, px: float, s
 
 
 # ---------------------------------------------------------------- outputs
+
+def write_candidates(res: Result, out: Path = OUT) -> None:
+    """All ranked candidate tiles, for the record and for adding targets later."""
+    out.mkdir(parents=True, exist_ok=True)
+    keys = ["id", "x", "y", "area_m2", "distance_m", "sol", "n_views", "cost_to_home_min"]
+    with (out / "target_candidates.csv").open("w", newline="", encoding="utf-8") as f:
+        wr = csv.DictWriter(f, fieldnames=keys, extrasaction="ignore")
+        wr.writeheader()
+        wr.writerows(res.targets)
+
 
 def write_outputs(res: Result, out: Path = OUT, source: str = "", synthetic: bool = False) -> dict:
     out.mkdir(parents=True, exist_ok=True)

@@ -98,3 +98,15 @@ def test_block_majority():
     m[2, 2] = True                  # 1 of 4 -> False
     out = vs.block_majority(m, 2)
     assert out.tolist() == [[True, False], [False, False]]
+
+
+def test_choose_keeps_ids_by_position(ridge_grid):
+    track = [np.array([[50.0, 150.0], [150.0, 150.0]])]
+    res = vs.seen_not_touched(ridge_grid, [{"x": 100.5, "y": 150.5, "sol": 7}], track, height=2.0)
+    a, b = res.targets[0], res.targets[-1]
+    chosen = vs.choose(res, {"target-a": (a["x"] + 5, a["y"]), "target-b": (b["x"], b["y"] - 5)})
+    assert [t["id"] for t in chosen.targets] == ["target-a", "target-b"]
+    assert chosen.targets[0]["candidate_id"] == a["id"]
+    assert {s["target"] for s in chosen.seen_from} <= {"target-a", "target-b"}
+    with pytest.raises(ValueError):
+        vs.choose(res, {"target-far": (390.0, 290.0)})
