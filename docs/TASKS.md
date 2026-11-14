@@ -26,7 +26,7 @@ MPC-2 is not merged by **Sun 09:30**; the Sun 11:00 feature freeze holds.
   reserve") and the two what-if controls (suit leak, dust/visibility); replans call the existing
   `POST /route` with `[current stop, …remaining]`. Hidden in DEMO mode (no planner). Done when the
   tests reproduce `notebooks/out/replanning_cases.json` and the PR is merged.
-- [ ] **MPC-3 · Bünyamin · Sun 08:00–08:30** — check the web suggestion against the notebook.
+- [x] **MPC-3 · Bünyamin · Sun 08:00–08:30** (#76, #79) — check the web suggestion against the notebook.
   Run both scenarios on the live app; write any difference to `docs/notes/yusuf.md`. Add a
   paragraph on replanning to `docs/submission/science.md` as part of B5.
 
