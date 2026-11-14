@@ -5,7 +5,7 @@
   "crs": {
     "proj4": "+proj=eqc +lat_ts=18.4889 +lat_0=0 +lon_0=77.2989 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs"
   },
-  "origin_lonlat": [77.27666, 18.47203],
+  "origin_lonlat": [77.27666, 18.4703429],
   "size_m": [2500, 2000],
   "assets_base": "bright-angel/",
   "rasters": {
