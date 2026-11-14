@@ -15,39 +15,6 @@ Delete each note in the PR that handles it. Also read `docs/PLAN_CHANGES.md` (yo
 4. Contracts are frozen at tag `contracts-v1`. The Y1 decisions were made for the team; if one of
    them does not work for you, tell Yusuf and he will open a `contracts/...` PR.
 
-## 2026-11-14 — from Yusuf (Y2, PR #5): show the map — needed for N1
-
-The map is merged in `web/src/map/` but is not mounted anywhere yet. Two changes in your files:
-
-1. `web/vite.config.ts`: let the dev server read `contracts/fixtures/` (outside `web/`).
-   Without this, `npm run dev` answers 403 for the fixture files; `npm run build` is unaffected.
-
-   ```ts
-   server: {
-     port: 5173,
-     fs: { allow: ['..'] },
-     // ...proxy as now
-   },
-   ```
-
-2. Mount the map and the layer list on the console route `/`. `MapView` fills its parent, so give
-   the parent a height. Create the source once:
-
-   ```tsx
-   import { useMemo } from 'react'
-   import { LayerToggle, MapView, fixtureSource, remoteSource } from '../map'
-
-   const source = useMemo(() => fixtureSource(), [])        // DEMO / until A2 publishes assets
-   // const source = useMemo(() => remoteSource(aoi, import.meta.env.VITE_ASSETS_URL), [aoi])
-
-   <div style={{ height: '100%' }}><MapView source={source} /></div>
-   <LayerToggle />
-   ```
-
-   Tested with both changes applied temporarily: fixture ortho north-up, pan, zoom, scale bar,
-   cursor readout, Fit AOI and the layer toggle all work, no console errors. In N6, `LayerToggle`
-   goes in the left column as planned.
-
 ## 2026-11-14 — from Yusuf: what is already in `web/` (N1)
 
 - `.github/workflows/ci.yml` exists with four jobs: contracts, web, planner, mission-control. The web
