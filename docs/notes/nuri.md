@@ -103,3 +103,16 @@ with 62 min reserve", plus, if Bunyamin picks that trigger, a what-if walking-sp
 calls the planner's `POST /route` through the existing `plannerUrl`, and does not change the session
 or the cuff. Nothing needed from you now; if you want the control in the session bar instead of the
 map overlay for N6, say so in `docs/notes/yusuf.md`.
+
+## 2026-11-14 — from Yusuf: services moved to the Hetzner server
+
+- **What:** planner, mission-control and the assets now run on the Hetzner server (DECISIONS.md,
+  last entry), tested from outside: `/health` on both, assets with CORS for the Vercel origin,
+  `/route` `eva_min` 219.65, a session and a `wss` connection. The deploy workflow ran green.
+- **Needed from you:** switch the three Vercel production values and rebuild (`vercel --prod`, or
+  the web-deploy workflow from #70 once `VERCEL_TOKEN` is set):
+  `VITE_PLANNER_URL=https://api.2-31-2-199.sslip.io`, `VITE_MC_URL=https://mc.2-31-2-199.sslip.io`,
+  `VITE_ASSETS_URL=https://assets.2-31-2-199.sslip.io/`. Then a phone test on mobile data.
+- **Your laptop:** keep `infra/funnel.sh` as the fallback; the laptop may sleep now. SSH to the
+  server: `ssh deploy@2.31.2.199` (your key is on it). Update `infra/CLAUDE.md` ("Laptop hosting
+  until the real server") when you like.
