@@ -3,7 +3,7 @@
 Everything written here is fake data for development only. Inputs are the hand-made
 fixtures/aoi.json and fixtures/route.json; outputs:
 
-  fixtures/assets/*.jpg|*.png|*.f32 (+ .json sidecars for .f32)
+  fixtures/assets/*.jpg|*.png|*.f32 (+ .json sidecars for .f32), incl. the planner's cost_2m.f32
   fixtures/assets/track.geojson, waypoints.geojson, targets.geojson
   fixtures/ws-state.jsonl
 
@@ -160,6 +160,13 @@ def rasters():
     cost = np.hypot(x - HAVEN[0], y - HAVEN[1]) / WALK_M_PER_MIN
     write_f32(r["cost_to_home"]["file"], cost, px, "min",
               "hypot(x - haven_x, y - haven_y) / 50")
+
+    # Walking cost for the planner (cost_2m.f32 stays outside the contract, see docs/DECISIONS.md):
+    # uniform 1/50 min per metre, NaN = no-go, on the same 2 m grid as cost_to_home.
+    s, _, _ = slope_deg(x, y)
+    walk = np.where(s >= NOGO_DEG, np.nan, 1.0 / WALK_M_PER_MIN)
+    write_f32("cost_2m.f32", walk, px, "min/m",
+              "1/50 where slope < 25 deg, NaN (no-go) where slope >= 25 deg")
 
 
 def collection(features):
