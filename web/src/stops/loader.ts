@@ -1,6 +1,7 @@
-// Loads stop content and keeps only entries that pass validation. Until F3 lands real files in
-// content/stops/<id>.json, the app reads the SYNTHETIC contracts/fixtures/stops.json.
-import { useMemo } from 'react'
+// Loads stop content and keeps only entries that pass validation. Live mode reads the real files in
+// content/stops/<id>.json (F3); DEMO mode reads the SYNTHETIC contracts/fixtures/stops.json.
+import { useEffect, useMemo, useState } from 'react'
+import { useMission } from '../app/store'
 import { fixtures } from '../lib/fixtures'
 import type { StopContent } from '../lib/types'
 import { validateStopContent } from './validate'
@@ -71,17 +72,87 @@ export function fixtureStops(): StopSet {
   return fixtureCache
 }
 
+/** Loaders for content/stops/*.json, keyed by path. Lazy on purpose: a file the dev server refuses
+ *  (server.fs.allow) becomes a loader error instead of breaking the whole app, DEMO mode included. */
+export type StopModules = Record<string, () => Promise<unknown>>
+
+const contentModules: StopModules = import.meta.glob('../../../content/stops/*.json', { import: 'default' })
+
+/** Load and validate content/stops/<id>.json. index.json is never loaded. A file that fails to load
+ *  is reported as an error; the others still load. */
+export async function loadLiveStops(modules: StopModules = contentModules): Promise<StopSet> {
+  const entries = Object.entries(modules).filter(([path]) => path.split('/').pop() !== 'index.json')
+  const loadErrors: string[] = []
+  const loaded = await Promise.all(
+    entries.map(async ([path, load]): Promise<[string, unknown] | null> => {
+      try {
+        return [path, await load()]
+      } catch (e) {
+        loadErrors.push(`${path}: could not load (${e instanceof Error ? e.message : String(e)})`)
+        return null
+      }
+    }),
+  )
+  const set = loadStopFiles(Object.fromEntries(loaded.filter((x): x is [string, unknown] => x !== null)))
+  return { stops: set.stops, errors: [...loadErrors, ...set.errors] }
+}
+
+let livePromise: Promise<StopSet> | null = null
+let liveCache: StopSet | null = null
+
+/** The real stop content, loaded once. */
+export function liveStops(): Promise<StopSet> {
+  livePromise ??= loadLiveStops().then((set) => (liveCache = set))
+  return livePromise
+}
+
+export interface StopSetResult {
+  set: StopSet
+  /** True while content comes from the SYNTHETIC fixtures (DEMO mode). */
+  synthetic: boolean
+  /** True until the live files have loaded. */
+  loading: boolean
+}
+
+const EMPTY: StopSet = { stops: {}, errors: [] }
+
+/** Every stop for the current mode: real content/stops files live, the fixtures in DEMO mode. */
+export function useStopSet(): StopSetResult {
+  const demo = useMission((s) => s.demo)
+  const [live, setLive] = useState<StopSet | null>(liveCache)
+  useEffect(() => {
+    if (demo || live) return
+    let active = true
+    void liveStops().then((set) => {
+      if (active) setLive(set)
+    })
+    return () => {
+      active = false
+    }
+  }, [demo, live])
+  return useMemo(
+    () =>
+      demo
+        ? { set: fixtureStops(), synthetic: true, loading: false }
+        : { set: live ?? EMPTY, synthetic: false, loading: live === null },
+    [demo, live],
+  )
+}
+
 export interface StopContentResult {
   content: StopContent | null
   /** True while content comes from the SYNTHETIC fixtures. */
   synthetic: boolean
+  /** True until the live files have loaded. */
+  loading: boolean
   errors: string[]
 }
 
-/** Stop content for one id. The one place to switch to real content (F3). */
+/** Stop content for one id: real content live, SYNTHETIC fixtures in DEMO mode. */
 export function useStopContent(id: string | null | undefined): StopContentResult {
-  return useMemo(() => {
-    const set = fixtureStops()
-    return { content: id ? (set.stops[id] ?? null) : null, synthetic: true, errors: set.errors }
-  }, [id])
+  const { set, synthetic, loading } = useStopSet()
+  return useMemo(
+    () => ({ content: id ? (set.stops[id] ?? null) : null, synthetic, loading, errors: set.errors }),
+    [id, set, synthetic, loading],
+  )
 }

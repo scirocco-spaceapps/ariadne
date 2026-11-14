@@ -1,17 +1,20 @@
-import { FIXTURE_LABEL, fixtureStops } from './loader'
+import { FIXTURE_LABEL, useStopSet } from './loader'
 import { StopCard } from './StopCard'
 import './stops.css'
 
-/** Development page for /dev/stops: every fixture stop in both variants, plus loader errors. */
+/** Development page for /dev/stops: every stop of the current mode in both variants, plus loader
+ *  errors. Live: content/stops/*.json. DEMO (?demo=1): the SYNTHETIC fixtures. */
 export function DevStopsPage() {
-  const { stops, errors } = fixtureStops()
-  const ids = Object.keys(stops)
+  const { set, synthetic, loading } = useStopSet()
+  const { stops, errors } = set
+  const ids = Object.keys(stops).sort()
+  const label = synthetic ? `${FIXTURE_LABEL} (SYNTHETIC)` : 'content/stops/*.json'
   return (
     <main className="stop-dev">
       <h1>Stop cards (dev)</h1>
       <p>
-        {ids.length} entries from <code>{FIXTURE_LABEL}</code> (SYNTHETIC). Left: console side panel. Right: cuff at
-        360 px.
+        {loading ? 'Loading ' : `${ids.length} entries from `}
+        <code>{label}</code>. Left: console side panel. Right: cuff at 360 px.
       </p>
       {errors.length > 0 && (
         <ul className="stop-errors" data-testid="dev-stop-errors">
