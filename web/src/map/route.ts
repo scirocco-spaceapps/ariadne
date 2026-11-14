@@ -212,6 +212,33 @@ export function stopIdFromPick(info: Pick<PickingInfo, 'layer' | 'object'>): str
   return o && typeof o.id === 'string' && !o.haven ? o.id : null
 }
 
+/** Target id of a clicked B3 target marker (Y7); null for anything else. */
+export function targetIdFromPick(info: Pick<PickingInfo, 'layer' | 'object'>): string | null {
+  if (info.layer?.id !== 'targets') return null
+  const o = info.object as { id?: unknown } | undefined
+  return o && typeof o.id === 'string' ? o.id : null
+}
+
+/**
+ * Applies a map click to the selection: a target sets selectedTarget; a stop clears the target (the
+ * stop card shows a selected target first) and sets selectedStop. Returns true when something was picked.
+ */
+export function selectFromPick(
+  info: Pick<PickingInfo, 'layer' | 'object'>,
+  actions: { selectStop: (id: string | null) => void; selectTarget: (id: string | null) => void },
+): boolean {
+  const target = targetIdFromPick(info)
+  if (target) {
+    actions.selectTarget(target)
+    return true
+  }
+  const stop = stopIdFromPick(info)
+  if (!stop) return false
+  actions.selectTarget(null)
+  actions.selectStop(stop)
+  return true
+}
+
 /** EVA clock as "T+ h:mm". */
 export function evaClockLabel(min: number): string {
   const m = Math.max(0, Math.round(min))
