@@ -104,7 +104,7 @@ describe('buildLayers', () => {
 describe('layerEntries', () => {
   it('lists only layers with data, in stacking order', () => {
     const ids = layerEntries(source(false), { ...FULL, geology: null }).map((e) => e.id)
-    expect(ids).toEqual(LAYER_ORDER.filter((id) => !['geology', 'route', 'astronaut', 'envelope'].includes(id)))
+    expect(ids).toEqual(LAYER_ORDER.filter((id) => !['geology', 'route', 'astronaut', 'envelope', 'thread'].includes(id)))
   })
 
   it('labels SYNTHETIC data as Simulation and placeholder places as Assumed', () => {
@@ -212,5 +212,52 @@ describe('return envelope (Y5)', () => {
     ])
     const synth = layerEntries(source(true), FULL, { route: false, astronaut: false, routeProvenance: 'Modeled', envelope: true })
     expect(synth.find((e) => e.id === 'envelope')?.provenance).toBe('Simulation')
+  })
+})
+
+describe('storm alert (Y6)', () => {
+  const route = fixtures.route
+  const geom = routeGeometry(route)
+  const base: MissionLayers = {
+    geom,
+    progress_m: 100,
+    marker: [300, 240],
+    numbers: stopNumbers(route),
+    selectedStop: null,
+    dash_m: 10,
+  }
+  const build = (alert: MissionLayers['alert']) =>
+    buildLayers({ source: source(false), data: FULL, isVisible: all, narrow: false, mission: { ...base, alert } })
+  const alerted = build({ path: [[380, 300], [220, 180], [60, 60]], pulse: 0.5 })
+  const cleared = build(null)
+  const ids = (ls: typeof alerted) => ls.map((l) => l.id)
+  const byId = (ls: typeof alerted) => Object.fromEntries(ls.map((l) => [l.id, l]))
+
+  it('draws the thread above the route and pulses the haven only during an alert', () => {
+    const a = ids(alerted)
+    expect(a.indexOf('thread')).toBeGreaterThan(a.indexOf('route-walked'))
+    expect(a.indexOf('thread')).toBeLessThan(a.indexOf('places'))
+    expect(a).toContain('haven-pulse')
+    expect(ids(cleared)).not.toContain('thread')
+    expect(ids(cleared)).not.toContain('haven-pulse')
+  })
+
+  it('fades the planned route during the alert and restores it after', () => {
+    expect(byId(alerted)['route-walked'].props.opacity).toBeLessThan(1)
+    expect(byId(cleared)['route-walked'].props.opacity).toBe(1)
+  })
+
+  it('switches the toggle entries and drops the thread on clear', () => {
+    const entries = (alert: boolean) =>
+      layerEntries(source(false), FULL, { route: true, astronaut: true, routeProvenance: 'Modeled', envelope: true, alert })
+    const on = entries(true)
+    expect(on.find((e) => e.id === 'thread')?.provenance).toBe('Simulation')
+    expect(on.find((e) => e.id === 'envelope')?.legend?.map((l) => l.label)).toEqual([
+      'Home before the storm',
+      'Not before the storm',
+    ])
+    const off = entries(false)
+    expect(off.find((e) => e.id === 'thread')).toBeUndefined()
+    expect(off.find((e) => e.id === 'envelope')?.legend).toHaveLength(3)
   })
 })

@@ -1,15 +1,22 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { Aoi } from '../lib/types'
+import { fixtures } from '../lib/fixtures'
+import type { Aoi, WsState } from '../lib/types'
 import type { AssetSource } from './assets'
 import {
   ENVELOPE_COLORS,
+  envelopeImage,
+  envelopeMode,
   envelopePixels,
   envelopeThresholds,
   loadCostRaster,
   makeMarginAt,
   marginAt,
   marginClass,
+  minutesToStorm,
   quantizeT,
+  stormMarginAt,
+  stormPixels,
+  timeToStorm,
   type CostRaster,
 } from './envelope'
 
@@ -139,5 +146,50 @@ describe('loadCostRaster', () => {
   it('rejects a file of the wrong size', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(new Float32Array(5).buffer)))
     await expect(loadCostRaster(source('short'))).rejects.toThrow('expected 3 x 2')
+  })
+})
+
+describe('storm alert (Y6)', () => {
+  const states = fixtures.frames.filter((f): f is WsState => f.type === 'state')
+  const at = (t: number) => states.find((s) => s.t_min === t)!
+  const rgba = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+  const px = (img: { data: Uint8ClampedArray }, i: number) => Array.from(img.data.slice(i * 4, i * 4 + 3))
+
+  it('counts the minutes left before the storm from the contract formula', () => {
+    const alert = at(30).alert!
+    expect(alert).toEqual({ type: 'storm_alert', lead_min: 25, since_t: 30 })
+    expect(timeToStorm(alert, 30)).toBe(25)
+    expect(timeToStorm(alert, 38)).toBe(17)
+    expect(timeToStorm(alert, 80)).toBe(0) // floored at 0
+    expect(minutesToStorm(25, 30, 31.5)).toBe(23.5)
+  })
+
+  it('switches mode only while the state carries an alert', () => {
+    expect(envelopeMode(null)).toEqual({ kind: 'normal' })
+    expect(envelopeMode(at(29))).toEqual({ kind: 'normal' })
+    expect(envelopeMode(at(30))).toEqual({ kind: 'storm', minutes_left: 25 })
+    expect(envelopeMode(at(49))).toEqual({ kind: 'storm', minutes_left: 6 })
+    expect(envelopeMode(at(50))).toEqual({ kind: 'normal' }) // cleared
+  })
+
+  it('shows home-before-the-storm cells in amber and dims the rest', () => {
+    // costs 10 20 NaN / 5 15 25; 17 min left -> 10, 5, 15 amber; 20, 25, NaN dim
+    const img = stormPixels(cost, 17)
+    const amber = rgba(ENVELOPE_COLORS.tight)
+    const dim = rgba(ENVELOPE_COLORS.out)
+    expect([0, 1, 2, 3, 4, 5].map((i) => px(img, i))).toEqual([amber, dim, dim, amber, amber, dim])
+    expect(stormMarginAt(cost, 5, 15, 17)).toBe(7)
+    expect(stormMarginAt(cost, 25, 15, 17)).toBeNull()
+  })
+
+  it('enters storm mode and comes back without leaking either way (fixture replay)', () => {
+    const image = (s: WsState) => envelopeImage(cost, model, s.t_min, envelopeMode(s))
+    // normal -> storm
+    expect(image(at(29)).data).toEqual(envelopePixels(cost, model, 29).data)
+    expect(image(at(30)).data).toEqual(stormPixels(cost, 25).data)
+    expect(image(at(38)).data).toEqual(stormPixels(cost, 17).data) // shrinks as the storm nears
+    // storm -> normal: identical to never having had an alert
+    expect(image(at(50)).data).toEqual(envelopePixels(cost, model, 50).data)
+    expect(image(at(50)).data).not.toEqual(image(at(49)).data)
   })
 })

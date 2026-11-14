@@ -88,3 +88,14 @@
   line-height: 14px;
   text-align: center;
 }
+
+/* Storm alert (Y6). */
+.am-storm-chip {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #ff5d6c;
+  color: #0a1114;
+  font-weight: 700;
+  font-size: 11px;
+  white-space: nowrap;
+}

@@ -33,3 +33,4 @@ export {
   type EnvelopeModel,
   type MarginClass,
 } from './envelope'
+export { envelopeMode, minutesToStorm, stormMarginAt, timeToStorm, type EnvelopeMode } from './envelope'
