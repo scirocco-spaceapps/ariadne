@@ -59,3 +59,45 @@ Delete each note in the PR that handles it. Also read `docs/PLAN_CHANGES.md` (yo
 
 - **Y5** will export `marginAt(x, y, t)` and the colour thresholds from `web/src/map/envelope.ts`
   for the cuff (N4). A note will follow here when it lands.
+
+## 2026-11-14 — from Mazlum: N1 and N2 are done (you were away)
+
+I did your N1 and N2 cards on Saturday so Yusuf and Furkan could start. Both are merged; read them
+before your next card and change anything you would have done differently — they are yours.
+
+**N1 — web shell (PR #13).**
+- Store `useMission` in `web/src/app/store.ts`: `demo, aoi, route, session {id, state, status,
+  statusDetail, lastEvent}, budget, selectedStop, selectedTarget, conditions`. `session.state` is the
+  `WsState` as received; `receive(msg)` applies a state or keeps an event as `lastEvent`.
+- Clients in `web/src/lib/`: `planner` and `missionControl` (`api.ts`, errors as `ApiError`),
+  `connectSession` (`socket.ts`: sends hello, reconnects with backoff, stops on 4404/4400),
+  `wsUrl`, `isDemo`, `assetUrl(aoi, file, demo)`, `fixtures` (bundled `contracts/fixtures`).
+- DEMO mode: `?demo=1` or `VITE_DEMO=1` replays `ws-state.jsonl` at 2 Hz, looping, with a
+  "DEMO DATA" badge (`DemoBadge.tsx`). Live mode joins the session in `?s=<id>`.
+- The console placeholder mounts Yusuf's `MapView` and `LayerToggle` (fixture source in DEMO,
+  `remoteSource(aoi, VITE_ASSETS_URL)` live); I closed his Y2 note here. `vite.config.ts` allows
+  `../contracts` for the dev server.
+- `web/netlify.toml` and `web/vercel.json` (base directory `web`, `/cuff` falls back to the app).
+- CI: `npm run lint` in the web job and a new `pipeline` job (pytest; passes while there are no
+  tests yet).
+
+**N2 — infra (PR #12).**
+- `infra/docker-compose.yml` (planner 8000, mission-control 8080, Caddy 80/443), `infra/Caddyfile`
+  (`API_HOST`, `MC_HOST` with WebSocket, `ASSETS_HOST` file server with CORS for `WEB_ORIGIN`,
+  1 h cache), `infra/.env.example`, `infra/deploy.sh`.
+- `.github/workflows/deploy.yml` runs `deploy.sh` over SSH on pushes to main that touch
+  `planner/`, `mission-control/` or `infra/`; it skips with a warning while the secrets are unset.
+- Only `docker compose config` was checked. Caddy and the server were not tested (no Docker
+  daemon, no server access).
+
+**Still yours — only you have the access:**
+1. Server: put the repo on it, `cp infra/.env.example infra/.env`, fill in the hosts, `WEB_ORIGIN`,
+   `ASSETS_DIR=/srv/assets` and `NASA_API_KEY`, then `sh infra/deploy.sh`.
+2. GitHub secrets for deploy: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_PATH`,
+   `DEPLOY_KNOWN_HOSTS` (`ssh-keyscan <host>`).
+3. Connect Vercel or Netlify to the repo with base directory `web` and set `VITE_PLANNER_URL`,
+   `VITE_MC_URL`, `VITE_ASSETS_URL`.
+4. `docker compose up` fails on planner until Ali Koray adds `planner/Dockerfile` (A5).
+
+**Not started:** N3–N8. N3 (cuff + QR pairing) needs a QR library; tell me if you take it or
+want me to.
