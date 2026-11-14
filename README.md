@@ -34,6 +34,10 @@ WebSocket messages):
   weather, a radiation value, NASA DONKI forecasts).
 - **web** (TypeScript, React, deck.gl): the mission console (`/`) and the cuff (`/cuff`). The return
   envelope is computed in the browser: margin = budget − elapsed time − reserve − minutes home.
+  A "Without the terrain model" switch redraws it from flat-ground costs and shows how much of the
+  site is still reachable either way. Two what-if controls (a suit leak, dust) trigger
+  receding-horizon replanning: the console suggests shorter stops or a skipped stop that keeps the
+  reserve, and the crew decides.
 
 All positions are metres in a local plane (x east, y north, from the AOI south-west corner). Every
 value on screen carries a provenance label: Observed, Derived, Modeled, Assumed or Simulation.
@@ -139,9 +143,8 @@ Team Scirocco, NASA Space Apps 2026, Muğla.
 
 ## Licence and credits
 
-<!-- TODO (Y8): the repo has no licence file yet; add one and name it here before it goes public. -->
-
-- **Licence:** not chosen yet.
+- **Licence:** the code and docs written by the team are under the [MIT licence](LICENSE). Data,
+  images and papers keep their own terms, listed below and in `REFERENCES.md`.
 - **HiRISE:** "Image: NASA/JPL/University of Arizona". The USGS Mars 2020 TRN mosaics are
   Fergason et al. 2020, CC0 1.0.
 - **Perseverance images:** NASA/JPL-Caltech (Navcam) and NASA/JPL-Caltech/ASU (Mastcam-Z); every
