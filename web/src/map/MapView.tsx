@@ -2,14 +2,15 @@
 // World units are metres in the AOI plane, x east, y north, north up on screen. No basemap, no Mercator.
 
 import { OrthographicView, type OrthographicViewState, type PickingInfo } from '@deck.gl/core'
-import { BitmapLayer } from '@deck.gl/layers'
 import { DeckGL } from '@deck.gl/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { AssetSource } from './assets'
+import { buildLayers, layerEntries, NARROW_PX, type LayerId } from './buildLayers'
 import { inAoi, type SizeM, type XY } from './coords'
-import { useLayerRegistry, useLayerVisible } from './layers'
+import { useLayerRegistry } from './layers'
 import { CursorReadout, NorthArrow, ScaleBar } from './overlays'
 import { fitZoom } from './scale'
+import { useSiteData } from './useSiteData'
 import './map.css'
 
 const VIEW = new OrthographicView({ id: 'map', flipY: false, controller: true })
@@ -29,26 +30,28 @@ function fittedState(width: number, height: number, size_m: SizeM): Orthographic
 
 export function MapView({ source, className }: Props) {
   const { aoi } = source
-  const size_m: SizeM = [aoi.size_m[0], aoi.size_m[1]]
-  const [w, h] = size_m
+  const [w, h] = aoi.size_m
 
   const [viewSize, setViewSize] = useState<{ width: number; height: number } | null>(null)
-  const [viewState, setViewState] = useState<OrthographicViewState>(() => fittedState(800, 600, size_m))
+  const [viewState, setViewState] = useState<OrthographicViewState>(() => fittedState(800, 600, [w, h]))
   const [cursor, setCursor] = useState<XY | null>(null)
 
+  const data = useSiteData(source)
+  const registered = useLayerRegistry((s) => s.layers)
   const register = useLayerRegistry((s) => s.register)
   const unregister = useLayerRegistry((s) => s.unregister)
-  const orthoVisible = useLayerVisible('ortho')
 
+  // Register every layer whose data is present and drop the ones that disappeared. Re-registering
+  // keeps each layer's visibility, so data arriving later does not reset the user's toggles.
+  const ownIds = useRef<string[]>([])
   useEffect(() => {
-    register({
-      id: 'ortho',
-      label: source.synthetic ? 'Orthoimage (SYNTHETIC)' : 'Orthoimage, MRO HiRISE',
-      provenance: source.synthetic ? 'Simulation' : 'Observed',
-      visible: true,
-    })
-    return () => unregister('ortho')
-  }, [register, unregister, source.synthetic])
+    const entries = layerEntries(source, data)
+    const ids = entries.map((e) => e.id)
+    ownIds.current.filter((id) => !ids.includes(id)).forEach(unregister)
+    entries.forEach(register)
+    ownIds.current = ids
+  }, [source, data, register, unregister])
+  useEffect(() => () => ownIds.current.forEach(unregister), [unregister])
 
   // Keep the AOI fitted to the container until the user pans or zooms
   // (the first resize reports the canvas default size, before layout).
@@ -77,19 +80,13 @@ export function MapView({ source, className }: Props) {
     [w, h],
   )
 
-  const layers = useMemo(
-    () =>
-      orthoVisible
-        ? [
-            new BitmapLayer({
-              id: 'ortho',
-              image: source.url(aoi.rasters.ortho.file),
-              bounds: [0, 0, w, h],
-            }),
-          ]
-        : [],
-    [orthoVisible, source, aoi.rasters.ortho.file, w, h],
-  )
+  // No layers until the real size is known, so a narrow map never downloads the big ortho first.
+  const narrow = viewSize ? viewSize.width < NARROW_PX : null
+  const layers = useMemo(() => {
+    if (narrow === null) return []
+    const visible = new Set(registered.filter((l) => l.visible).map((l) => l.id))
+    return buildLayers({ source, data, narrow, isVisible: (id: LayerId) => visible.has(id) })
+  }, [registered, source, data, narrow])
 
   const zoom = typeof viewState.zoom === 'number' ? viewState.zoom : viewState.zoom?.[0] ?? 0
 
@@ -109,6 +106,10 @@ export function MapView({ source, className }: Props) {
         onResize={onResize}
         getCursor={({ isDragging }) => (isDragging ? 'grabbing' : 'crosshair')}
       />
+      <div className="am-overlay am-top-left">
+        <span className="am-title">{aoi.name}</span>
+        {source.synthetic && <span className="am-badge">SYNTHETIC fixture data</span>}
+      </div>
       <div className="am-overlay am-top-right">
         <NorthArrow />
         <button type="button" className="am-button" onClick={fit}>
@@ -119,7 +120,6 @@ export function MapView({ source, className }: Props) {
         <ScaleBar zoom={zoom} />
         <CursorReadout xy={cursor} />
       </div>
-      {source.synthetic && <div className="am-overlay am-top-left am-badge">SYNTHETIC fixture data</div>}
     </div>
   )
 }
