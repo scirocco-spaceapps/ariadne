@@ -18,7 +18,10 @@ import {
   replanKey,
   routeStops,
   sessionReplan,
+  trackArrival,
+  type Arrival,
   type Legs,
+  type SeenState,
   type ReplanResult,
   type SessionReplan,
 } from './replan'
@@ -168,11 +171,21 @@ export function useReplan(source: AssetSource): Replan {
   const table = useLegTable(route, enabled)
   const cost = useCostToHome(source)
 
-  // Arrival time at the stop being dwelt at, remembered per session (the state does not carry it).
-  const [arrival, setArrival] = useState<{ key: string; t: number } | null>(null)
-  const stopKey = state?.at_stop ? `${state.session}|${state.at_stop}` : null
-  if (stopKey && arrival?.key !== stopKey) setArrival({ key: stopKey, t: state!.t_min })
-  const arrivedAt = stopKey && arrival?.key === stopKey ? arrival.t : null
+  // Arrival time at the stop being dwelt at (the state does not carry it): seen, or from the plan
+  // after a reload or a seek into the dwell (trackArrival).
+  const [track, setTrack] = useState<{ arrival: Arrival | null; seen: SeenState | null }>({ arrival: null, seen: null })
+  let tracked = track
+  const moved =
+    state !== null &&
+    (track.seen?.session !== state.session || track.seen.t_min !== state.t_min || track.seen.at_stop !== state.at_stop)
+  if (moved) {
+    tracked = {
+      arrival: route ? trackArrival(track.arrival, track.seen, state, route) : null,
+      seen: { session: state.session, t_min: state.t_min, at_stop: state.at_stop },
+    }
+    setTrack(tracked)
+  }
+  const arrivedAt = state?.at_stop ? (tracked.arrival?.t ?? null) : null
 
   const input = enabled && state && route ? sessionReplan(route, state, arrivedAt) : null
   const leak = leakOn ? leak_min : 0
