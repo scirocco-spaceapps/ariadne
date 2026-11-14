@@ -14,9 +14,9 @@ info:
 
     Times are minutes from EVA start (`t_min`) unless named `*_utc` (ISO 8601, UTC).
 servers:
-  - url: http://localhost:8001
+  - url: http://localhost:8000
     description: planner
-  - url: http://localhost:8002
+  - url: http://localhost:8080
     description: mission-control
 tags:
   - name: planner
@@ -27,9 +27,9 @@ tags:
 paths:
   /health:
     servers:
-      - url: http://localhost:8001
+      - url: http://localhost:8000
         description: planner
-      - url: http://localhost:8002
+      - url: http://localhost:8080
         description: mission-control
     get:
       tags: [planner, mission-control]
@@ -44,7 +44,7 @@ paths:
 
   /route:
     servers:
-      - url: http://localhost:8001
+      - url: http://localhost:8000
         description: planner
     post:
       tags: [planner]
@@ -61,15 +61,15 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/RouteResponse" }
-        "400":
-          description: Unknown stop id or no traversable path.
+        "422":
+          description: Unknown or unreachable stop, or an invalid body. FastAPI request-validation errors use the same status.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
 
   /abort:
     servers:
-      - url: http://localhost:8001
+      - url: http://localhost:8000
         description: planner
     post:
       tags: [planner]
@@ -86,15 +86,15 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/AbortResponse" }
-        "400":
-          description: Position outside the AOI or not traversable.
+        "422":
+          description: Position outside the AOI or on an unreachable cell, or an invalid body.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
 
   /conditions:
     servers:
-      - url: http://localhost:8002
+      - url: http://localhost:8080
         description: mission-control
     get:
       tags: [mission-control]
@@ -109,7 +109,7 @@ paths:
 
   /sessions:
     servers:
-      - url: http://localhost:8002
+      - url: http://localhost:8080
         description: mission-control
     post:
       tags: [mission-control]
@@ -134,7 +134,7 @@ paths:
 
   /sessions/{id}/control:
     servers:
-      - url: http://localhost:8002
+      - url: http://localhost:8080
         description: mission-control
     parameters:
       - $ref: "#/components/parameters/SessionId"
@@ -166,7 +166,7 @@ paths:
 
   /sessions/{id}/events:
     servers:
-      - url: http://localhost:8002
+      - url: http://localhost:8080
         description: mission-control
     parameters:
       - $ref: "#/components/parameters/SessionId"
@@ -187,6 +187,38 @@ paths:
               schema: { $ref: "#/components/schemas/Ack" }
         "400":
           description: Invalid event.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Unknown session.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /sessions/{id}/script:
+    servers:
+      - url: http://localhost:8080
+        description: mission-control
+    parameters:
+      - $ref: "#/components/parameters/SessionId"
+    post:
+      tags: [mission-control]
+      operationId: runSessionScript
+      summary: Run a scripted demo on the session (start, alert at a set time, clear) for rehearsals and e2e tests.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SessionScript" }
+      responses:
+        "200":
+          description: Script started. Progress arrives over WebSocket as usual.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ack" }
+        "400":
+          description: Unknown script name.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -229,10 +261,15 @@ components:
         status: { type: string, const: ok }
         service: { type: string, enum: [planner, mission-control] }
     Error:
+      description: "`detail` is a message, or FastAPI's list of validation errors on a 422."
       type: object
       required: [detail]
       properties:
-        detail: { type: string }
+        detail:
+          anyOf:
+            - type: string
+            - type: array
+              items: { type: object, additionalProperties: true }
     Ack:
       type: object
       required: [ok]
@@ -317,28 +354,39 @@ components:
     ConditionSource:
       description: Fields every non-null condition part carries.
       type: object
-      required: [provenance, source, fetched_at]
+      required: [provenance, source, mode]
       properties:
         provenance: { $ref: "#/components/schemas/Provenance" }
-        source: { type: string, description: Human-readable source with URL. }
-        fetched_at: { type: string, format: date-time }
+        source: { type: string, description: "Human-readable citation, e.g. instrument, paper or feed name." }
+        source_url: { type: string, format: uri }
+        mode:
+          type: string
+          enum: [archive, live]
+          description: "archive = recorded values from a past sol or a publication; live = fetched from an upstream feed by this service."
+        fetched_at: { type: string, format: date-time, description: When this service last fetched the part. }
     Weather:
+      description: "MEDA-style surface weather. Keys of `values` are e.g. air_temp_min, air_temp_max, pressure, dust_opacity; `units` gives the unit of each key."
       allOf:
         - $ref: "#/components/schemas/ConditionSource"
         - type: object
+          required: [sol, values, units]
           properties:
             sol: { type: [integer, "null"] }
-            temp_min_c: { type: [number, "null"] }
-            temp_max_c: { type: [number, "null"] }
-            pressure_pa: { type: [number, "null"] }
-            wind_mps: { type: [number, "null"] }
+            values:
+              type: object
+              additionalProperties: { type: [number, "null"] }
+            units:
+              type: object
+              additionalProperties: { type: string }
     Radiation:
       allOf:
         - $ref: "#/components/schemas/ConditionSource"
         - type: object
+          required: [value, unit]
           properties:
-            dose_rate_ugy_per_day: { type: [number, "null"] }
-            sol: { type: [integer, "null"] }
+            value: { type: number, description: Surface dose rate. }
+            unit: { type: string, description: "e.g. µGy/day" }
+            measured_at: { type: string, description: "Where it was measured, e.g. Gale crater (MSL RAD); Modeled for Jezero." }
     SpaceWeatherEvent:
       type: object
       additionalProperties: false
@@ -351,20 +399,24 @@ components:
       allOf:
         - $ref: "#/components/schemas/ConditionSource"
         - type: object
-          required: [events, stale]
+          required: [events, fetched_at, stale]
           properties:
             events:
               type: array
               items: { $ref: "#/components/schemas/SpaceWeatherEvent" }
-            stale: { type: boolean, description: True when the last successful fetch is older than the refresh interval. }
+            stale: { type: boolean, description: True when serving the last good copy after a failed refresh. }
     Partner:
+      description: One context value from a Space Apps partner agency (e.g. ESA, MBRSC).
       allOf:
         - $ref: "#/components/schemas/ConditionSource"
         - type: object
-          required: [name, data]
+          required: [agency, mission, value, unit, source_url]
           properties:
-            name: { type: string }
-            data: { type: object, additionalProperties: true }
+            agency: { type: string }
+            mission: { type: string }
+            value: { type: number }
+            unit: { type: string }
+            description: { type: string, description: What the value is, in one line. }
     Conditions:
       type: object
       additionalProperties: false
@@ -419,6 +471,13 @@ components:
         type: { type: string, enum: [storm_alert, clear] }
         lead_min: { type: number, minimum: 0, description: Minutes until the storm arrives; storm_alert only. }
         abort_path: { $ref: "#/components/schemas/Path" }
+
+    SessionScript:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name: { type: string, enum: [demo90], description: "demo90: start, storm alert at a set time, then clear." }
 
     # ---------- WebSocket (see ws-messages.md) ----------
     WsAlert:
@@ -481,13 +540,15 @@ components:
         nodata: { type: string, enum: [NaN] }
         optional: { type: boolean, description: "File may be absent; clients must handle that." }
         legend:
+          description: "Colour legend of a classified PNG. Slope bins carry max_deg; traversability classes carry class."
           type: array
           items:
             type: object
             additionalProperties: false
-            required: [max_deg, color, label]
+            required: [color, label]
             properties:
-              max_deg: { type: number }
+              max_deg: { type: number, description: Upper bound of a slope bin (degrees). }
+              class: { type: string, enum: [go, caution, no-go] }
               color: { type: string, pattern: "^#[0-9a-fA-F]{6}$" }
               label: { type: string }
     VectorRef:
@@ -558,6 +619,7 @@ components:
             track: { $ref: "#/components/schemas/VectorRef" }
             waypoints: { $ref: "#/components/schemas/VectorRef" }
             targets: { $ref: "#/components/schemas/VectorRef" }
+            geology: { $ref: "#/components/schemas/VectorRef" }
         safe_haven: { $ref: "#/components/schemas/Place" }
         stops:
           type: array

@@ -24,6 +24,7 @@ FIX = ROOT / "fixtures"
 RASTERS = FIX / "rasters"
 LABEL = "SYNTHETIC"
 WALK_M_PER_MIN = 50.0  # Assumed, fixtures only (see docs/DATA_SOURCES.md)
+CAUTION_DEG, NOGO_DEG = 15.0, 25.0  # Assumed, fixtures only; real thresholds come from model/params.json
 
 
 def load(name: str):
@@ -46,7 +47,7 @@ def grid(px_m: float):
 def elevation(x, y):
     """Tilted plane plus one hill well away from the fixture route."""
     plane = -2550.0 + 0.05 * x + 0.02 * y
-    hill = 20.0 * np.exp(-((x - 400.0) ** 2 + (y - 100.0) ** 2) / (2 * 30.0**2))
+    hill = 30.0 * np.exp(-((x - 400.0) ** 2 + (y - 100.0) ** 2) / (2 * 30.0**2))
     return plane + hill
 
 
@@ -87,6 +88,8 @@ def write_f32(name: str, arr: np.ndarray, px_m: float, unit: str, formula: str):
         "width": int(arr.shape[1]),
         "height": int(arr.shape[0]),
         "px_m": px_m,
+        "min": round(float(np.nanmin(arr)), 4),
+        "max": round(float(np.nanmax(arr)), 4),
         "dtype": "float32",
         "byte_order": "little",
         "layout": "row-major, row 0 = north edge, no header",
@@ -113,7 +116,7 @@ def rasters():
     px = r["dem"]["px_m"]
     x, y = grid(px)
     write_f32(r["dem"]["file"], elevation(x, y), px, "m",
-              "-2550 + 0.05*x + 0.02*y + 20*exp(-((x-400)^2+(y-100)^2)/(2*30^2))")
+              "-2550 + 0.05*x + 0.02*y + 30*exp(-((x-400)^2+(y-100)^2)/(2*30^2))")
 
     # Hillshade (sun azimuth 315, altitude 45)
     px = r["hillshade"]["px_m"]
@@ -137,12 +140,17 @@ def rasters():
         lower = b["max_deg"]
     stamp(Image.fromarray(rgb, "RGB")).save(RASTERS / r["slope"]["file"], pnginfo=png_info())
 
-    # Traversability: 8-bit grey, 255 = easiest, 0 = impassable (slope >= 30 deg)
+    # Traversability: RGB coloured by the go / caution / no-go classes of its legend
     px = r["traversability"]["px_m"]
     x, y = grid(px)
     s, _, _ = slope_deg(x, y)
-    t = np.clip(255 * (1 - s / 30.0), 0, 255).astype(np.uint8)
-    stamp(Image.fromarray(t, "L")).save(RASTERS / r["traversability"]["file"], pnginfo=png_info())
+    colors = {b["class"]: tuple(int(b["color"][i:i + 2], 16) for i in (1, 3, 5))
+              for b in r["traversability"]["legend"]}
+    rgb = np.zeros(s.shape + (3,), dtype=np.uint8)
+    rgb[s < CAUTION_DEG] = colors["go"]
+    rgb[(s >= CAUTION_DEG) & (s < NOGO_DEG)] = colors["caution"]
+    rgb[s >= NOGO_DEG] = colors["no-go"]
+    stamp(Image.fromarray(rgb, "RGB")).save(RASTERS / r["traversability"]["file"], pnginfo=png_info())
 
     # Cost to home: straight-line distance to the safe haven / 50 m per min
     px = r["cost_to_home"]["px_m"]

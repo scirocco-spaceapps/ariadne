@@ -4,10 +4,12 @@
   "width": 125,
   "height": 100,
   "px_m": 4,
+  "min": -2549.86,
+  "max": -2497.993,
   "dtype": "float32",
   "byte_order": "little",
   "layout": "row-major, row 0 = north edge, no header",
   "unit": "m",
-  "formula": "-2550 + 0.05*x + 0.02*y + 20*exp(-((x-400)^2+(y-100)^2)/(2*30^2))",
+  "formula": "-2550 + 0.05*x + 0.02*y + 30*exp(-((x-400)^2+(y-100)^2)/(2*30^2))",
   "provenance": "Simulation"
 }

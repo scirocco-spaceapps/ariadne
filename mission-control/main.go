@@ -12,7 +12,7 @@ import (
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8002"
+		port = "8080"
 	}
 	log.Fatal(server.New().Listen(":" + port))
 }

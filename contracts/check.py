@@ -66,6 +66,14 @@ def check_aoi(aoi: dict, where: str) -> None:
     ids = [p["id"] for p in [aoi["safe_haven"], *aoi["stops"]]]
     if len(ids) != len(set(ids)):
         fail(f"{where}: duplicate place ids {ids}")
+    slope_legend = aoi["rasters"]["slope"].get("legend", [])
+    if not slope_legend or any("max_deg" not in b for b in slope_legend):
+        fail(f"{where}: slope.legend must list bins with max_deg")
+    elif [b["max_deg"] for b in slope_legend] != sorted(b["max_deg"] for b in slope_legend):
+        fail(f"{where}: slope.legend bins must be in ascending max_deg")
+    classes = {b.get("class") for b in aoi["rasters"]["traversability"].get("legend", [])}
+    if classes != {"go", "caution", "no-go"}:
+        fail(f"{where}: traversability.legend must have exactly the classes go, caution, no-go")
 
 
 def check_rasters(aoi: dict) -> None:
@@ -82,8 +90,17 @@ def check_rasters(aoi: dict) -> None:
             if f.stat().st_size != cols * rows * 4:
                 fail(f"fixture raster {key}: {f.stat().st_size} bytes, expected {cols}x{rows}x4")
             side = Path(str(f) + ".json")
-            if not side.exists() or not load(side).get("synthetic"):
-                fail(f"fixture raster {key}: sidecar {side.name} missing or not marked synthetic")
+            if not side.exists():
+                fail(f"fixture raster {key}: sidecar {side.name} missing")
+                continue
+            meta = load(side)
+            if not meta.get("synthetic"):
+                fail(f"fixture raster {key}: sidecar {side.name} not marked synthetic")
+            for field, want in (("width", cols), ("height", rows), ("px_m", r["px_m"])):
+                if meta.get(field) != want:
+                    fail(f"fixture raster {key}: sidecar {field}={meta.get(field)}, expected {want}")
+            if not all(isinstance(meta.get(k), (int, float)) for k in ("min", "max")):
+                fail(f"fixture raster {key}: sidecar needs numeric min and max")
         else:
             with Image.open(f) as im:
                 if im.size != (cols, rows):
@@ -204,6 +221,10 @@ def main() -> int:
     validate({"route": load(FIX / "route.json"), "budget_min": 240, "reserve_min": 30, "dwell_min": 20},
              "SessionCreate", "example SessionCreate")
     validate({"type": "hello", "role": "cuff"}, "WsHello", "example WsHello")
+    validate({"name": "demo90"}, "SessionScript", "example SessionScript")
+    validate({"detail": "stop s9 is unreachable"}, "Error", "example Error (message)")
+    validate({"detail": [{"loc": ["body", "stops"], "msg": "field required", "type": "missing"}]},
+             "Error", "example Error (FastAPI 422)")
 
     return report()
 

@@ -1,9 +1,12 @@
 {
   "_comment": "Walk model parameters. Fill every value with a source; a value without one is Assumed and gets a row in docs/DATA_SOURCES.md. Owner: Bunyamin.",
-  "walk_speed_flat_m_per_min": { "value": null, "unit": "m/min", "provenance": null, "source": null },
-  "slope_speed_factor": { "value": null, "unit": "per deg", "provenance": null, "source": null },
   "max_slope_deg": { "value": null, "unit": "deg", "provenance": null, "source": null },
+  "caution_slope_deg": { "value": null, "unit": "deg", "provenance": null, "source": null },
+  "walk_speed_flat_m_per_min": { "value": null, "unit": "m/min", "provenance": null, "source": null },
+  "speed_vs_slope": { "value": null, "unit": "table or function of slope (deg) -> speed factor", "provenance": null, "source": null },
   "dwell_min": { "value": null, "unit": "min", "provenance": null, "source": null },
   "budget_min": { "value": null, "unit": "min", "provenance": null, "source": null },
-  "reserve_min": { "value": null, "unit": "min", "provenance": null, "source": null }
+  "reserve_min": { "value": null, "unit": "min", "provenance": null, "source": null },
+  "radiation_dose_rate": { "value": null, "unit": "uGy/day", "provenance": null, "source": null, "measured_at": null },
+  "observer_height_m": { "value": null, "unit": "m", "provenance": null, "source": null }
 }

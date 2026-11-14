@@ -127,6 +127,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/sessions/{id}/script": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["SessionId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run a scripted demo on the session (start, alert at a set time, clear) for rehearsals and e2e tests. */
+        post: operations["runSessionScript"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -146,8 +165,11 @@ export interface components {
             /** @enum {string} */
             service: "planner" | "mission-control";
         };
+        /** @description `detail` is a message, or FastAPI's list of validation errors on a 422. */
         Error: {
-            detail: string;
+            detail: string | {
+                [key: string]: unknown;
+            }[];
         };
         Ack: {
             ok: boolean;
@@ -205,21 +227,38 @@ export interface components {
         /** @description Fields every non-null condition part carries. */
         ConditionSource: {
             provenance: components["schemas"]["Provenance"];
-            /** @description Human-readable source with URL. */
+            /** @description Human-readable citation, e.g. instrument, paper or feed name. */
             source: string;
-            /** Format: date-time */
-            fetched_at: string;
+            /** Format: uri */
+            source_url?: string;
+            /**
+             * @description archive = recorded values from a past sol or a publication; live = fetched from an upstream feed by this service.
+             * @enum {string}
+             */
+            mode: "archive" | "live";
+            /**
+             * Format: date-time
+             * @description When this service last fetched the part.
+             */
+            fetched_at?: string;
         };
+        /** @description MEDA-style surface weather. Keys of `values` are e.g. air_temp_min, air_temp_max, pressure, dust_opacity; `units` gives the unit of each key. */
         Weather: components["schemas"]["ConditionSource"] & {
-            sol?: number | null;
-            temp_min_c?: number | null;
-            temp_max_c?: number | null;
-            pressure_pa?: number | null;
-            wind_mps?: number | null;
+            sol: number | null;
+            values: {
+                [key: string]: number | null;
+            };
+            units: {
+                [key: string]: string;
+            };
         };
         Radiation: components["schemas"]["ConditionSource"] & {
-            dose_rate_ugy_per_day?: number | null;
-            sol?: number | null;
+            /** @description Surface dose rate. */
+            value: number;
+            /** @description e.g. µGy/day */
+            unit: string;
+            /** @description Where it was measured, e.g. Gale crater (MSL RAD); Modeled for Jezero. */
+            measured_at?: string;
         };
         SpaceWeatherEvent: {
             id: string;
@@ -229,14 +268,17 @@ export interface components {
         };
         SpaceWeather: components["schemas"]["ConditionSource"] & {
             events: components["schemas"]["SpaceWeatherEvent"][];
-            /** @description True when the last successful fetch is older than the refresh interval. */
+            /** @description True when serving the last good copy after a failed refresh. */
             stale: boolean;
         };
+        /** @description One context value from a Space Apps partner agency (e.g. ESA, MBRSC). */
         Partner: components["schemas"]["ConditionSource"] & {
-            name: string;
-            data: {
-                [key: string]: unknown;
-            };
+            agency: string;
+            mission: string;
+            value: number;
+            unit: string;
+            /** @description What the value is */
+            description?: string;
         };
         Conditions: {
             weather: components["schemas"]["Weather"] | null;
@@ -274,6 +316,13 @@ export interface components {
             /** @description Minutes until the storm arrives; storm_alert only. */
             lead_min?: number;
             abort_path?: components["schemas"]["Path"];
+        };
+        SessionScript: {
+            /**
+             * @description demo90: start, storm alert at a set time, then clear.
+             * @enum {string}
+             */
+            name: "demo90";
         };
         WsAlert: {
             /** @enum {string} */
@@ -327,8 +376,12 @@ export interface components {
             nodata?: "NaN";
             /** @description File may be absent; clients must handle that. */
             optional?: boolean;
+            /** @description Colour legend of a classified PNG. Slope bins carry max_deg; traversability classes carry class. */
             legend?: {
-                max_deg: number;
+                /** @description Upper bound of a slope bin (degrees). */
+                max_deg?: number;
+                /** @enum {string} */
+                class?: "go" | "caution" | "no-go";
                 color: string;
                 label: string;
             }[];
@@ -376,6 +429,7 @@ export interface components {
                 track: components["schemas"]["VectorRef"];
                 waypoints: components["schemas"]["VectorRef"];
                 targets?: components["schemas"]["VectorRef"];
+                geology?: components["schemas"]["VectorRef"];
             };
             safe_haven: components["schemas"]["Place"];
             stops: components["schemas"]["Place"][];
@@ -440,6 +494,7 @@ export type SessionCreate = components['schemas']['SessionCreate'];
 export type SessionCreated = components['schemas']['SessionCreated'];
 export type SessionControl = components['schemas']['SessionControl'];
 export type SessionEvent = components['schemas']['SessionEvent'];
+export type SessionScript = components['schemas']['SessionScript'];
 export type WsAlert = components['schemas']['WsAlert'];
 export type WsState = components['schemas']['WsState'];
 export type WsEvent = components['schemas']['WsEvent'];
@@ -496,8 +551,8 @@ export interface operations {
                     "application/json": components["schemas"]["RouteResponse"];
                 };
             };
-            /** @description Unknown stop id or no traversable path. */
-            400: {
+            /** @description Unknown or unreachable stop, or an invalid body. FastAPI request-validation errors use the same status. */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -529,8 +584,8 @@ export interface operations {
                     "application/json": components["schemas"]["AbortResponse"];
                 };
             };
-            /** @description Position outside the AOI or not traversable. */
-            400: {
+            /** @description Position outside the AOI or on an unreachable cell, or an invalid body. */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -662,6 +717,50 @@ export interface operations {
                 };
             };
             /** @description Invalid event. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unknown session. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    runSessionScript: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["SessionId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionScript"];
+            };
+        };
+        responses: {
+            /** @description Script started. Progress arrives over WebSocket as usual. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ack"];
+                };
+            };
+            /** @description Unknown script name. */
             400: {
                 headers: {
                     [name: string]: unknown;

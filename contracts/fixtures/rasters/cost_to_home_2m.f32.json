@@ -4,6 +4,8 @@
   "width": 250,
   "height": 200,
   "px_m": 2,
+  "min": 0.0283,
+  "max": 11.0931,
   "dtype": "float32",
   "byte_order": "little",
   "layout": "row-major, row 0 = north edge, no header",

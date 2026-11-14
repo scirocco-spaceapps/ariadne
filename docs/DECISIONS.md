@@ -17,3 +17,11 @@ Format: `YYYY-MM-DD — <decision> — <why> — <who>`
 - 2026-11-14 — web pins TypeScript ~5.9 instead of the Vite template's 7.0. — openapi-typescript 7.13 (type generation from contracts) requires TypeScript 5. — Yusuf
 - 2026-11-14 — `traversability_*.png` is 8-bit grey, 255 = easiest, 0 = impassable; `slope_*.png` is RGB coloured by `slope.legend`. — The contract names the files but not the encoding; this fixes it for fixtures and pipeline. — Yusuf
 - 2026-11-14 — `AbortResponse` carries `provenance` (in addition to path, time_min, distance_m). — Every value shown to a user carries provenance. — Yusuf
+- 2026-11-14 — Supersedes the ports line above: planner listens on 8000, mission-control on 8080 (web 5173 unchanged). — Matches infra/docker-compose in task N2. — Yusuf
+- 2026-11-14 — Supersedes the traversability line above: `traversability_*.png` is RGB coloured by three classes (go, caution, no-go) listed in `rasters.traversability.legend`; thresholds come from model/params.json. — Task A3 classifies cells into three classes. — Yusuf
+- 2026-11-14 — Condition parts all carry `provenance`, `source`, `mode` (archive or live), optional `source_url` and `fetched_at`. Weather is `{sol, values, units}`; radiation `{value, unit, measured_at}`; partner `{agency, mission, value, unit, source_url}`. — Matches tasks M4, M6, B4 and N5 (archive vs live shown apart). — Yusuf
+- 2026-11-14 — planner answers 422 for unknown or unreachable stops and positions outside the AOI; `Error.detail` is a string or FastAPI's validation list. — Task A5 and FastAPI's own 422s share one shape. — Yusuf
+- 2026-11-14 — `POST /sessions/{id}/script {name: "demo90"}` is in the contract from v1. — Task M5 and the F4 e2e test need it; adding it now avoids a contract change mid-sprint. — Yusuf
+- 2026-11-14 — `vectors.geology` (optional, geology.geojson) added to aoi.json. — Geology is a MUST layer in the game plan; it was missing a slot. — Yusuf
+- 2026-11-14 — Placeholder AOI is centred on lon 77.2989 E, lat 18.4889 N (rover position on sol 1250, per the task book); proj4 lat_ts and lon_0 use that centre. — Same centre task A1 crops around; A2 replaces the values with real ones. — Yusuf
+- 2026-11-14 — Ideas for later are appended to this file as lines starting `- LATER:` (what, why, hours, who). — The task book's "new idea" rule needs one place for them. — Yusuf

@@ -11,7 +11,7 @@ Endpoints are defined in `contracts/openapi.yaml` (tag `planner`): `GET /health`
 cd planner
 python -m venv .venv && .venv/Scripts/activate   # Windows; source .venv/bin/activate elsewhere
 pip install -r requirements-dev.txt
-uvicorn app.main:app --reload --port 8001
+uvicorn app.main:app --reload --port 8000
 ```
 
 **Test:** `cd planner && python -m pytest`
