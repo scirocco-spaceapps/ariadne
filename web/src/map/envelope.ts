@@ -21,7 +21,7 @@ export const ENVELOPE_COLORS: Record<MarginClass, string> = {
   out: '#0a1114',
 }
 /** Alpha of each class over the imagery (0-255). */
-const ALPHA: Record<MarginClass, number> = { safe: 55, tight: 110, out: 150 }
+const ALPHA: Record<MarginClass, number> = { safe: 75, tight: 130, out: 150 }
 
 /** Class boundaries in minutes of margin, both taken from the model. */
 export function envelopeThresholds(model: EnvelopeModel): { safe_min: number; tight_min: number } {
@@ -162,11 +162,38 @@ export function envelopeCanvas(
   return canvas
 }
 
+/** Share of AOI cells (0-1) whose way home is finite and at most maxCost minutes. */
+export function shareWithin(cost: CostRaster, maxCost: number): number {
+  const n = cost.data.length
+  if (n === 0) return 0
+  let k = 0
+  for (let i = 0; i < n; i++) if (cost.data[i] <= maxCost) k++ // NaN compares false
+  return k / n
+}
+
+/**
+ * Share of the AOI from which home is still reachable, by the same rule the envelope draws:
+ * margin >= 0 (cost <= B - t - R) normally, or home before the storm (cost <= minutes left).
+ */
+export function reachableShare(
+  cost: CostRaster,
+  model: EnvelopeModel,
+  t: number,
+  stormMinutesLeft: number | null = null,
+): number {
+  const maxCost = stormMinutesLeft === null ? model.budget_min - t - model.reserve_min : stormMinutesLeft
+  return shareWithin(cost, maxCost)
+}
+
+/** Cost-to-home rasters in aoi.json: the terrain model, or the flat-ground variant (A7, optional). */
+export type CostKey = 'cost_to_home' | 'cost_to_home_flat'
+
 const cache = new Map<string, Promise<CostRaster>>()
 
-/** Fetches rasters.cost_to_home once per URL (little-endian float32, row-major, row 0 north). */
-export function loadCostRaster(source: AssetSource): Promise<CostRaster> {
-  const ref = source.aoi.rasters.cost_to_home
+/** Fetches a cost raster once per URL (little-endian float32, row-major, row 0 north). */
+export function loadCostRaster(source: AssetSource, key: CostKey = 'cost_to_home'): Promise<CostRaster> {
+  const ref = source.aoi.rasters[key]
+  if (!ref) return Promise.reject(new Error(`aoi.json has no rasters.${key}`))
   const url = source.url(ref.file)
   let p = cache.get(url)
   if (!p) {
@@ -187,20 +214,27 @@ export function loadCostRaster(source: AssetSource): Promise<CostRaster> {
   return p
 }
 
-/** The cost-to-home raster of a source; null while loading or when it cannot be loaded. */
-export function useCostToHome(source: AssetSource): CostRaster | null {
-  const [cost, setCost] = useState<{ source: AssetSource; raster: CostRaster } | null>(null)
+/**
+ * A cost raster of a source; null while loading, when it cannot be loaded, or when an optional one
+ * (the flat variant) is not on the asset host.
+ */
+export function useCostToHome(source: AssetSource, key: CostKey = 'cost_to_home'): CostRaster | null {
+  const [cost, setCost] = useState<{ source: AssetSource; key: CostKey; raster: CostRaster } | null>(null)
   useEffect(() => {
     let cancelled = false
-    loadCostRaster(source).then(
-      (raster) => !cancelled && setCost({ source, raster }),
-      () => !cancelled && setCost(null),
-    )
+    const ref = source.aoi.rasters[key]
+    const present = !ref ? Promise.resolve(false) : ref.optional ? source.exists(ref.file) : Promise.resolve(true)
+    present
+      .then((ok) => (ok ? loadCostRaster(source, key) : null))
+      .then(
+        (raster) => !cancelled && setCost(raster ? { source, key, raster } : null),
+        () => !cancelled && setCost(null),
+      )
     return () => {
       cancelled = true
     }
-  }, [source])
-  return cost && cost.source === source ? cost.raster : null
+  }, [source, key])
+  return cost && cost.source === source && cost.key === key ? cost.raster : null
 }
 
 /**
@@ -219,4 +253,24 @@ export function useEnvelopeImage(
     const image = envelopeCanvas(cost, { budget_min, reserve_min }, tq, stormKey >= 0 ? stormKey : null)
     return image ? { image } : null
   }, [cost, budget_min, reserve_min, tq, stormKey])
+}
+
+/**
+ * Reachable share of the site for the terrain and the flat-ground rasters (Y9), recomputed only when
+ * an input changes. Null unless both rasters are given. stormKey as in useEnvelopeImage.
+ */
+export function useReachableShares(
+  terrain: CostRaster | null,
+  flat: CostRaster | null,
+  budget_min: number,
+  reserve_min: number,
+  tq: number,
+  stormKey: number,
+): { terrain: number; flat: number } | null {
+  return useMemo(() => {
+    if (!terrain || !flat) return null
+    const model = { budget_min, reserve_min }
+    const storm = stormKey >= 0 ? stormKey : null
+    return { terrain: reachableShare(terrain, model, tq, storm), flat: reachableShare(flat, model, tq, storm) }
+  }, [terrain, flat, budget_min, reserve_min, tq, stormKey])
 }

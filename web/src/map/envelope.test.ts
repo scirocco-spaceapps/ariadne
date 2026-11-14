@@ -14,6 +14,8 @@ import {
   marginClass,
   minutesToStorm,
   quantizeT,
+  reachableShare,
+  shareWithin,
   stormMarginAt,
   stormPixels,
   timeToStorm,
@@ -146,6 +148,47 @@ describe('loadCostRaster', () => {
   it('rejects a file of the wrong size', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(new Float32Array(5).buffer)))
     await expect(loadCostRaster(source('short'))).rejects.toThrow('expected 3 x 2')
+  })
+
+  it('loads the flat variant by key, and rejects a key aoi.json does not list', async () => {
+    const withFlat = {
+      ...aoi,
+      rasters: {
+        ...aoi.rasters,
+        cost_to_home_flat: { file: 'cost_to_home_flat_2m.f32', px_m: 10, dtype: 'float32', unit: 'min', optional: true },
+      },
+    } as unknown as Aoi
+    const fetchMock = vi.fn(async () => new Response(new Float32Array([1, 1, 1, 1, 1, 1]).buffer))
+    vi.stubGlobal('fetch', fetchMock)
+    const r = await loadCostRaster({ ...source('flat'), aoi: withFlat }, 'cost_to_home_flat')
+    expect(r.data[0]).toBe(1)
+    expect(fetchMock).toHaveBeenCalledWith('https://assets.test/flat/cost_to_home_flat_2m.f32')
+    await expect(loadCostRaster(source('none'), 'cost_to_home_flat')).rejects.toThrow('no rasters.cost_to_home_flat')
+  })
+})
+
+describe('reachable share (Y9)', () => {
+  // cost = 10 20 NaN / 5 15 25; margin >= 0  <=>  cost <= 70 - t
+  it('counts finite cells within the limit over all AOI cells', () => {
+    expect(shareWithin(cost, 15)).toBeCloseTo(3 / 6) // 10, 5, 15
+    expect(shareWithin(cost, 4)).toBe(0)
+    expect(shareWithin(cost, Infinity)).toBeCloseTo(5 / 6) // NaN never counts
+  })
+
+  it('shrinks as time passes, by the envelope rule', () => {
+    expect(reachableShare(cost, model, 0)).toBeCloseTo(5 / 6)
+    expect(reachableShare(cost, model, 50)).toBeCloseTo(4 / 6) // cost <= 20
+    expect(reachableShare(cost, model, 60)).toBeCloseTo(2 / 6) // cost <= 10
+    expect(reachableShare(cost, model, 70)).toBe(0)
+  })
+
+  it('is higher without obstacles: a flat raster with no blocked cell', () => {
+    const flat: CostRaster = { ...cost, data: new Float32Array([10, 12, 14, 5, 11, 15]) }
+    expect(reachableShare(flat, model, 50)).toBeGreaterThan(reachableShare(cost, model, 50))
+  })
+
+  it('uses the minutes left before the storm during an alert', () => {
+    expect(reachableShare(cost, model, 0, 10)).toBeCloseTo(2 / 6) // cost <= 10, no reserve
   })
 })
 

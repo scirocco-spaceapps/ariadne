@@ -14,6 +14,7 @@ import {
   marginAt,
   quantizeT,
   minutesToStorm,
+  useReachableShares,
   stormMarginAt,
   useCostToHome,
   useEnvelopeImage,
@@ -112,7 +113,12 @@ export function MapView({ source, className }: Props) {
   // Return envelope (Y5): redrawn only when the time moves by at least 0.5 min. During a storm alert
   // (Y6) it shows where home is reachable before the storm instead; the mode comes from the current
   // state alone, so clearing the alert restores the normal envelope.
-  const cost = useCostToHome(source)
+  // Y9: the same envelope from the flat-ground variant (A7), to show what the terrain model changes.
+  const costTerrain = useCostToHome(source)
+  const costFlat = useCostToHome(source, 'cost_to_home_flat')
+  const [flat, setFlat] = useState(false)
+  const flatOn = flat && costFlat !== null
+  const cost = flatOn ? costFlat : costTerrain
   const tNow = state ? state.t_min : planT
   const tq = quantizeT(tNow)
   // Read as primitives from the store, so the React Compiler can keep the memos below.
@@ -124,6 +130,8 @@ export function MapView({ source, className }: Props) {
   const { budget_min, reserve_min } = aoi.model
   const envelope = useEnvelopeImage(cost, budget_min, reserve_min, tq, stormKey)
   const envelopeProvenance: Provenance = source.synthetic ? 'Simulation' : 'Modeled'
+  // Share of the site from which home is still reachable, for both variants, at the drawn time.
+  const shares = useReachableShares(flatOn ? costTerrain : null, flatOn ? costFlat : null, budget_min, reserve_min, tq, stormKey)
   const cursorMargin =
     cost && cursor
       ? alerted
@@ -153,12 +161,13 @@ export function MapView({ source, className }: Props) {
       routeProvenance,
       envelope: cost !== null,
       alert: alerted,
+      flat: flatOn,
     })
     const ids = entries.map((e) => e.id)
     ownIds.current.filter((id) => !ids.includes(id)).forEach(unregister)
     entries.forEach(register)
     ownIds.current = ids
-  }, [source, data, register, unregister, route, hasMarker, routeProvenance, cost, alerted])
+  }, [source, data, register, unregister, route, hasMarker, routeProvenance, cost, alerted, flatOn])
   useEffect(() => () => ownIds.current.forEach(unregister), [unregister])
 
   // Keep the AOI fitted to the container until the user pans or zooms
@@ -190,7 +199,9 @@ export function MapView({ source, className }: Props) {
 
   const zoom = typeof viewState.zoom === 'number' ? viewState.zoom : viewState.zoom?.[0] ?? 0
   // Dashes stay about DASH_PX on screen; zoom is quantised so panning does not rebuild them.
-  const dash_m = DASH_PX * metresPerPixel(Math.round(zoom * 4) / 4)
+  const zoomQ = Math.round(zoom * 4) / 4
+  const dash_m = DASH_PX * metresPerPixel(zoomQ)
+  const ppm = 1 / metresPerPixel(zoomQ) // screen px per metre, for label placement (Y9)
 
   // No layers until the real size is known, so a narrow map never downloads the big ortho first.
   const narrow = viewSize ? viewSize.width < NARROW_PX : null
@@ -198,8 +209,8 @@ export function MapView({ source, className }: Props) {
     if (narrow === null) return []
     const visible = new Set(registered.filter((l) => l.visible).map((l) => l.id))
     const mission: MissionLayers = { geom, progress_m, marker, numbers, selectedStop, dash_m, alert: alertLayers, selectedTarget }
-    return buildLayers({ source, data, narrow, mission, envelope, isVisible: (id: LayerId) => visible.has(id) })
-  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers, selectedTarget])
+    return buildLayers({ source, data, narrow, mission, envelope, ppm, isVisible: (id: LayerId) => visible.has(id) })
+  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers, selectedTarget, ppm])
 
   // The stop card shows a selected target before a selected stop, so picking a stop clears the target.
   const onClick = useCallback(
@@ -235,7 +246,23 @@ export function MapView({ source, className }: Props) {
         <button type="button" className="am-button" onClick={fit}>
           Fit AOI
         </button>
+        {costFlat && (
+          <label className="am-compare-toggle" htmlFor="am-compare">
+            <input id="am-compare" type="checkbox" checked={flat} onChange={(e) => setFlat(e.target.checked)} />
+            Without the terrain model
+          </label>
+        )}
       </div>
+      {shares && (
+        <div className="am-overlay am-compare-caption" data-testid="compare-caption">
+          <span>
+            {alerted ? 'Home before the storm' : 'Can still get home'} at T+{tq.toFixed(1)} min:{' '}
+            <b>{Math.round(shares.terrain * 100)} %</b> of the site with the terrain model ·{' '}
+            <b>{Math.round(shares.flat * 100)} %</b> on flat ground
+          </span>
+          <span className={`am-prov am-prov-${envelopeProvenance.toLowerCase()}`}>{envelopeProvenance}</span>
+        </div>
+      )}
       <div className="am-overlay am-bottom-left">
         <ScaleBar zoom={zoom} />
         <CursorReadout xy={cursor} margin={cursorMargin} />
