@@ -107,7 +107,7 @@ fields copied from the USGS data-release pages on 2026-11-14; Astropedia's "Use 
 | Mars 2020 raw images, Navcam and Mastcam-Z | https://mars.nasa.gov/mars2020/multimedia/raw-images/ | NASA/JPL-Caltech/ASU (Mastcam-Z) | Stop photos; each image is listed under "Stop photos" below |
 | Mars 2020 MEDA, `CAL_ATS` and `DER_PS` for sol 1215 (NASA PDS Atmospheres Node) | https://doi.org/10.17189/1522849 | NASA PDS dataset doi:10.17189/1522849 | Conditions panel: air temperature, pressure (dust opacity not available) |
 | MSL RAD surface dose rate (Hassler et al. 2014, Science 343, 1244797) | https://doi.org/10.1126/science.1244797 | Citation | Modeled radiation dose rate |
-| DONKI WSA-ENLIL CME arrival forecasts for Mars (CCMC, via api.nasa.gov) | TBD (the app links https://kauai.ccmc.gsfc.nasa.gov/DONKI/; no row in `DATA_SOURCES.md` yet) | NASA CCMC | Space-weather list in the conditions panel, live mode only |
+| DONKI WSA-ENLIL CME arrival forecasts for Mars (CCMC, via api.nasa.gov) | https://kauai.ccmc.gsfc.nasa.gov/DONKI/ | NASA CCMC | Space-weather list in the conditions panel, live mode only |
 | USGS SIM 3464, Jezero crater geologic map | — | — | **Not used.** No geology layer is published (`geology.geojson` is optional and absent) |
 
 ## Stop photos (`content/photos/`)
