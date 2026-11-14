@@ -76,10 +76,24 @@ because the NASA-data sentence is longer (18 words, about 7 s).
 
 Human checks (the card's steps 1 and 2). The script is locked when all three are filled in:
 
-- Read-aloud time, measured by Furkan: ___ s (must be ≤ 30 s, final card included)
+- Read-aloud time, measured by Furkan: 27–28 s (must be ≤ 30 s, final card included)
 - Read by Ali Koray: done, wording changes applied
 - After his read, Furkan dropped "fastest" from A5: no shot shows that the way home is the fastest one
 - Read to the team at the 23:30 check: ___ (OK / changes)
+
+### Backup cuts (only if a take runs over 30 s)
+
+First choice: record the take again. If the video still runs over 30 s, make these cuts in this
+order, before recording. Never skip words while reading. Never cut the NASA-data part of A4
+("NASA HiRISE images and terrain").
+
+| Order | Cut | Saves | Why it is safe |
+|---|---|---|---|
+| 1 | A6: ", one safe step at a time" | 6 words, about 2.4 s | Closing phrase; carries no claim |
+| 2 | A4: "of Jezero crater" | 3 words, about 1.2 s | Jezero crater is already in the console header (shot S1) |
+| 3 | A5: "in" ("comes in" → "comes") | 1 word, about 0.4 s | Same meaning |
+
+A 32 s take with cut 1 comes to about 29.6 s; with cuts 1 and 2, about 28.4 s.
 
 ## Shot list (Variant A)
 
