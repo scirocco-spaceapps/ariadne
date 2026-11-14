@@ -24,6 +24,8 @@ Delete each note in the PR that handles it.
   value shown to a user needs a DATA_SOURCES row. You took over Mazlum's card, so this is yours (or
   Bunyamin's for the RAD URL).
 - **Also:** the Project link on the form is the repo, so it must be public before submission (Y8).
+- **Update (F6 review):** Bunyamin confirmed the MSL RAD DOI, https://doi.org/10.1126/science.1244797;
+  the `radiation_dose_rate` DATA_SOURCES row can carry it. DONKI still has no row.
 
 ## 2026-11-14 — from Bunyamin (MPC-1): the replanning rule is ready for MPC-2
 
