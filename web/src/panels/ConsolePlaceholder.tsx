@@ -3,6 +3,7 @@ import { useMission } from '../app/store'
 import { assetsUrl } from '../lib/config'
 import { aoi } from '../lib/fixtures'
 import { LayerToggle, MapView, fixtureSource, remoteSource } from '../map'
+import { SessionControls } from './SessionControls'
 
 /** Console until the N6 layout: the map with its layer toggles, and the session line. */
 export function ConsolePlaceholder() {
@@ -19,6 +20,7 @@ export function ConsolePlaceholder() {
           Session: {status}
           {state && <> · T+{state.t_min.toFixed(1)} min · pos {state.pos.map((v) => v.toFixed(0)).join(', ')} m ({state.provenance})</>}
         </p>
+        <SessionControls />
       </header>
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <aside style={{ width: 220, padding: 8, overflow: 'auto' }}>

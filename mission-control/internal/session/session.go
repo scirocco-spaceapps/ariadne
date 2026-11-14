@@ -60,6 +60,7 @@ type Session struct {
 	speed   float64
 	clients map[*Client]struct{}
 	stop    chan struct{}
+	active  time.Time // last join, leave, update or running tick
 }
 
 func newSession(id string, engine Engine) *Session {
@@ -69,6 +70,7 @@ func newSession(id string, engine Engine) *Session {
 		speed:   DefaultSpeed,
 		clients: make(map[*Client]struct{}),
 		stop:    make(chan struct{}),
+		active:  time.Now(),
 	}
 }
 
@@ -77,6 +79,7 @@ func (s *Session) Join(c *Client) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.clients[c] = struct{}{}
+	s.active = time.Now()
 	enqueue(c, s.stateFrameLocked())
 }
 
@@ -85,6 +88,7 @@ func (s *Session) Leave(c *Client) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	delete(s.clients, c)
+	s.active = time.Now()
 }
 
 // Clients returns the number of connected listeners.
@@ -107,6 +111,7 @@ func (s *Session) Update(fn func(*Control) []contract.Event) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	evs := fn(&Control{s: s})
+	s.active = time.Now()
 	s.broadcastLocked(evs)
 }
 
@@ -132,6 +137,7 @@ func (s *Session) tick(elapsed time.Duration) {
 	if !s.running {
 		return
 	}
+	s.active = time.Now()
 	evs := s.engine.Advance(elapsed.Seconds() * s.speed)
 	if s.engine.Done() {
 		s.running = false
@@ -210,10 +216,21 @@ func enqueue(c *Client, frame []byte) bool {
 	}
 }
 
+// Done is closed when the session is removed from its store.
+func (s *Session) Done() <-chan struct{} { return s.stop }
+
+// idleSince reports whether nobody listens, the clock is stopped, and nothing happened since t.
+func (s *Session) idleSince(t time.Time) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return len(s.clients) == 0 && !s.running && s.active.Before(t)
+}
+
 // Store holds all sessions in memory.
 type Store struct {
 	mu       sync.Mutex
 	sessions map[string]*Session
+	janitor  chan struct{}
 }
 
 // NewStore returns an empty store.
@@ -239,10 +256,63 @@ func (st *Store) Get(id string) *Session {
 	return st.sessions[id]
 }
 
-// Close stops every session clock.
+// Len returns the number of sessions.
+func (st *Store) Len() int {
+	st.mu.Lock()
+	defer st.mu.Unlock()
+	return len(st.sessions)
+}
+
+// Sweep removes sessions that have been idle (no listeners, clock stopped) for longer than ttl
+// and returns their ids.
+func (st *Store) Sweep(now time.Time, ttl time.Duration) []string {
+	st.mu.Lock()
+	defer st.mu.Unlock()
+	var gone []string
+	for id, s := range st.sessions {
+		if s.idleSince(now.Add(-ttl)) {
+			close(s.stop)
+			delete(st.sessions, id)
+			gone = append(gone, id)
+		}
+	}
+	return gone
+}
+
+// StartJanitor sweeps every interval until Close; onSweep sees the removed ids.
+func (st *Store) StartJanitor(ttl, interval time.Duration, onSweep func(ids []string)) {
+	st.mu.Lock()
+	if st.janitor != nil {
+		st.mu.Unlock()
+		return
+	}
+	st.janitor = make(chan struct{})
+	done := st.janitor
+	st.mu.Unlock()
+	go func() {
+		t := time.NewTicker(interval)
+		defer t.Stop()
+		for {
+			select {
+			case <-done:
+				return
+			case now := <-t.C:
+				if ids := st.Sweep(now, ttl); len(ids) > 0 && onSweep != nil {
+					onSweep(ids)
+				}
+			}
+		}
+	}()
+}
+
+// Close stops the janitor and every session clock.
 func (st *Store) Close() {
 	st.mu.Lock()
 	defer st.mu.Unlock()
+	if st.janitor != nil {
+		close(st.janitor)
+		st.janitor = nil
+	}
 	for id, s := range st.sessions {
 		close(s.stop)
 		delete(st.sessions, id)

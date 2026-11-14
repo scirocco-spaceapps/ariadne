@@ -1,0 +1,71 @@
+/* Console session controls and the Pair cuff dialog. */
+.session-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.session-controls button {
+  min-height: 36px;
+  padding: 4px 14px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.session-note {
+  font-size: 13px;
+  padding: 2px 8px;
+  border: 1px solid #b26a00;
+  border-radius: 4px;
+  color: #b26a00;
+}
+.session-error {
+  font-size: 13px;
+  color: #c62828;
+}
+
+.pair-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+}
+.pair-dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 20px 24px;
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+  text-align: center;
+}
+.pair-dialog h2 {
+  margin: 0;
+  font-size: 20px;
+}
+.pair-hint,
+.pair-note,
+.pair-warn {
+  margin: 0;
+  font-size: 14px;
+}
+.pair-warn {
+  color: #b26a00;
+}
+.pair-url {
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.pair-dialog button {
+  min-height: 40px;
+  padding: 4px 20px;
+  font-size: 15px;
+  cursor: pointer;
+}

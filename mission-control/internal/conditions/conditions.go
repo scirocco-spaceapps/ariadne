@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"sync"
 	"time"
@@ -25,7 +25,7 @@ const (
 
 	donkiSource    = "NASA DONKI WSA-ENLIL simulations (CCMC), CME arrivals forecast for Mars"
 	donkiSourceURL = "https://kauai.ccmc.gsfc.nasa.gov/DONKI/"
-	partnerMissing = "no partner-agency value yet (task M6)"
+	partnerMissing = "no partner-agency value: no openly accessible ESA or EMM dust value for Jezero was found (docs/DECISIONS.md, 2026-11-14)"
 )
 
 // Config locates the inputs.
@@ -87,7 +87,7 @@ func (s *Service) spaceWeather(ctx context.Context) (*contract.SpaceWeather, err
 	}
 	events, err := s.cfg.DONKI.MarsArrivals(ctx, now.Add(-Window), now)
 	if err != nil {
-		log.Printf("conditions: %v", err)
+		slog.Warn("DONKI fetch failed", "err", err)
 		s.lastErr = err
 		return s.cachedLocked()
 	}
