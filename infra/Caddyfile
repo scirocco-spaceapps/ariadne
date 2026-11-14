@@ -1,0 +1,26 @@
+# Hostnames and the web origin come from the environment (see .env.example).
+# On a laptop the *.localhost defaults get certificates from Caddy's local CA.
+
+{$API_HOST} {
+	encode gzip
+	reverse_proxy planner:8000
+}
+
+# reverse_proxy passes WebSocket upgrades through, so wss://{$MC_HOST}/ws works as is.
+{$MC_HOST} {
+	encode gzip
+	reverse_proxy mission-control:8080
+}
+
+{$ASSETS_HOST} {
+	root * /srv/assets
+	encode gzip
+	# Long enough to spare the hotspot, short enough that a re-published raster shows up within the hour.
+	header Cache-Control "public, max-age=3600"
+	header Access-Control-Allow-Origin "{$WEB_ORIGIN}"
+	header Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+	header Vary Origin
+	@preflight method OPTIONS
+	respond @preflight 204
+	file_server
+}
