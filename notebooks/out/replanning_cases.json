@@ -1,0 +1,568 @@
+{
+ "_comment": "Receding-horizon replanning cases (task MPC-1). SYNTHETIC triggers on the real route. For each case, decide(input, legs_min, params) (notebooks/replanning.py) must return `expected`: fields in matching.exact equal, times within matching.tolerance_min. MPC-2 tests read this file and notebooks/out/route.json, not the live planner. Definitions: deadline = budget - leak - reserve; margin = deadline - (t + D); reserve_left = reserve + margin. See docs/model.md, Replanning.",
+ "provenance": "Simulation",
+ "planner_commit": "156dd4bb43af1d64b1fd68ce3a4b7066890314ca",
+ "route_fetched_at": "2026-11-14T16:20:19Z",
+ "matching": {
+  "exact": [
+   "action",
+   "reason",
+   "kept",
+   "dropped",
+   "dwell_min"
+  ],
+  "tolerance_min": {
+   "margin_min": 0.5,
+   "reserve_left_min": 0.5,
+   "end_min": 0.5
+  }
+ },
+ "console": {
+  "provenance": "Simulation",
+  "note": "Console what-if controls; values are team choices, not measurements.",
+  "speed_factor": {
+   "default": 0.5,
+   "min": 0.3,
+   "max": 1.0,
+   "step": 0.1
+  },
+  "leak_min": {
+   "default": 120,
+   "min": 0,
+   "max": 180,
+   "step": 10
+  }
+ },
+ "stops": [
+  "mount-washburn",
+  "tuff-cliff",
+  "bright-angel",
+  "cheyava-falls",
+  "masonic-temple"
+ ],
+ "legs_min": {
+  "haven": {
+   "mount-washburn": 22.64,
+   "tuff-cliff": 26.15,
+   "bright-angel": 42.8,
+   "cheyava-falls": 43.77,
+   "masonic-temple": 47.23
+  },
+  "mount-washburn": {
+   "haven": 22.64,
+   "tuff-cliff": 4.81,
+   "bright-angel": 21.74,
+   "cheyava-falls": 21.8,
+   "masonic-temple": 28.48
+  },
+  "tuff-cliff": {
+   "haven": 26.15,
+   "bright-angel": 20.71,
+   "cheyava-falls": 20.29,
+   "masonic-temple": 29.12
+  },
+  "bright-angel": {
+   "haven": 42.8,
+   "cheyava-falls": 7.05,
+   "masonic-temple": 10.43
+  },
+  "cheyava-falls": {
+   "haven": 43.77,
+   "masonic-temple": 17.21
+  },
+  "masonic-temple": {
+   "haven": 47.23
+  }
+ },
+ "legs_m": {
+  "haven": {
+   "mount-washburn": 451.77,
+   "tuff-cliff": 549.38,
+   "bright-angel": 1034.94,
+   "cheyava-falls": 1012.34,
+   "masonic-temple": 1145.24
+  },
+  "mount-washburn": {
+   "haven": 451.77,
+   "tuff-cliff": 126.19,
+   "bright-angel": 607.54,
+   "cheyava-falls": 580.66,
+   "masonic-temple": 781.7
+  },
+  "tuff-cliff": {
+   "haven": 549.38,
+   "bright-angel": 581.12,
+   "cheyava-falls": 539.38,
+   "masonic-temple": 816.63
+  },
+  "bright-angel": {
+   "haven": 1034.94,
+   "cheyava-falls": 164.87,
+   "masonic-temple": 258.74
+  },
+  "cheyava-falls": {
+   "haven": 1012.34,
+   "masonic-temple": 422.92
+  },
+  "masonic-temple": {
+   "haven": 1145.24
+  }
+ },
+ "cases": [
+  {
+   "id": "nominal",
+   "what": "No trigger at Tuff Cliff: the plan fits.",
+   "provenance": "Simulation",
+   "planner_commit": "156dd4bb43af1d64b1fd68ce3a4b7066890314ca",
+   "params": {
+    "budget_min": 360,
+    "reserve_min": 60,
+    "dwell_min": 20,
+    "min_dwell_min": 10
+   },
+   "input": {
+    "t_min": 47.45,
+    "current_stop": "tuff-cliff",
+    "x_m": 2088.4,
+    "y_m": 1525.0,
+    "lead_min": 0.0,
+    "dwell_done_min": 0.0,
+    "remaining": [
+     "bright-angel",
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "home_now_min": 26.15
+   },
+   "expected": {
+    "action": "none",
+    "reason": "plan_fits",
+    "deadline_min": 300.0,
+    "kept": [
+     "bright-angel",
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "dropped": [],
+    "dwell_min": 20,
+    "end_min": 219.65,
+    "margin_min": 80.35,
+    "reserve_left_min": 140.35
+   }
+  },
+  {
+   "id": "dust-0.5-mount-washburn",
+   "what": "Dust: half walking speed from the Mount Washburn arrival on.",
+   "provenance": "Simulation",
+   "planner_commit": "156dd4bb43af1d64b1fd68ce3a4b7066890314ca",
+   "params": {
+    "budget_min": 360,
+    "reserve_min": 60,
+    "dwell_min": 20,
+    "min_dwell_min": 10
+   },
+   "input": {
+    "t_min": 22.64,
+    "current_stop": "mount-washburn",
+    "x_m": 2100.8,
+    "y_m": 1407.6,
+    "lead_min": 0.0,
+    "dwell_done_min": 0.0,
+    "remaining": [
+     "tuff-cliff",
+     "bright-angel",
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "home_now_min": 22.64,
+    "speed_factor": 0.5
+   },
+   "expected": {
+    "action": "shorten_dwells",
+    "reason": null,
+    "deadline_min": 300.0,
+    "kept": [
+     "tuff-cliff",
+     "bright-angel",
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "dropped": [],
+    "dwell_min": 16,
+    "end_min": 296.66,
+    "margin_min": 3.34,
+    "reserve_left_min": 63.34
+   }
+  },
+  {
+   "id": "dust-0.4-mount-washburn",
+   "what": "Heavier dust: 0.4 of the planned walking speed.",
+   "provenance": "Simulation",
+   "planner_commit": "156dd4bb43af1d64b1fd68ce3a4b7066890314ca",
+   "params": {
+    "budget_min": 360,
+    "reserve_min": 60,
+    "dwell_min": 20,
+    "min_dwell_min": 10
+   },
+   "input": {
+    "t_min": 22.64,
+    "current_stop": "mount-washburn",
+    "x_m": 2100.8,
+    "y_m": 1407.6,
+    "lead_min": 0.0,
+    "dwell_done_min": 0.0,
+    "remaining": [
+     "tuff-cliff",
+     "bright-angel",
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "home_now_min": 22.64,
+    "speed_factor": 0.4
+   },
+   "expected": {
+    "action": "drop_stops",
+    "reason": null,
+    "deadline_min": 300.0,
+    "kept": [
+     "tuff-cliff",
+     "bright-angel",
+     "cheyava-falls"
+    ],
+    "dropped": [
+     "masonic-temple"
+    ],
+    "dwell_min": 20,
+    "end_min": 293.49,
+    "margin_min": 6.51,
+    "reserve_left_min": 66.51
+   }
+  },
+  {
+   "id": "dust-0.5-mid-leg",
+   "what": "Dust starts halfway (by path length) from Tuff Cliff to Bright Angel.",
+   "provenance": "Simulation",
+   "planner_commit": "156dd4bb43af1d64b1fd68ce3a4b7066890314ca",
+   "params": {
+    "budget_min": 360,
+    "reserve_min": 60,
+    "dwell_min": 20,
+    "min_dwell_min": 10
+   },
+   "input": {
+    "t_min": 77.81,
+    "current_stop": "bright-angel",
+    "x_m": 1810.2,
+    "y_m": 1505.0,
+    "lead_min": 10.36,
+    "dwell_done_min": 0.0,
+    "remaining": [
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "home_now_min": 33.63,
+    "speed_factor": 0.5
+   },
+   "expected": {
+    "action": "shorten_dwells",
+    "reason": null,
+    "deadline_min": 300.0,
+    "kept": [
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "dropped": [],
+    "dwell_min": 19,
+    "end_min": 298.51,
+    "margin_min": 1.49,
+    "reserve_left_min": 61.49
+   }
+  },
+  {
+   "id": "leak-90-tuff-cliff",
+   "what": "Suit leak takes 90 min off the budget at Tuff Cliff.",
+   "provenance": "Simulation",
+   "planner_commit": "156dd4bb43af1d64b1fd68ce3a4b7066890314ca",
+   "params": {
+    "budget_min": 360,
+    "reserve_min": 60,
+    "dwell_min": 20,
+    "min_dwell_min": 10
+   },
+   "input": {
+    "t_min": 47.45,
+    "current_stop": "tuff-cliff",
+    "x_m": 2088.4,
+    "y_m": 1525.0,
+    "lead_min": 0.0,
+    "dwell_done_min": 0.0,
+    "remaining": [
+     "bright-angel",
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "home_now_min": 26.15,
+    "leak_min": 90
+   },
+   "expected": {
+    "action": "shorten_dwells",
+    "reason": null,
+    "deadline_min": 210,
+    "kept": [
+     "bright-angel",
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "dropped": [],
+    "dwell_min": 17,
+    "end_min": 207.65,
+    "margin_min": 2.35,
+    "reserve_left_min": 62.35
+   }
+  },
+  {
+   "id": "leak-120-bright-angel",
+   "what": "Suit leak takes 120 min off the budget at Bright Angel.",
+   "provenance": "Simulation",
+   "planner_commit": "156dd4bb43af1d64b1fd68ce3a4b7066890314ca",
+   "params": {
+    "budget_min": 360,
+    "reserve_min": 60,
+    "dwell_min": 20,
+    "min_dwell_min": 10
+   },
+   "input": {
+    "t_min": 88.16,
+    "current_stop": "bright-angel",
+    "x_m": 1531.9,
+    "y_m": 1474.0,
+    "lead_min": 0.0,
+    "dwell_done_min": 0.0,
+    "remaining": [
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "home_now_min": 42.8,
+    "leak_min": 120
+   },
+   "expected": {
+    "action": "drop_stops",
+    "reason": null,
+    "deadline_min": 180,
+    "kept": [
+     "cheyava-falls"
+    ],
+    "dropped": [
+     "masonic-temple"
+    ],
+    "dwell_min": 20,
+    "end_min": 178.98,
+    "margin_min": 1.02,
+    "reserve_left_min": 61.02
+   }
+  },
+  {
+   "id": "leak-120-during-dwell",
+   "what": "The same leak 10 min into the Bright Angel dwell.",
+   "provenance": "Simulation",
+   "planner_commit": "156dd4bb43af1d64b1fd68ce3a4b7066890314ca",
+   "params": {
+    "budget_min": 360,
+    "reserve_min": 60,
+    "dwell_min": 20,
+    "min_dwell_min": 10
+   },
+   "input": {
+    "t_min": 98.16,
+    "current_stop": "bright-angel",
+    "x_m": 1531.9,
+    "y_m": 1474.0,
+    "lead_min": 0.0,
+    "dwell_done_min": 10.0,
+    "remaining": [
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "home_now_min": 42.8,
+    "leak_min": 120
+   },
+   "expected": {
+    "action": "drop_stops",
+    "reason": null,
+    "deadline_min": 180,
+    "kept": [
+     "cheyava-falls"
+    ],
+    "dropped": [
+     "masonic-temple"
+    ],
+    "dwell_min": 20,
+    "end_min": 178.98,
+    "margin_min": 1.02,
+    "reserve_left_min": 61.02
+   }
+  },
+  {
+   "id": "leak-150-cheyava-falls",
+   "what": "Large leak at Cheyava Falls: nothing fits, go home now.",
+   "provenance": "Simulation",
+   "planner_commit": "156dd4bb43af1d64b1fd68ce3a4b7066890314ca",
+   "params": {
+    "budget_min": 360,
+    "reserve_min": 60,
+    "dwell_min": 20,
+    "min_dwell_min": 10
+   },
+   "input": {
+    "t_min": 115.21,
+    "current_stop": "cheyava-falls",
+    "x_m": 1603.8,
+    "y_m": 1608.5,
+    "lead_min": 0.0,
+    "dwell_done_min": 0.0,
+    "remaining": [
+     "masonic-temple"
+    ],
+    "home_now_min": 43.77,
+    "leak_min": 150
+   },
+   "expected": {
+    "action": "go_home_now",
+    "reason": null,
+    "deadline_min": 150,
+    "kept": [],
+    "dropped": [
+     "masonic-temple"
+    ],
+    "dwell_min": 0,
+    "end_min": 158.98,
+    "margin_min": -8.98,
+    "reserve_left_min": 51.02
+   }
+  },
+  {
+   "id": "leak-150-dust-0.5-cheyava-falls",
+   "what": "Large leak and dust: the walk home is slower too.",
+   "provenance": "Simulation",
+   "planner_commit": "156dd4bb43af1d64b1fd68ce3a4b7066890314ca",
+   "params": {
+    "budget_min": 360,
+    "reserve_min": 60,
+    "dwell_min": 20,
+    "min_dwell_min": 10
+   },
+   "input": {
+    "t_min": 115.21,
+    "current_stop": "cheyava-falls",
+    "x_m": 1603.8,
+    "y_m": 1608.5,
+    "lead_min": 0.0,
+    "dwell_done_min": 0.0,
+    "remaining": [
+     "masonic-temple"
+    ],
+    "home_now_min": 43.77,
+    "leak_min": 150,
+    "speed_factor": 0.5
+   },
+   "expected": {
+    "action": "go_home_now",
+    "reason": null,
+    "deadline_min": 150,
+    "kept": [],
+    "dropped": [
+     "masonic-temple"
+    ],
+    "dwell_min": 0,
+    "end_min": 202.75,
+    "margin_min": -52.75,
+    "reserve_left_min": 7.25
+   }
+  },
+  {
+   "id": "dust-0.6-leak-60-mount-washburn",
+   "what": "Both triggers, mild: speed 0.6 and a 60 min leak.",
+   "provenance": "Simulation",
+   "planner_commit": "156dd4bb43af1d64b1fd68ce3a4b7066890314ca",
+   "params": {
+    "budget_min": 360,
+    "reserve_min": 60,
+    "dwell_min": 20,
+    "min_dwell_min": 10
+   },
+   "input": {
+    "t_min": 22.64,
+    "current_stop": "mount-washburn",
+    "x_m": 2100.8,
+    "y_m": 1407.6,
+    "lead_min": 0.0,
+    "dwell_done_min": 0.0,
+    "remaining": [
+     "tuff-cliff",
+     "bright-angel",
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "home_now_min": 22.64,
+    "speed_factor": 0.6,
+    "leak_min": 60
+   },
+   "expected": {
+    "action": "shorten_dwells",
+    "reason": null,
+    "deadline_min": 240,
+    "kept": [
+     "tuff-cliff",
+     "bright-angel",
+     "cheyava-falls",
+     "masonic-temple"
+    ],
+    "dropped": [],
+    "dwell_min": 11,
+    "end_min": 239.32,
+    "margin_min": 0.68,
+    "reserve_left_min": 60.68
+   }
+  },
+  {
+   "id": "storm-alert",
+   "what": "Storm alert active (mission-control abort): no suggestion, even with a leak.",
+   "provenance": "Simulation",
+   "planner_commit": "156dd4bb43af1d64b1fd68ce3a4b7066890314ca",
+   "params": {
+    "budget_min": 360,
+    "reserve_min": 60,
+    "dwell_min": 20,
+    "min_dwell_min": 10
+   },
+   "input": {
+    "t_min": 115.21,
+    "current_stop": "cheyava-falls",
+    "x_m": 1603.8,
+    "y_m": 1608.5,
+    "lead_min": 0.0,
+    "dwell_done_min": 0.0,
+    "remaining": [
+     "masonic-temple"
+    ],
+    "home_now_min": 43.77,
+    "leak_min": 150,
+    "storm_alert": true
+   },
+   "expected": {
+    "action": "none",
+    "reason": "storm_alert",
+    "deadline_min": 150,
+    "kept": [
+     "masonic-temple"
+    ],
+    "dropped": [],
+    "dwell_min": 20,
+    "end_min": 219.65,
+    "margin_min": -69.65,
+    "reserve_left_min": -9.65
+   }
+  }
+ ]
+}
