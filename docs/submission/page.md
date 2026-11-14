@@ -112,14 +112,35 @@ On the real data (Modeled unless noted):
   is not a human, so this is a sanity check, not proof of safety.
 - Between Tuff Cliff and Bright Angel our planned leg is 581 m; the rover drove 582 m.
 
-The demo video uses the app's **DEMO replay**. That is **SYNTHETIC** data, marked "DEMO DATA" on
-screen. Its storm alert is **simulated**. DONKI forecasts appear in the conditions panel in live
-mode only; they never raise the alert.
+The demo video is recorded on the live site. The map, the stops and the photos are real NASA data;
+the astronaut's walk is a **simulation** and the storm alert is **simulated**, raised by the operator.
+The app's **DEMO replay** (`?demo=1`) is **SYNTHETIC** data, marked "DEMO DATA" on screen, and is
+used only by the automated test. DONKI forecasts appear in the conditions panel in live mode only;
+they never raise the alert.
 
-<!-- SCIENCE PLACEHOLDER — docs/submission/science.md (Bunyamin, task B5, Sunday ~09:30).
-Not written yet. Do not fill this from other docs. Paste Bunyamin's text here when it lands. -->
+**Science.** Bright Angel, on the northern edge of Neretva Vallis in Jezero crater, is where
+Perseverance found Cheyava Falls. This reddish mudstone has millimetre-size "leopard spots", and
+the rover took its Sapphire Canyon core from it on about sol 1215 (NASA, July 2024; Hurowitz et
+al. 2025, Nature). Did these spots form through chemistry that microbes could have used for
+energy, or without life? A rover found the clue. A geologist on foot could go back to test it.
 
-**Science:** _placeholder, to come from `docs/submission/science.md` (B5)._
+Our walk follows Perseverance's own stops, in the rover's order: Mount Washburn, Tuff Cliff, Bright
+Angel, Cheyava Falls and Masonic Temple. Each stop card asks one science question from the NASA
+pages and papers, and lists the tasks a human would do there: the contact between two rock units,
+layer thicknesses with a scale bar, close-ups of the spots and veins. We also mapped ground that the
+rover's cameras saw but the rover never drove to. Four targets there are 22–46 min from the safe
+haven.
+
+The walk model answers a planner's first question: does the walk fit, and how much is left over?
+The walk is 2.89 km: 119.7 min of walking plus 100 min at the stops, which leaves 80.3 min before
+the 60 min reserve (Modeled). It cannot say how a suited astronaut walks on Mars. No one has done
+it yet, so the speed, the slope limit and the EVA length come from lunar requirements and a Mars
+suit design study (Assumed). If a what-if suit leak or a dust storm cuts the time, the console
+suggests the smallest change that still gets the astronaut home with the reserve intact: shorter
+stops first, then skipping a stop. The crew decides.
+
+The full science write-up (stops, targets, data products, model, replanning, limitations) is in
+`docs/submission/science.md`.
 
 ### Benefits
 
@@ -219,7 +240,7 @@ for us and for Project Details. -->
 | Mars 2020, raw image API (camera model, rover attitude) | https://mars.nasa.gov/rss/api/?feed=raw_images&category=mars2020&feedtype=json | Checking that each target photo points at its target |
 | Mars 2020, MEDA calibrated air temperature and derived pressure (NASA PDS Atmospheres Node) | https://doi.org/10.17189/1522849 | Weather in the conditions panel: sol 1215, archive, Derived |
 | MSL, RAD surface dose rate at Gale crater (Hassler et al. 2014) | https://doi.org/10.1126/science.1244797 | Radiation value in the conditions panel (Modeled for Jezero) |
-| NASA DONKI, WSA-ENLIL CME arrival forecasts for Mars (CCMC) | TBD (open question; the app links https://kauai.ccmc.gsfc.nasa.gov/DONKI/) | Space-weather list in the conditions panel, live mode only; it does not raise the demo alert |
+| NASA DONKI, WSA-ENLIL CME arrival forecasts for Mars (CCMC) | https://kauai.ccmc.gsfc.nasa.gov/DONKI/ | Space-weather list in the conditions panel, live mode only; it does not raise the demo alert |
 | NASA NTRS 20210026296, Artemis III EVA mission capability (Scoville), quoting the xEVA requirements | https://ntrs.nasa.gov/citations/20210026296 | 20° slope limit, 2 km/h walking speed, 1 h contingency |
 | NASA NTRS 20260005204, Mars PLSS design study (Oliver et al., ICES 2026) | https://ntrs.nasa.gov/citations/20260005204 | 360 min EVA budget, 60 min reserve |
 | Apollo 15 Activities Timeline (Lunar Orbital Data Explorer, WUSTL) | https://an.rsl.wustl.edu/apollo/data/A15/pages/time/time.html | 20 min at each stop (median of nine Apollo 15 geology stations) |
@@ -277,18 +298,11 @@ Everything I was unsure about while writing this page (F6, 2026-11-14):
 
 1. **Repo is private.** The Project link works only after Yusuf makes the repo public (Y8). It has
    no licence file yet either. The REFERENCES.md link in the table above also needs the public repo.
-2. **Science section is a placeholder.** `science.md` is empty (Bunyamin, B5, Sunday ~09:30).
-3. **DONKI has no row in `DATA_SOURCES.md`.** The app links https://kauai.ccmc.gsfc.nasa.gov/DONKI/
-   (mission-control). Note left for Yusuf, who took over Mazlum's card.
-4. **Tobler 1993 has no URL.** `docs/model.md` says the citation was written from memory.
-5. **NTRS and Apollo rows under NASA Data.** They are NASA documents and Apollo data, not Mars
+2. **Tobler 1993 has no URL.** `docs/model.md` says the citation was written from memory.
+3. **NTRS and Apollo rows under NASA Data.** They are NASA documents and Apollo data, not Mars
    datasets. If the judges expect datasets only, move them to the other list.
-6. **Stop science text.** The stop cards cite NASA news pages and papers, and Bunyamin reviewed
-   them (F3), but the science write-up itself is not done (see 2).
-7. **Summary numbers.** The Summary has no numbers on purpose; if you want one, the 2.89 km /
+4. **Summary numbers.** The Summary has no numbers on purpose; if you want one, the 2.89 km /
    80.3 min margin is the safest (Modeled, `DATA_SOURCES.md` row of the planned walk).
-8. **MPC replanning.** Not described here: it is not merged yet (TASKS.md, MPC-2). Add one line
-   only if it lands before Sunday 09:30 and shows in the demo.
 
 Closed after review (2026-11-14): the HiRISE credit is "Image: NASA/JPL/University of Arizona"
 (HiRISE image-use policy, Ali Koray); the 5-author USGS data-release citation is the right one
@@ -299,3 +313,7 @@ Details against the sources.
 Closed (2026-11-14, live site): planner, mission control and the assets now run on a Hetzner Cloud
 server that stays up through judging; Nuri's laptop with Tailscale Funnel is only the fallback. The
 production site loads its assets from that server, and the HiRISE layer renders in the browser.
+
+Closed (2026-11-14, science): the Science section is Bunyamin's text from `science.md` section 1
+(B5, #79), which also covers the stop questions and the replanning panel (MPC-2/MPC-3, live check
+#76). DONKI now has a `DATA_SOURCES.md` row, so its link is filled in under NASA Data.
