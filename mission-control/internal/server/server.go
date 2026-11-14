@@ -3,8 +3,10 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/gofiber/contrib/websocket"
@@ -12,6 +14,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 
 	"github.com/ozyusuf/ariadne/mission-control/internal/contract"
+	"github.com/ozyusuf/ariadne/mission-control/internal/planner"
 	"github.com/ozyusuf/ariadne/mission-control/internal/session"
 	"github.com/ozyusuf/ariadne/mission-control/internal/sim"
 )
@@ -26,6 +29,8 @@ type Health struct {
 type Config struct {
 	// WebOrigins is the CORS allow list, comma-separated (WEB_ORIGIN).
 	WebOrigins string
+	// PlannerURL is the planner base URL for POST /abort (PLANNER_URL); empty skips the call.
+	PlannerURL string
 }
 
 // DefaultConfig works from the mission-control folder of a repo checkout.
@@ -46,7 +51,10 @@ const (
 type Server struct {
 	App      *fiber.App
 	Sessions *session.Store
-	cfg      Config
+	Planner  interface {
+		Abort(ctx context.Context, from contract.XY) ([]contract.XY, float64, error)
+	}
+	cfg Config
 }
 
 // New returns the server with all routes registered.
@@ -54,6 +62,7 @@ func New(cfg Config) *Server {
 	s := &Server{
 		App:      fiber.New(fiber.Config{AppName: "ariadne-mission-control"}),
 		Sessions: session.NewStore(),
+		Planner:  planner.New(cfg.PlannerURL),
 		cfg:      cfg,
 	}
 	s.App.Use(cors.New(cors.Config{AllowOrigins: cfg.WebOrigins}))
@@ -62,6 +71,7 @@ func New(cfg Config) *Server {
 	})
 	s.App.Post("/sessions", s.createSession)
 	s.App.Post("/sessions/:id/control", s.controlSession)
+	s.App.Post("/sessions/:id/events", s.sessionEvent)
 	s.App.Use("/ws", func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
 			return c.Next()
@@ -194,6 +204,72 @@ func (s *Server) controlSession(c *fiber.Ctx) error {
 		}
 		return nil
 	})
+	return c.JSON(contract.Ack{OK: true})
+}
+
+// sessionEvent is the POST /sessions/{id}/events body (schema SessionEvent).
+type sessionEvent struct {
+	Type      string        `json:"type"`
+	LeadMin   *float64      `json:"lead_min"`
+	AbortPath []contract.XY `json:"abort_path"`
+}
+
+// alertable is what /events needs from an engine beyond session.Engine.
+type alertable interface {
+	StartAlert(leadMin float64, path []contract.XY, timeMin float64) error
+	Clear() error
+}
+
+func (s *Server) sessionEvent(c *fiber.Ctx) error {
+	sess := s.Sessions.Get(c.Params("id"))
+	if sess == nil {
+		return c.Status(fiber.StatusNotFound).JSON(contract.Error{Detail: "unknown session"})
+	}
+	var body sessionEvent
+	dec := json.NewDecoder(bytes.NewReader(c.Body()))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&body); err != nil {
+		return badRequest(c, "invalid body: "+err.Error())
+	}
+
+	var apply func(eng alertable) error
+	switch body.Type {
+	case contract.EventStormAlert:
+		if body.LeadMin == nil || *body.LeadMin < 0 {
+			return badRequest(c, "storm_alert needs lead_min >= 0")
+		}
+		if st := sess.State(); st.Alert != nil {
+			return badRequest(c, "an alert is already active")
+		}
+		// The planner call happens outside the session lock; the engine prepends the position
+		// reached meanwhile, so the path still starts at the astronaut.
+		path, timeMin, err := s.Planner.Abort(c.Context(), sess.State().Pos)
+		if err != nil {
+			log.Printf("session %s: planner /abort failed, using fallback path: %v", sess.ID, err)
+			path, timeMin = body.AbortPath, 0
+		}
+		apply = func(eng alertable) error { return eng.StartAlert(*body.LeadMin, path, timeMin) }
+	case contract.EventClear:
+		apply = func(eng alertable) error { return eng.Clear() }
+	default:
+		return badRequest(c, "type must be storm_alert or clear")
+	}
+
+	var applyErr error
+	sess.Update(func(ctl *session.Control) []contract.Event {
+		eng, ok := ctl.Engine().(alertable)
+		if !ok {
+			applyErr = fmt.Errorf("session does not support events")
+			return nil
+		}
+		if applyErr = apply(eng); applyErr != nil {
+			return nil
+		}
+		return []contract.Event{{Name: body.Type, TMin: ctl.Engine().Snapshot().TMin}}
+	})
+	if applyErr != nil {
+		return badRequest(c, applyErr.Error())
+	}
 	return c.JSON(contract.Ack{OK: true})
 }
 

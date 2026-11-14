@@ -14,6 +14,7 @@ func main() {
 	if v := os.Getenv("WEB_ORIGIN"); v != "" {
 		cfg.WebOrigins = v
 	}
+	cfg.PlannerURL = os.Getenv("PLANNER_URL")
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
