@@ -2,34 +2,3 @@
 
 Owner of this file: Bunyamin (`model/`, `notebooks/`, `docs/model.md`, `docs/validation.md`).
 Delete each note in the PR that handles it.
-
-## 2026-11-14 — from Ali Koray (A3/A4 re-run with B1): 3.1 % of the rover track is no-go
-
-- **What:** with `max_slope_deg` = 20, 3.1 % of Perseverance's actual track inside the AOI falls in our
-  no-go class (26.3 % is caution, ≥ 15°). Those track cells are therefore unreachable in `cost_to_home`.
-- **Why it matters (B4):** part of this comes from the 2 m aggregation, which takes the maximum of four
-  1 m Horn slopes. Taking the mean instead lowers track slopes by about 1° (median 11.5° → 10.7°,
-  p95 19.2° → 18.2°). Part may be DTM noise; the western AOI also has striping (see `docs/DATA_SOURCES.md`).
-  The rover is not a human, but a route the rover drove being "no-go" is worth one sentence in
-  validation, or a threshold or aggregation decision.
-- **Your call:** keep 20° and max (conservative), or change either. Tell me and I re-run `04_cost.py` →
-  `05_cost_to_home.py` (2 minutes).
-
-## 2026-11-14 — from Ali Koray (task A4): B2 sites checked, all fine
-
-- **Haven:** DEM slope 4.9° at the haven (rover tilt 4.5°); the steepest cell within 10 m is 7.8°, below
-  the 15° caution slope. Passable.
-- **Stops:** all five sit on passable cells; all 25 cells within 10 m are passable. Cheyava Falls is 16.5°
-  (caution class, not no-go).
-- **Route** haven → five stops in your order → haven with B1 params: 2.9 km, 124 min walking +
-  100 min dwell = 224 min, 76 min margin inside 300 min (budget minus reserve). Steepest leg max 19.9°.
-- The aoi.json change is PR #32 for Yusuf. Nothing for you to move.
-
-## 2026-11-14 — from Ali Koray: re-run with the mean (your PR #35), numbers for B4
-
-- `04_cost.py` now aggregates the 2 m slope as the mean of the four 1 m Horn slopes; re-ran
-  `04_cost.py` → `05_cost_to_home.py` → `06_variants.py` (PR `pipeline/slope-mean`).
-- **Rover track no-go share (≥ 20°): 1.8 %** (was 3.1 % with the maximum). Track: median 10.7°,
-  p95 18.2°, 20.6 % ≥ 15° (caution).
-- AOI: go 58.8 %, caution 20.5 %, no-go 20.7 %; 75.4 % reachable from the haven.
-- Planned walk: 219.7 min with 80.3 min margin (was 224.0 / 76.0).
