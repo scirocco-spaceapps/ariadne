@@ -1,0 +1,11 @@
+{
+  "name": "Ariadne cuff",
+  "short_name": "Ariadne",
+  "description": "Wrist display for the Ariadne Mars EVA demo: margin to home, next stop, storm alerts.",
+  "start_url": "/cuff",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000"
+}

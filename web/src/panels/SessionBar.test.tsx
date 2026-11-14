@@ -83,9 +83,11 @@ describe('session helpers', () => {
   })
 
   it('points the phone at the session or at the DEMO replay', () => {
-    expect(cuffUrl('http://192.168.1.5:5173', 'a b', false)).toBe('http://192.168.1.5:5173/cuff?s=a%20b')
+    expect(cuffUrl('http://192.168.1.5:5173', 'a b', false)).toBe('http://192.168.1.5:5173/cuff?s=a+b')
     expect(cuffUrl('https://ariadne.example/', null, true)).toBe('https://ariadne.example/cuff?demo=1')
     expect(cuffUrl('https://ariadne.example', null, false)).toBeNull()
+    // With a route, the stop order travels with the link so the phone plans the same route.
+    expect(cuffUrl('https://a.example', 'x', false, fixtures.route)).toBe('https://a.example/cuff?s=x&stops=s1,s2&home=0')
     expect(isLocalHost('localhost')).toBe(true)
     expect(isLocalHost('192.168.1.5')).toBe(false)
   })
