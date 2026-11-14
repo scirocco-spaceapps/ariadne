@@ -34,6 +34,8 @@ import {
 } from './route'
 import { fitZoom, metresPerPixel } from './scale'
 import { TimeBar } from './TimeBar'
+import { ReplanPanel } from './ReplanPanel'
+import { useReplan } from './useReplan'
 import { useSiteData } from './useSiteData'
 import './map.css'
 
@@ -147,6 +149,10 @@ export function MapView({ source, className }: Props) {
     [alerted, abortPath, pulse],
   )
 
+  // MPC-2: replanning suggestion (live session only; hidden in DEMO).
+  const replan = useReplan(source)
+  const hasSuggestion = replan.path !== null
+
   const registered = useLayerRegistry((s) => s.layers)
   const register = useLayerRegistry((s) => s.register)
   const unregister = useLayerRegistry((s) => s.unregister)
@@ -162,12 +168,13 @@ export function MapView({ source, className }: Props) {
       envelope: cost !== null,
       alert: alerted,
       flat: flatOn,
+      suggestion: hasSuggestion,
     })
     const ids = entries.map((e) => e.id)
     ownIds.current.filter((id) => !ids.includes(id)).forEach(unregister)
     entries.forEach(register)
     ownIds.current = ids
-  }, [source, data, register, unregister, route, hasMarker, routeProvenance, cost, alerted, flatOn])
+  }, [source, data, register, unregister, route, hasMarker, routeProvenance, cost, alerted, flatOn, hasSuggestion])
   useEffect(() => () => ownIds.current.forEach(unregister), [unregister])
 
   // Keep the AOI fitted to the container until the user pans or zooms
@@ -208,9 +215,19 @@ export function MapView({ source, className }: Props) {
   const layers = useMemo(() => {
     if (narrow === null) return []
     const visible = new Set(registered.filter((l) => l.visible).map((l) => l.id))
-    const mission: MissionLayers = { geom, progress_m, marker, numbers, selectedStop, dash_m, alert: alertLayers, selectedTarget }
+    const mission: MissionLayers = {
+      geom,
+      progress_m,
+      marker,
+      numbers,
+      selectedStop,
+      dash_m,
+      alert: alertLayers,
+      selectedTarget,
+      suggestion: replan.path,
+    }
     return buildLayers({ source, data, narrow, mission, envelope, ppm, isVisible: (id: LayerId) => visible.has(id) })
-  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers, selectedTarget, ppm])
+  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers, selectedTarget, ppm, replan.path])
 
   // The stop card shows a selected target before a selected stop, so picking a stop clears the target.
   const onClick = useCallback(
@@ -237,6 +254,7 @@ export function MapView({ source, className }: Props) {
         onResize={onResize}
         getCursor={({ isDragging, isHovering }) => (isDragging ? 'grabbing' : isHovering ? 'pointer' : 'crosshair')}
       />
+      <ReplanPanel replan={replan} aoi={aoi} />
       <div className="am-overlay am-top-left">
         <span className="am-title">{aoi.name}</span>
         {source.synthetic && <span className="am-badge">SYNTHETIC fixture data</span>}

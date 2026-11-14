@@ -24,18 +24,3 @@ Delete each note in the PR that handles it.
   value shown to a user needs a DATA_SOURCES row. You took over Mazlum's card, so this is yours (or
   Bunyamin's for the RAD URL).
 - **Also:** the Project link on the form is the repo, so it must be public before submission (Y8).
-
-## 2026-11-14 — from Bunyamin (MPC-1): the replanning rule is ready for MPC-2
-
-- **What:** the rule is `decide()` in `notebooks/replanning.py` (plain Python, port it line by line)
-  and in words in `docs/model.md`, "Replanning" (definitions of `D`, `margin`, `reserve_left`, the
-  9 rule lines with reasons).
-- **Test source:** MPC-2 tests run against `notebooks/out/route.json` (leg table `legs_min`, planner
-  commit) and `notebooks/out/replanning_cases.json` (11 cases, each with its own params, input
-  including x/y in metres, and expected decision), **not the live planner**. Matching rule in the
-  file: `action`, `reason`, `kept`, `dropped`, `dwell_min` exact; `margin_min`, `reserve_left_min`,
-  `end_min` within 0.5 min.
-- **Console controls:** defaults and ranges are in the cases file under `console` (Simulation):
-  `speed_factor` default 0.5, 0.3–1.0, step 0.1; `leak_min` default 120, 0–180, step 10.
-- **On the console:** `home_now_min` is `cost_to_home` at the astronaut's (x, y); `lead_min` = leg
-  time × remaining path length / leg path length; while a storm alert is active, show no suggestion.
