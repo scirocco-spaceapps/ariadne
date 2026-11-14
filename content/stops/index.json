@@ -1,10 +1,7 @@
-{
-  "_comment": "Task B2 (Bunyamin). Safe haven and science stops for the Bright Angel EVA. Positions are Perseverance end-of-drive localizations from M20_waypoints.json (Mars 2000 sphere, lon east-positive); pipeline A4 converts them to AOI metres. Each position is the rover's location on arrival, within a few tens of metres of the outcrop, not the outcrop itself. Stop order is the rover's visiting order.",
-  "provenance": "Observed",
-  "source": "NASA/JPL-Caltech Mars 2020 MMGIS layer M20_waypoints.json; sols matched to targets from the NASA pages in each source_url",
-  "source_url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
-  "safe_haven": {
+[
+  {
     "id": "haven",
+    "kind": "safe_haven",
     "name": "Safe haven (pressurized rover)",
     "lon": 77.3197,
     "lat": 18.48985,
@@ -13,59 +10,74 @@
     "rover_tilt_deg": 4.5,
     "source_url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
     "why": "A spot where Perseverance itself parked on the Margin unit before entering Neretva Vallis. The rover measured 4.5° tilt here, below the 15° caution slope. All five stops are 0.4-1.1 km away, so the planned walk fits the 360 min budget with the 60 min reserve intact (rough estimate). Slope from the DEM is still to be checked when A3 publishes slope_2m.",
-    "flag": "Position chosen by us (Assumed as a parking site); flatness from rover tilt only, not yet from the 2 m slope raster."
+    "flag": "Position chosen by us (Assumed as a parking site); flatness from rover tilt only, not yet from the 2 m slope raster.",
+    "provenance": "Observed",
+    "source": "NASA/JPL-Caltech Mars 2020 MMGIS layer M20_waypoints.json; sols matched to targets from the NASA pages in each source_url"
   },
-  "stops": [
-    {
-      "id": "mount-washburn",
-      "name": "Mount Washburn",
-      "lon": 77.31403,
-      "lat": 18.49409,
-      "sol": 1162,
-      "rmc": "52_4312",
-      "source_url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/",
-      "why": "A hill of boulders with textures and compositions never seen before on Mars; the first science stop inside Neretva Vallis, reached after a 200 m drive in one sol."
-    },
-    {
-      "id": "tuff-cliff",
-      "name": "Tuff Cliff",
-      "lon": 77.31381,
-      "lat": 18.49607,
-      "sol": 1168,
-      "rmc": "52_5032",
-      "source_url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/",
-      "why": "Outcrop 132 m north of Mount Washburn; the lowest member of the lake-deposited Tuff Cliff to Walhalla Glades succession of the Bright Angel formation."
-    },
-    {
-      "id": "bright-angel",
-      "name": "Bright Angel",
-      "lon": 77.30391,
-      "lat": 18.49521,
-      "sol": 1175,
-      "rmc": "53_0",
-      "source_url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/",
-      "why": "Light-toned outcrops at the northern edge of the channel, reached on June 9, 2024 after a four-sol, 605 m drive; the type area of the Bright Angel formation."
-    },
-    {
-      "id": "cheyava-falls",
-      "name": "Cheyava Falls",
-      "lon": 77.30519,
-      "lat": 18.49748,
-      "sol": 1210,
-      "rmc": "56_0",
-      "source_url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-rover-scientists-find-intriguing-mars-rock/",
-      "why": "The rock with the 'leopard spots' and the Sapphire Canyon core (collected July 21, 2024, about sol 1215): the potential biosignature a human geologist would come to check. Rover arrived at this workspace on sol 1210."
-    },
-    {
-      "id": "masonic-temple",
-      "name": "Masonic Temple",
-      "lon": 77.30109,
-      "lat": 18.49195,
-      "sol": 1231,
-      "rmc": "56_3438",
-      "source_url": "https://doi.org/10.1038/s41586-025-09413-0",
-      "why": "Strata on the southern margin of Neretva Vallis with rocks like Bright Angel's (Hurowitz et al. 2025, Nature); a comparison site, abrasion target Malgosa Crest on sol 1242. Rover position from sol 1231 to 1244.",
-      "flag": "Position inferred: no NASA news page names the sol; matched from the Malgosa Crest abrasion sol (1242) in Hurowitz et al. 2025 to the rover's parking spot over sols 1231-1244."
-    }
-  ]
-}
+  {
+    "id": "mount-washburn",
+    "kind": "stop",
+    "name": "Mount Washburn",
+    "lon": 77.31403,
+    "lat": 18.49409,
+    "sol": 1162,
+    "rmc": "52_4312",
+    "source_url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/",
+    "why": "A hill of boulders with textures and compositions never seen before on Mars; the first science stop inside Neretva Vallis, reached after a 200 m drive in one sol.",
+    "provenance": "Observed",
+    "source": "NASA/JPL-Caltech Mars 2020 MMGIS layer M20_waypoints.json; sols matched to targets from the NASA pages in each source_url"
+  },
+  {
+    "id": "tuff-cliff",
+    "kind": "stop",
+    "name": "Tuff Cliff",
+    "lon": 77.31381,
+    "lat": 18.49607,
+    "sol": 1168,
+    "rmc": "52_5032",
+    "source_url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/",
+    "why": "Outcrop 132 m north of Mount Washburn; the lowest member of the lake-deposited Tuff Cliff to Walhalla Glades succession of the Bright Angel formation.",
+    "provenance": "Observed",
+    "source": "NASA/JPL-Caltech Mars 2020 MMGIS layer M20_waypoints.json; sols matched to targets from the NASA pages in each source_url"
+  },
+  {
+    "id": "bright-angel",
+    "kind": "stop",
+    "name": "Bright Angel",
+    "lon": 77.30391,
+    "lat": 18.49521,
+    "sol": 1175,
+    "rmc": "53_0",
+    "source_url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/",
+    "why": "Light-toned outcrops at the northern edge of the channel, reached on June 9, 2024 after a four-sol, 605 m drive; the type area of the Bright Angel formation.",
+    "provenance": "Observed",
+    "source": "NASA/JPL-Caltech Mars 2020 MMGIS layer M20_waypoints.json; sols matched to targets from the NASA pages in each source_url"
+  },
+  {
+    "id": "cheyava-falls",
+    "kind": "stop",
+    "name": "Cheyava Falls",
+    "lon": 77.30519,
+    "lat": 18.49748,
+    "sol": 1210,
+    "rmc": "56_0",
+    "source_url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-rover-scientists-find-intriguing-mars-rock/",
+    "why": "The rock with the 'leopard spots' and the Sapphire Canyon core (collected July 21, 2024, about sol 1215): the potential biosignature a human geologist would come to check. Rover arrived at this workspace on sol 1210.",
+    "provenance": "Observed",
+    "source": "NASA/JPL-Caltech Mars 2020 MMGIS layer M20_waypoints.json; sols matched to targets from the NASA pages in each source_url"
+  },
+  {
+    "id": "masonic-temple",
+    "kind": "stop",
+    "name": "Masonic Temple",
+    "lon": 77.30109,
+    "lat": 18.49195,
+    "sol": 1231,
+    "rmc": "56_3438",
+    "source_url": "https://doi.org/10.1038/s41586-025-09413-0",
+    "why": "Strata on the southern margin of Neretva Vallis with rocks like Bright Angel's (Hurowitz et al. 2025, Nature); a comparison site, abrasion target Malgosa Crest on sol 1242. Rover position from sol 1231 to 1244.",
+    "flag": "Position inferred: no NASA news page names the sol; matched from the Malgosa Crest abrasion sol (1242) in Hurowitz et al. 2025 to the rover's parking spot over sols 1231-1244.",
+    "provenance": "Observed",
+    "source": "NASA/JPL-Caltech Mars 2020 MMGIS layer M20_waypoints.json; sols matched to targets from the NASA pages in each source_url"
+  }
+]
