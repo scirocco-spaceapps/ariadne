@@ -128,3 +128,40 @@ map overlay for N6, say so in `docs/notes/yusuf.md`.
   "Deploy to production" step: `rm -rf ../.git` (the job runs in `web/`). Without `.git` the CLI
   sends no commit author and the deploy counts as the token owner's. Then Actions → web-deploy →
   Run workflow. If that still fails, keep deploying by hand (`vercel --prod`) until after judging.
+
+## 2026-11-15 — from Yusuf: N7 merged (#80) and checked on the live server
+
+Merged after a local re-check on top of the latest main (lint, 297 tests, build, e2e demo90 all
+green). Then on the live site (Vercel + Hetzner), console at 1920 x 1080 and cuff in iPhone 13
+emulation, Playwright recording both, session running at 1 min/s:
+
+- `docker compose stop mission-control` at 00:08:58: both screens showed "Lost mission-control ·
+  DEMO DATA in 10 s" within about 2 s and switched to DEMO DATA at 00:09:10.
+- `docker compose start mission-control` at 00:09:12: the console recreated the session at
+  T+0:06 (new id) within 3 s, said "pair the cuff again" and kept running; the cuff said
+  "Session ended on mission-control · scan the new QR on the console", as designed.
+- Recordings and stills (outside the repo, on Yusuf's PC): `Desktop\NASA\yedek-kayit-2026-11-15\`
+  (backup run of the whole scenario with the alert mid-walk, and `kopma-testi\` for this test).
+
+Still yours: a real phone over mobile data (wake lock, QR scan with the camera).
+
+### Real phone test (Yusuf, 00:14–00:19, Android Chrome on mobile data, screen recording)
+
+- **Passed:** QR pairing with the phone camera; layout at phone width with no horizontal scroll;
+  live clock, margin, consumables and next stop updating; the stop card at Tuff Cliff; the
+  full-screen storm alert; airplane mode for about 20 s → "Lost mission-control · DEMO DATA in
+  10 s" → DEMO replay → "Connected" again when airplane mode went off.
+- **Not tested:** wake lock. "Keep screen on" was never tapped (the label stayed "Keep screen on";
+  it would say "Screen stays on") and the screen dimmed after about a minute. Retest: tap the
+  button, wait longer than the phone's screen timeout.
+- **To fix (your call):**
+  1. **Fake storm alert in the fallback.** The DEMO fallback replays `ws-state.jsonl`, which has
+     a storm alert at t = 30. On the phone the replay ran from T+0:07 to T+0:29 and the alert
+     flashed on screen while the live link came back. In a talk, an outage longer than about
+     30 s would put a full-screen STORM ALERT on both screens that nobody triggered. Suggestion:
+     the fallback replays only the calm part (t < 30) in a loop, or drops alert frames.
+  2. **"This app cannot be installed"** in Chrome: `src/cuff/manifest.webmanifest` has no icons
+     (Chrome needs 192 and 512 px). The shortcut also opens `/cuff` without `?s=`, which shows
+     "No session". Not needed for the demo.
+- **For the demo script:** at 3 min/s a 30 min lead lasts 10 s, so the cuff showed "Time to
+  storm 0:00" with "Walk home 13 min". Give the alert at 1 min/s, or set Lead to 60 min.
