@@ -7,7 +7,9 @@ plans a science walk, and shows at every moment whether the astronaut can still 
 safe haven. A mission console and a phone worn as a wrist cuff share one clock, so both see the
 same margin to home. Built for NASA Space Apps 2026 by team Scirocco.
 
-<!-- TODO (Y8): one screenshot of the console from the e2e artifacts goes here. -->
+![The mission console on the live site: HiRISE orthoimage, the planned route through five stops, the return envelope, the seen-not-touched layer and the replanning panel](docs/img/console-live.png)
+
+*The mission console on the live site, captured by the end-to-end test (`e2e/`) on 14 Nov 2026.*
 
 ## Live demo
 
