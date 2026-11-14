@@ -48,7 +48,9 @@ export function SessionBar() {
 
   const running = state?.running ?? false
   const live = !demo && id !== null
-  const end = Math.max((route ?? fixtures.route).totals.eva_min, 1)
+  // Scrubber range: the planned EVA, or the EVA budget when the route is not known here (a reload
+  // that rejoins ?s=<id>). Never the fixture's 48 min on the live console.
+  const end = Math.max(route?.totals.eva_min ?? budget?.budget_min ?? 0, state?.t_min ?? 0, 1)
   const t = drag ?? state?.t_min ?? 0
   const storm = timeToStorm(state)
 
@@ -186,7 +188,9 @@ export function SessionBar() {
             onKeyUp={commitSeek}
             onBlur={commitSeek}
           />
-          <span className="cx-clock cx-dim">{evaClock(end)}</span>
+          <span className="cx-clock cx-dim" data-testid="bar-end">
+            {route ? evaClock(end) : 'T+ —'}
+          </span>
           <ProvBadge p="Simulation" />
         </div>
 
