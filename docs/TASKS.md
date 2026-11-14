@@ -47,3 +47,8 @@ MPC-2 is not merged by **Sun 09:30**; the Sun 11:00 feature freeze holds.
   (Y6 card).
 - [ ] **Y8 · Yusuf · Sun 10:00–11:00** — two runs on the live URL, README from what exists, secret
   scan of the git history, then make the repo public.
+- Note (Sat 23:50, Yusuf): Y8 work done ahead of Sunday: README with a live screenshot (#75), MIT
+  `LICENSE`, secret scan of all 285 commits clean, two live e2e runs (the scenario works; the last
+  test check needs a fix in `e2e/`, note in `docs/notes/furkan.md`). The repo stays private until
+  the competition ends (team decision); the submission links must then use the live app, or the
+  repo is made public right before the final submission.
