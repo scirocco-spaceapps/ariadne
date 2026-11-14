@@ -1,0 +1,42 @@
+{
+  "id": "bright-angel",
+  "name": "Bright Angel",
+  "kind": "stop",
+  "science_question": "Are the light-toned outcrops at Bright Angel ancient rock exposed by river erosion, or sediment that later filled the channel?",
+  "tasks": [
+    "Photograph the light-toned outcrop where it meets the channel sand.",
+    "Photograph the layering in one slab with a scale bar in the frame.",
+    "Look for light-toned, erosion-resistant veins or centimetre-size nodules and note where they occur."
+  ],
+  "photos": [
+    {
+      "file": "photos/bright-angel_1.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1176_0771341345_098EBY_N0530000ZCAM09216_0630LMJ",
+      "sol": 1176,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "Light-toned, flat-lying rock below the sand of the Neretva Vallis channel at Bright Angel."
+    },
+    {
+      "file": "photos/bright-angel_2.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1176_0771341966_098EBY_N0530000ZCAM09216_0630LMJ",
+      "sol": 1176,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "Close view of light-toned, finely layered rock slabs at Bright Angel."
+    }
+  ],
+  "unit": "Bright Angel formation",
+  "provenance": "Observed",
+  "sources": [
+    {
+      "title": "NASA's Perseverance Fords an Ancient River to Reach Science Target (NASA/JPL, 13 June 2024)",
+      "url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/"
+    },
+    {
+      "title": "Hurowitz et al. 2025, Redox-driven mineral and organic associations in Jezero Crater, Mars, Nature",
+      "url": "https://doi.org/10.1038/s41586-025-09413-0"
+    }
+  ],
+  "draft": true
+}

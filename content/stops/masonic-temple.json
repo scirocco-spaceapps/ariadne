@@ -1,0 +1,38 @@
+{
+  "id": "masonic-temple",
+  "name": "Masonic Temple",
+  "kind": "stop",
+  "science_question": "These rocks belong to the same Bright Angel formation, but they are redder and the abraded target Malgosa Crest showed no organic-carbon signal. What makes this side of the valley different?",
+  "tasks": [
+    "Photograph the outcrop and compare its colour with the light-toned rock at Bright Angel.",
+    "Find a conglomerate with rounded, millimetre- to centimetre-size clasts and image it with a scale bar.",
+    "Find the Malgosa Crest abrasion patch and photograph it."
+  ],
+  "photos": [
+    {
+      "file": "photos/masonic-temple_1.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1240_0777023997_598EBY_N0563438ZCAM09297_1100LMJ",
+      "sol": 1240,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "Low, light-toned outcrop slabs partly buried by sand at Masonic Temple."
+    },
+    {
+      "file": "photos/masonic-temple_2.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1233_0776404196_640EBY_N0563438ZCAM09285_0630LMJ",
+      "sol": 1233,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "Wind-sculpted, layered outcrop edge at Masonic Temple."
+    }
+  ],
+  "unit": "Bright Angel formation, Masonic Temple area",
+  "provenance": "Observed",
+  "sources": [
+    {
+      "title": "Hurowitz et al. 2025, Redox-driven mineral and organic associations in Jezero Crater, Mars, Nature",
+      "url": "https://doi.org/10.1038/s41586-025-09413-0"
+    }
+  ],
+  "draft": true
+}

@@ -1,0 +1,42 @@
+{
+  "id": "tuff-cliff",
+  "name": "Tuff Cliff",
+  "kind": "stop",
+  "science_question": "Is the light-toned, layered rock at Tuff Cliff older rock exposed by the river, or sediment that later filled the channel?",
+  "tasks": [
+    "Photograph the outcrop face from about 5 m to show its layering.",
+    "Measure the thickness of three layers with a scale bar in the frame.",
+    "Look for signs of transport by currents, such as cross-bedding, and photograph any you find."
+  ],
+  "photos": [
+    {
+      "file": "photos/tuff-cliff_1.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1169_0770718530_081EBY_N0525032ZCAM09207_1100LMJ",
+      "sol": 1169,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "The rocky hill at Tuff Cliff."
+    },
+    {
+      "file": "photos/tuff-cliff_2.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1170_0770805868_988EBY_N0525032ZCAM09208_0630LMJ",
+      "sol": 1170,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "Light-toned rock broken into thin, parallel slabs at Tuff Cliff."
+    }
+  ],
+  "unit": "Bright Angel formation, Tuff Cliff outcrop",
+  "provenance": "Observed",
+  "sources": [
+    {
+      "title": "NASA's Perseverance Fords an Ancient River to Reach Science Target (NASA/JPL, 13 June 2024)",
+      "url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/"
+    },
+    {
+      "title": "Hurowitz et al. 2025, Redox-driven mineral and organic associations in Jezero Crater, Mars, Nature",
+      "url": "https://doi.org/10.1038/s41586-025-09413-0"
+    }
+  ],
+  "draft": true
+}

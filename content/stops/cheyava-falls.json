@@ -1,0 +1,43 @@
+{
+  "id": "cheyava-falls",
+  "name": "Cheyava Falls",
+  "kind": "stop",
+  "science_question": "Do the 'leopard spots' in this reddish mudstone record chemical reactions that microbes could have used for energy, or did they form without life, for example at high temperature?",
+  "tasks": [
+    "Find the arrowhead-shaped rock (about 1 by 0.6 m) and photograph it with its drill hole and abrasion patch.",
+    "Image the reddish bands between the white calcium sulfate veins at close range, with a scale bar.",
+    "Photograph the millimetre-size light spots with dark rims in one 10 cm area.",
+    "Look for millimetre-size olivine crystals in the veins and note where they are."
+  ],
+  "photos": [
+    {
+      "file": "photos/cheyava-falls_1.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1217_0774980023_770EBY_N0560000ZCAM09264_1100LMJ",
+      "sol": 1217,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "A drill hole and a white abrasion patch on reddish rock at the Cheyava Falls site."
+    },
+    {
+      "file": "photos/cheyava-falls_2.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1217_0774980058_772EBY_N0560000ZCAM09264_1100LMJ",
+      "sol": 1217,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "Reddish rock with light-toned veins and small dark spots at the Cheyava Falls site."
+    }
+  ],
+  "unit": "Bright Angel formation, mudstone (Beaver Falls workspace)",
+  "provenance": "Observed",
+  "sources": [
+    {
+      "title": "NASA's Perseverance Rover Scientists Find Intriguing Mars Rock (NASA/JPL, 25 July 2024)",
+      "url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-rover-scientists-find-intriguing-mars-rock/"
+    },
+    {
+      "title": "Hurowitz et al. 2025, Redox-driven mineral and organic associations in Jezero Crater, Mars, Nature",
+      "url": "https://doi.org/10.1038/s41586-025-09413-0"
+    }
+  ],
+  "draft": true
+}

@@ -1,0 +1,19 @@
+# Stop photos
+
+Perseverance raw images (Mastcam-Z right camera, colour), downloaded as NASA's 1200 px JPG browse
+version. Every image was taken with the rover at the stop's position: the `site_drive` below equals
+the stop's `rmc` in `stops/index.json` (from NASA's raw-image API fields `site` and `drive`).
+Captions describe only what is visible. Status: draft, waiting for Bunyamin's review.
+
+| File | Sol | Date (UTC) | Camera | Credit | site_drive | Page | Caption |
+|---|---|---|---|---|---|---|---|
+| `photos/mount-washburn_1.jpg` | 1164 | 2024-05-29 | Mastcam-Z Right | NASA/JPL-Caltech/ASU | 52_4312 | [ZR0_1164_0770274620_848EBY_N0524312ZCAM03910_1100LMJ](https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1164_0770274620_848EBY_N0524312ZCAM03910_1100LMJ) | A light-toned, speckled boulder in front of darker boulders on Mount Washburn. |
+| `photos/mount-washburn_2.jpg` | 1164 | 2024-05-29 | Mastcam-Z Right | NASA/JPL-Caltech/ASU | 52_4312 | [ZR0_1164_0770275801_910EBY_N0524312ZCAM03911_0340LMJ](https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1164_0770275801_910EBY_N0524312ZCAM03911_0340LMJ) | The boulder-covered slope of Mount Washburn. |
+| `photos/tuff-cliff_1.jpg` | 1169 | 2024-06-03 | Mastcam-Z Right | NASA/JPL-Caltech/ASU | 52_5032 | [ZR0_1169_0770718530_081EBY_N0525032ZCAM09207_1100LMJ](https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1169_0770718530_081EBY_N0525032ZCAM09207_1100LMJ) | The rocky hill at Tuff Cliff. |
+| `photos/tuff-cliff_2.jpg` | 1170 | 2024-06-04 | Mastcam-Z Right | NASA/JPL-Caltech/ASU | 52_5032 | [ZR0_1170_0770805868_988EBY_N0525032ZCAM09208_0630LMJ](https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1170_0770805868_988EBY_N0525032ZCAM09208_0630LMJ) | Light-toned rock broken into thin, parallel slabs at Tuff Cliff. |
+| `photos/bright-angel_1.jpg` | 1176 | 2024-06-11 | Mastcam-Z Right | NASA/JPL-Caltech/ASU | 53_0 | [ZR0_1176_0771341345_098EBY_N0530000ZCAM09216_0630LMJ](https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1176_0771341345_098EBY_N0530000ZCAM09216_0630LMJ) | Light-toned, flat-lying rock below the sand of the Neretva Vallis channel at Bright Angel. |
+| `photos/bright-angel_2.jpg` | 1176 | 2024-06-11 | Mastcam-Z Right | NASA/JPL-Caltech/ASU | 53_0 | [ZR0_1176_0771341966_098EBY_N0530000ZCAM09216_0630LMJ](https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1176_0771341966_098EBY_N0530000ZCAM09216_0630LMJ) | Close view of light-toned, finely layered rock slabs at Bright Angel. |
+| `photos/cheyava-falls_1.jpg` | 1217 | 2024-07-23 | Mastcam-Z Right | NASA/JPL-Caltech/ASU | 56_0 | [ZR0_1217_0774980023_770EBY_N0560000ZCAM09264_1100LMJ](https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1217_0774980023_770EBY_N0560000ZCAM09264_1100LMJ) | A drill hole and a white abrasion patch on reddish rock at the Cheyava Falls site. |
+| `photos/cheyava-falls_2.jpg` | 1217 | 2024-07-23 | Mastcam-Z Right | NASA/JPL-Caltech/ASU | 56_0 | [ZR0_1217_0774980058_772EBY_N0560000ZCAM09264_1100LMJ](https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1217_0774980058_772EBY_N0560000ZCAM09264_1100LMJ) | Reddish rock with light-toned veins and small dark spots at the Cheyava Falls site. |
+| `photos/masonic-temple_1.jpg` | 1240 | 2024-08-15 | Mastcam-Z Right | NASA/JPL-Caltech/ASU | 56_3438 | [ZR0_1240_0777023997_598EBY_N0563438ZCAM09297_1100LMJ](https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1240_0777023997_598EBY_N0563438ZCAM09297_1100LMJ) | Low, light-toned outcrop slabs partly buried by sand at Masonic Temple. |
+| `photos/masonic-temple_2.jpg` | 1233 | 2024-08-08 | Mastcam-Z Right | NASA/JPL-Caltech/ASU | 56_3438 | [ZR0_1233_0776404196_640EBY_N0563438ZCAM09285_0630LMJ](https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1233_0776404196_640EBY_N0563438ZCAM09285_0630LMJ) | Wind-sculpted, layered outcrop edge at Masonic Temple. |

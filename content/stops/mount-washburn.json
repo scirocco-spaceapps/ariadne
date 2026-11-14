@@ -1,0 +1,38 @@
+{
+  "id": "mount-washburn",
+  "name": "Mount Washburn",
+  "kind": "stop",
+  "science_question": "The boulders on Mount Washburn have textures and compositions never seen before on Mars. Were they brought down from the crater rim, or carried in from beyond Jezero by water?",
+  "tasks": [
+    "Photograph the boulder field from the foot of the hill to show the range of textures.",
+    "Find the light-toned, speckled boulder (about 45 by 35 cm) among the darker ones and image its grains up close.",
+    "Compare the grain size and texture of three darker boulders with the light-toned one."
+  ],
+  "photos": [
+    {
+      "file": "photos/mount-washburn_1.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1164_0770274620_848EBY_N0524312ZCAM03910_1100LMJ",
+      "sol": 1164,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "A light-toned, speckled boulder in front of darker boulders on Mount Washburn."
+    },
+    {
+      "file": "photos/mount-washburn_2.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1164_0770275801_910EBY_N0524312ZCAM03911_0340LMJ",
+      "sol": 1164,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "The boulder-covered slope of Mount Washburn."
+    }
+  ],
+  "unit": "Neretva Vallis channel, boulder field",
+  "provenance": "Observed",
+  "sources": [
+    {
+      "title": "NASA's Perseverance Fords an Ancient River to Reach Science Target (NASA/JPL, 13 June 2024)",
+      "url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/"
+    }
+  ],
+  "draft": true
+}
