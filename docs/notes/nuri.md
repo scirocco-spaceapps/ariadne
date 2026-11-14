@@ -144,3 +144,24 @@ emulation, Playwright recording both, session running at 1 min/s:
   (backup run of the whole scenario with the alert mid-walk, and `kopma-testi\` for this test).
 
 Still yours: a real phone over mobile data (wake lock, QR scan with the camera).
+
+### Real phone test (Yusuf, 00:14–00:19, Android Chrome on mobile data, screen recording)
+
+- **Passed:** QR pairing with the phone camera; layout at phone width with no horizontal scroll;
+  live clock, margin, consumables and next stop updating; the stop card at Tuff Cliff; the
+  full-screen storm alert; airplane mode for about 20 s → "Lost mission-control · DEMO DATA in
+  10 s" → DEMO replay → "Connected" again when airplane mode went off.
+- **Not tested:** wake lock. "Keep screen on" was never tapped (the label stayed "Keep screen on";
+  it would say "Screen stays on") and the screen dimmed after about a minute. Retest: tap the
+  button, wait longer than the phone's screen timeout.
+- **To fix (your call):**
+  1. **Fake storm alert in the fallback.** The DEMO fallback replays `ws-state.jsonl`, which has
+     a storm alert at t = 30. On the phone the replay ran from T+0:07 to T+0:29 and the alert
+     flashed on screen while the live link came back. In a talk, an outage longer than about
+     30 s would put a full-screen STORM ALERT on both screens that nobody triggered. Suggestion:
+     the fallback replays only the calm part (t < 30) in a loop, or drops alert frames.
+  2. **"This app cannot be installed"** in Chrome: `src/cuff/manifest.webmanifest` has no icons
+     (Chrome needs 192 and 512 px). The shortcut also opens `/cuff` without `?s=`, which shows
+     "No session". Not needed for the demo.
+- **For the demo script:** at 3 min/s a 30 min lead lasts 10 s, so the cuff showed "Time to
+  storm 0:00" with "Walk home 13 min". Give the alert at 1 min/s, or set Lead to 60 min.
