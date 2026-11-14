@@ -1,6 +1,6 @@
-// Console side panels (route, timeline, conditions) and session controls. Owner: Nuri.
-export { ConsolePlaceholder } from './ConsolePlaceholder'
-export { SessionControls } from './SessionControls'
-export { cuffUrl } from './pairing'
+// Console layout, side panels (route, conditions) and session bar. Owner: Nuri.
+export { Console } from './Console'
 export { ConditionsPanel } from './ConditionsPanel'
 export { RouteSheet } from './RouteSheet'
+export { SessionBar } from './SessionBar'
+export { cuffUrl } from './pairing'

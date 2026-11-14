@@ -19,6 +19,11 @@ export default defineConfig({
         rewrite: (p) => p.replace(/^\/api\/mc/, ''),
       },
       '/ws': { target: 'ws://localhost:8080', ws: true },
+      // Live-mode assets (VITE_ASSETS_URL unset → "/"): AOI files and stop photos from the local
+      // assets host (infra Caddy on 8090). Without these the dev server answers its own index.html
+      // and the map shows no imagery.
+      '/bright-angel': { target: 'http://127.0.0.1:8090' },
+      '/content': { target: 'http://127.0.0.1:8090' },
     },
   },
   test: {

@@ -1,6 +1,6 @@
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { Cuff } from '../cuff'
-import { ConsolePlaceholder } from '../panels'
+import { Console } from '../panels'
 import { DevStopsPage } from '../stops'
 import { useMissionBootstrap, useSessionSocket } from './bootstrap'
 import { DemoBadge } from './DemoBadge'
@@ -13,7 +13,7 @@ export function App() {
     <>
       <DemoBadge />
       <Routes>
-        <Route path="/" element={<ConsolePlaceholder />} />
+        <Route path="/" element={<Console />} />
         <Route path="/cuff" element={<Cuff />} />
         {/* Furkan's stop-card check page: every fixture stop in both variants. */}
         <Route path="/dev/stops" element={<DevStopsPage />} />

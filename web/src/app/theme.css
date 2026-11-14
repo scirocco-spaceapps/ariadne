@@ -1,0 +1,82 @@
+/* Ariadne theme: the visual brief's dark tokens and type. The cuff keeps its own black
+   stylesheet (src/cuff/cuff.css); everything else reads these variables. */
+:root {
+  --bg: #0a1114;
+  --panel: #111b20;
+  --panel2: #17252c;
+  --line: #273a42;
+  --ink: #e7efec;
+  --muted: #8fa3a8;
+  --thread: #ff5d6c;
+  --safe: #46c58b;
+  --warn: #f2a93b;
+  --sand: #d9a877;
+  --tint: rgba(231, 239, 236, 0.06);
+
+  --display: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+  --body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  /* Provenance colours, readable on the dark panels. */
+  --prov-observed: #46c58b;
+  --prov-derived: #5aa9e6;
+  --prov-modeled: #b28df0;
+  --prov-assumed: #f2a93b;
+  --prov-simulation: #ff8a4c;
+
+  color-scheme: dark;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+a {
+  color: #8fd3ff;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button,
+select {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 4px 10px;
+  min-height: 30px;
+  cursor: pointer;
+}
+button:hover:not(:disabled),
+select:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+button:disabled,
+select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+:focus-visible {
+  outline: 2px solid #8fd3ff;
+  outline-offset: 1px;
+}
+input[type='checkbox'],
+input[type='range'] {
+  accent-color: var(--ink);
+}
