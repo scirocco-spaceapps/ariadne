@@ -86,3 +86,11 @@ answered in `docs/notes/furkan.md`. Still open for N4 and N6:
   (`{kind: 'normal'}` or `{kind: 'storm', minutes_left}`), and `stormMarginAt(cost, x, y, minutes_left)`
   = minutes to spare walking home before the storm, null if blocked.
 - **No action needed** unless you want the cuff to show the storm margin.
+
+## 2026-11-14 — from Furkan (task F4): LATER, astronaut position as text on the console
+
+- **What:** a `data-testid` element on the console with the astronaut's `state.pos` (e.g. the
+  map's astronaut tooltip or a small readout), like the cuff's `cuff-pos`.
+- **Why:** the console draws the astronaut only on the WebGL map, so the demo90 e2e test reads
+  the console's position from its store through the Vite dev server. A readout would let the test
+  check the screen instead and also run against a built site. LATER, not needed for the demo.
