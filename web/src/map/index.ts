@@ -7,3 +7,17 @@ export { useLayerRegistry, useLayerVisible, type LayerEntry, type LegendItem } f
 export { LAYER_ORDER, type LayerId } from './buildLayers'
 export { cellIndex, inAoi, rasterShape, rasterToWorld, worldToRaster, type Cell, type SizeM, type XY } from './coords'
 export { fitZoom, metresPerPixel, niceScaleBar } from './scale'
+export { TimeBar } from './TimeBar'
+export { usePlanClock } from './planClock'
+export {
+  arrivalTicks,
+  nextProgress,
+  pointAt,
+  progressAtTime,
+  progressFromState,
+  routeGeometry,
+  splitAt,
+  stopNumbers,
+  type Progress,
+  type RouteGeometry,
+} from './route'
