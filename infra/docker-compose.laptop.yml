@@ -1,0 +1,9 @@
+# Laptop hosting until the real server: the same stack, published only on loopback, behind
+# Tailscale Funnel (infra/funnel.sh). Caddy keeps the assets host (CORS, cache headers) on :8090;
+# planner and mission-control are reached directly on 8000 and 8080.
+# Use with: docker compose -f infra/docker-compose.yml -f infra/docker-compose.laptop.yml --env-file infra/.env.laptop up -d --build
+services:
+  caddy:
+    # No 80/443 on the laptop: Funnel terminates HTTPS.
+    ports: !override
+      - "127.0.0.1:8090:8090"
