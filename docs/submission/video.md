@@ -112,8 +112,9 @@ screen (`T+ m:ss`). Fixture times: storm alert at T+0:30, home at T+0:38, clear 
 Real-data shots (R1, R2) are **TO RECORD**. They are not in the e2e video, which has synthetic data
 only. Record them from the console running on real assets: production
 `https://ariadne-gilt-tau.vercel.app`, or a local web app with `VITE_ASSETS_URL` on the real
-bundle. On 2026-11-14 the production console listed the real stops and layers, but the HiRISE
-image did not render because the assets host was offline. Record when it is back up.
+bundle. Early on 2026-11-14 the HiRISE image did not render because the assets host (then a team
+laptop) was offline. The assets now run on the Hetzner server, and on 2026-11-14 the production
+console showed the HiRISE layer, so record from production.
 
 | Sentence | Shot | Source | On screen | Caption / credit |
 |---|---|---|---|---|
