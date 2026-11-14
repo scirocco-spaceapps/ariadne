@@ -1,2 +1,3 @@
 // The astronaut's wrist display (/cuff). Owner: Nuri.
-export { CuffPlaceholder } from './CuffPlaceholder'
+export { Cuff } from './Cuff'
+export { formatClock } from './format'

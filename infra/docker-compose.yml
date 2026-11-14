@@ -1,0 +1,60 @@
+# Ariadne services: planner, mission-control and Caddy (HTTPS, WSS and the assets host).
+# Server:  docker compose -f infra/docker-compose.yml --env-file infra/.env up -d --build
+# Laptop:  same command with the defaults below (*.localhost names, Caddy's local CA).
+name: ariadne
+
+services:
+  planner:
+    build: ../planner
+    restart: unless-stopped
+    environment:
+      DATA_DIR: /srv/assets
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:5173}
+    volumes:
+      - ${ASSETS_DIR:-../contracts/fixtures}:/srv/assets:ro
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  mission-control:
+    build: ../mission-control
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      PLANNER_URL: http://planner:8000
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:5173}
+      NASA_API_KEY: ${NASA_API_KEY:-}
+      MODEL_PARAMS_PATH: /repo/model/params.json
+      MEDA_PATH: /repo/content/conditions/meda.json
+    volumes:
+      - ../model:/repo/model:ro
+      - ../content/conditions:/repo/content/conditions:ro
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      - planner
+
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    environment:
+      API_HOST: ${API_HOST:-api.localhost}
+      MC_HOST: ${MC_HOST:-mc.localhost}
+      ASSETS_HOST: ${ASSETS_HOST:-assets.localhost}
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:5173}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${ASSETS_DIR:-../contracts/fixtures}:/srv/assets:ro
+      # Stop photos: the web app loads VITE_ASSETS_URL + "content/" + photos[].file (web/src/stops).
+      - ../content:/srv/content:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - planner
+      - mission-control
+
+volumes:
+  caddy_data:
+  caddy_config:

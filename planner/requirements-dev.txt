@@ -1,3 +1,7 @@
 -r requirements.txt
 pytest>=8.0
 httpx>=0.27
+# schema validation of responses against contracts/openapi.yaml
+jsonschema>=4.21
+pyyaml>=6.0
+referencing>=0.35

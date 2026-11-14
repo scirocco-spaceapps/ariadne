@@ -1,0 +1,43 @@
+# Hostnames and the web origin come from the environment (see .env.example).
+# On a laptop the *.localhost defaults get certificates from Caddy's local CA.
+
+# Long enough to spare the hotspot, short enough that a re-published raster shows up within the hour.
+# Only for files that exist: a cached 404 would hide a file published a minute later.
+(files) {
+	@exists file
+	@missing not file
+	header @exists Cache-Control "public, max-age=3600"
+	header @missing Cache-Control "no-store"
+	file_server
+}
+
+{$API_HOST} {
+	encode gzip
+	reverse_proxy planner:8000
+}
+
+# reverse_proxy passes WebSocket upgrades through, so wss://{$MC_HOST}/ws works as is.
+{$MC_HOST} {
+	encode gzip
+	reverse_proxy mission-control:8080
+}
+
+{$ASSETS_HOST} {
+	encode gzip
+	header Access-Control-Allow-Origin "{$WEB_ORIGIN}"
+	header Access-Control-Allow-Methods "GET, HEAD, OPTIONS"
+	header Vary Origin
+	@preflight method OPTIONS
+	handle @preflight {
+		respond 204
+	}
+	# Stop photos from the repo's content/ (web loads VITE_ASSETS_URL + "content/" + file).
+	handle /content/* {
+		root * /srv
+		import files
+	}
+	handle {
+		root * /srv/assets
+		import files
+	}
+}

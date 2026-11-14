@@ -16,9 +16,25 @@
 | `src/stops/` | stop cards and content — Furkan |
 
 **Run:** `cd web && npm install && npm run dev` (http://localhost:5173; proxies `/api/planner` to
-8000, `/api/mc` and `/ws` to 8080).
+8000, `/api/mc` and `/ws` to 8080). `npm run dev:lan` also serves on the LAN so a phone on the
+same network or hotspot can open it.
+
+**Pairing (N3):** the console's "Create session" posts the store's route (the SYNTHETIC fixture
+route until the planner is wired in) to mission-control and puts `?s=<id>` in the URL; "Pair cuff"
+shows a QR for `/cuff?s=<id>` (`/cuff?demo=1` in DEMO mode). Open the console on the LAN address,
+not `localhost`, or the phone cannot reach the QR's URL. The DEMO replay is locked to the wall
+clock, so every screen in DEMO mode shows the same frame.
 
 **Test:** `cd web && npm run check` (typecheck, vitest, build).
+
+**Env:** `VITE_PLANNER_URL`, `VITE_MC_URL`, `VITE_ASSETS_URL` (default: the dev proxy and `/`),
+`VITE_DEMO=1`. `?demo=1` also turns on DEMO mode: the store replays `contracts/fixtures/`
+(SYNTHETIC) and a "DEMO DATA" badge shows. `?s=<id>` joins a live session.
+
+**Shared API for other folders:** `useMission` (store) from `src/app`; `planner`, `missionControl`,
+`connectSession`, `assetUrl(aoi, file, demo)`, `fixtures` and the contract types from `src/lib`.
+
+**Deploy:** `netlify.toml` or `vercel.json` (base directory `web`); `/cuff` falls back to the app.
 
 **Types:** `npm run gen:types` regenerates `src/lib/types.ts` from `contracts/openapi.yaml`.
 

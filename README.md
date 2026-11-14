@@ -53,6 +53,9 @@ never used to produce measurements.
 ## Limitations
 
 - Fixture rasters, routes, conditions and stop content are SYNTHETIC placeholders.
-- AOI origin, safe haven, stops and EVA budget in `contracts/aoi.json` are placeholders (Assumed).
+- The safe haven and the five stops in `contracts/aoi.json` are Perseverance waypoints (Derived); the
+  Masonic Temple position is inferred from a published abrasion sol, not named by NASA for that sol.
+- EVA budget, reserve, slope limits and walking speed are lunar EVA planning values adopted for Mars
+  (Assumed, with sources in [`docs/model.md`](docs/model.md)).
 - The walk model is a planning aid for a hackathon demo, not a validated EVA safety tool.
 - Conditions data may be stale or missing; the app shows that instead of filling gaps.

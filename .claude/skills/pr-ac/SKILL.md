@@ -42,10 +42,11 @@ git status --porcelain
 
 Every changed path must be inside one of the allowed paths (a folder path covers everything under
 it; a file path covers only that file; an "except" clause removes those folders). The only extra
-path allowed is `docs/ai-use/<name>.md` (added in step 5). Inside `web/`, also check the path
+paths allowed are `docs/ai-use/<name>.md` (added in step 5) and appended notes in
+`docs/notes/<owner>.md` (additions only; deleting lines is allowed only in your own notes file). Inside `web/`, also check the path
 against `.github/CODEOWNERS`: `web/src/map/` and `web/src/stops/` have their own owners.
 
-If any other path changed: stop, list the paths, and write a note for that path's owner (who and
+If any other path changed: stop, list the paths, and append a note to `docs/notes/<owner>.md` (who and
 what must change) instead of opening the PR.
 
 Also stop if `contracts/` changed on a non-`contracts/` branch, or if a lockfile or root config

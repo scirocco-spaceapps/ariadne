@@ -32,8 +32,10 @@ Exact ownership is in `.github/CODEOWNERS`. Each directory has its own `CLAUDE.m
 
 ### Scope
 - Edit only inside the directory you were started for. If another directory must change, stop and
-  write a note for its owner (in your PR description, or a file `NOTE-for-<owner>.md` inside your own
-  directory). Do not make the change yourself.
+  append a note to `docs/notes/<owner>.md` (what, where, why, which task). Do not make the change
+  yourself.
+- At the start of every task, read `docs/notes/<your name>.md` if it exists: other owners leave
+  requests for you there.
 - New dependencies need the directory owner's OK. Do not touch root config, CI or lockfiles outside
   your directory.
 

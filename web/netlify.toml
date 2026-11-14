@@ -1,0 +1,13 @@
+# Netlify: base directory = web. Every PR gets a deploy preview once the repo is connected.
+[build]
+  command = "npm ci && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Client-side routes (/cuff) fall back to the app.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
