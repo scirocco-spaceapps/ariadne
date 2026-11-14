@@ -6,8 +6,10 @@ import { fixtureStops } from './loader'
 import { StopCard, type StopCardVariant } from './StopCard'
 import { useStopTasks } from './taskStore'
 
+// Most tests use the SYNTHETIC fixtures, which are what DEMO mode shows. Live content: see below.
 beforeEach(() => {
   useMission.getState().reset()
+  useMission.getState().setDemo(true)
   useStopTasks.getState().reset()
 })
 
@@ -102,7 +104,33 @@ describe('StopCard behaviour', () => {
   })
 })
 
+describe('StopCard live mode (content/stops)', () => {
+  beforeEach(() => useMission.getState().setDemo(false))
+
+  it.each(variants)('renders the real Mount Washburn card without the SYNTHETIC badge (%s)', async (variant) => {
+    render(<StopCard variant={variant} id="mount-washburn" />)
+    const heading = await screen.findByRole('heading', { level: 2, name: 'Mount Washburn' })
+    const card = heading.closest('article') as HTMLElement
+    expect(within(card).queryByText('SYNTHETIC')).toBeNull()
+    expect(within(card).getByText('Observed')).toBeTruthy()
+    expect(screen.getByTestId('photo-credit').textContent).toBe('Credit: NASA/JPL-Caltech/ASU')
+  })
+
+  it('does not show fixture ids', async () => {
+    render(<StopCard variant="console" id="s1" />)
+    expect(await screen.findByText('No content for s1.')).toBeTruthy()
+  })
+})
+
 describe('DevStopsPage', () => {
+  it('renders every real stop live, without errors', async () => {
+    useMission.getState().setDemo(false)
+    render(<DevStopsPage />)
+    expect(await screen.findByText('9 entries from', { exact: false })).toBeTruthy()
+    expect(screen.getAllByTestId('stop-card')).toHaveLength(18)
+    expect(screen.queryByTestId('dev-stop-errors')).toBeNull()
+  })
+
   it('renders every fixture stop in both variants', () => {
     render(<DevStopsPage />)
     const cards = screen.getAllByTestId('stop-card')

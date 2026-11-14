@@ -28,7 +28,9 @@ export function StopCard({ variant, id, content }: StopCardProps) {
   if (!c) {
     return (
       <section className={`stop-card stop-card--${variant} stop-card--empty`} data-testid="stop-card">
-        <p>{wantedId ? `No content for ${wantedId}.` : 'Select a stop or target.'}</p>
+        <p>
+          {!wantedId ? 'Select a stop or target.' : loaded.loading ? 'Loading stop content…' : `No content for ${wantedId}.`}
+        </p>
         {variant === 'console' && loaded.errors.length > 0 && (
           <ul className="stop-errors">
             {loaded.errors.map((e) => (
