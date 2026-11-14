@@ -2,9 +2,9 @@
   "id": "bright-angel",
   "name": "Bright Angel",
   "kind": "stop",
-  "science_question": "Are the light-toned outcrops at Bright Angel ancient rock exposed by river erosion, or sediment that later filled the channel?",
+  "science_question": "The light-toned Bright Angel rocks sit in the channel below the Margin unit. Are they younger than the Margin unit, as Jones et al. suggest, and where exactly is the contact?",
   "tasks": [
-    "Photograph the light-toned outcrop where it meets the channel sand.",
+    "Photograph the contact between the light-toned outcrop and the Margin unit.",
     "Photograph the layering in one slab with a scale bar in the frame.",
     "Look for light-toned, erosion-resistant veins or centimetre-size nodules and note where they occur."
   ],
@@ -36,6 +36,10 @@
     {
       "title": "Hurowitz et al. 2025, Redox-driven mineral and organic associations in Jezero Crater, Mars, Nature",
       "url": "https://doi.org/10.1038/s41586-025-09413-0"
+    },
+    {
+      "title": "Jones et al. 2025, A fluvio-lacustrine environment preserved in the Jezero crater inlet channel, Neretva Vallis (Mars), EPSC-DPS 2025 abstract EPSC-DPS2025-888",
+      "url": "https://meetingorganizer.copernicus.org/EPSC-DPS2025/EPSC-DPS2025-888.html"
     }
   ],
   "draft": true

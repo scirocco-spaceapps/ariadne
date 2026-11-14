@@ -2,10 +2,10 @@
   "id": "mount-washburn",
   "name": "Mount Washburn",
   "kind": "stop",
-  "science_question": "The boulders on Mount Washburn have textures and compositions never seen before on Mars. Were they brought down from the crater rim, or carried in from beyond Jezero by water?",
+  "science_question": "Some boulders on Mount Washburn are of a type never seen before on Mars. Were they brought down from the crater rim, or carried in from beyond Jezero by water?",
   "tasks": [
     "Photograph the boulder field from the foot of the hill to show the range of textures.",
-    "Find the light-toned, speckled boulder (about 45 by 35 cm) among the darker ones and image its grains up close.",
+    "Find Atoko Point, the light-toned, speckled boulder (about 45 by 35 cm) among the darker ones, and image its grains up close.",
     "Compare the grain size and texture of three darker boulders with the light-toned one."
   ],
   "photos": [
@@ -15,7 +15,7 @@
       "sol": 1164,
       "camera": "Mastcam-Z Right",
       "credit": "NASA/JPL-Caltech/ASU",
-      "caption": "A light-toned, speckled boulder in front of darker boulders on Mount Washburn."
+      "caption": "A light-toned, speckled boulder, likely Atoko Point, in front of darker boulders on Mount Washburn."
     },
     {
       "file": "photos/mount-washburn_2.jpg",

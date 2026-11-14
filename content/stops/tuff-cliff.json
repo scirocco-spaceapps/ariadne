@@ -2,7 +2,7 @@
   "id": "tuff-cliff",
   "name": "Tuff Cliff",
   "kind": "stop",
-  "science_question": "Is the light-toned, layered rock at Tuff Cliff older rock exposed by the river, or sediment that later filled the channel?",
+  "science_question": "Jones et al. read the Tuff Cliff to Walhalla Glades layers as lake deposits. Do the layers here show a quiet lake rather than a flowing river?",
   "tasks": [
     "Photograph the outcrop face from about 5 m to show its layering.",
     "Measure the thickness of three layers with a scale bar in the frame.",
@@ -26,7 +26,7 @@
       "caption": "Light-toned rock broken into thin, parallel slabs at Tuff Cliff."
     }
   ],
-  "unit": "Bright Angel formation, Tuff Cliff outcrop",
+  "unit": "Bright Angel formation, Tuff Cliff member",
   "provenance": "Observed",
   "sources": [
     {
@@ -34,8 +34,8 @@
       "url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/"
     },
     {
-      "title": "Hurowitz et al. 2025, Redox-driven mineral and organic associations in Jezero Crater, Mars, Nature",
-      "url": "https://doi.org/10.1038/s41586-025-09413-0"
+      "title": "Jones et al. 2025, A fluvio-lacustrine environment preserved in the Jezero crater inlet channel, Neretva Vallis (Mars), EPSC-DPS 2025 abstract EPSC-DPS2025-888",
+      "url": "https://meetingorganizer.copernicus.org/EPSC-DPS2025/EPSC-DPS2025-888.html"
     }
   ],
   "draft": true
