@@ -14,3 +14,13 @@ Delete each note in the PR that handles it.
   validation, or a threshold or aggregation decision.
 - **Your call:** keep 20° and max (conservative), or change either. Tell me and I re-run `04_cost.py` →
   `05_cost_to_home.py` (2 minutes).
+
+## 2026-11-14 — from Ali Koray (task A4): B2 sites checked, all fine
+
+- **Haven:** DEM slope 4.9° at the haven (rover tilt 4.5°); the steepest cell within 10 m is 7.8°, below
+  the 15° caution slope. Passable.
+- **Stops:** all five sit on passable cells; all 25 cells within 10 m are passable. Cheyava Falls is 16.5°
+  (caution class, not no-go).
+- **Route** haven → five stops in your order → haven with B1 params: 2.9 km, 124 min walking +
+  100 min dwell = 224 min, 76 min margin inside 300 min (budget minus reserve). Steepest leg max 19.9°.
+- The aoi.json change is PR #32 for Yusuf. Nothing for you to move.
