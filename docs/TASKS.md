@@ -18,7 +18,7 @@ MPC-2 is not merged by **Sun 09:30**; the Sun 11:00 feature freeze holds.
   `notebooks/out/`, `notebooks/out/replanning_cases.json` (inputs and expected decisions), new
   parameters with provenance in `model/params.json`, and a "Replanning" section in
   `docs/model.md`. Done when merged and a note in `docs/notes/yusuf.md` says so.
-- [x] **MUST 6 check · Yusuf · while MPC-1 runs** — gate for merging MPC-2.
+- [x] **MUST 6 check · Yusuf · while MPC-1 runs** — gate for merging MPC-2. (#63)
   The e2e demo90 test is green on main, and the storm scenario runs once on the live app
   (alert, thread home on the console, alert screen on the cuff, clear).
 - [ ] **MPC-2 · Yusuf · after MPC-1 and the MUST 6 check, before Sat 23:30** — the rule on the console.
