@@ -1,7 +1,6 @@
 """AOI frame and local paths shared by every pipeline script.
 
-Frame: contracts/aoi.json (crs.proj4, origin_lonlat, size_m). Until the real origin is merged into
-the contract, pipeline/aoi_frame.json may override origin_lonlat (see that file for why).
+Frame: contracts/aoi.json (crs.proj4, origin_lonlat, size_m) is the only source.
 
 Coordinates (root CLAUDE.md):
 - projected: metres in crs.proj4 (local equirectangular, true scale at the AOI latitude);
@@ -27,7 +26,6 @@ from pyproj import CRS, Transformer
 
 REPO = Path(__file__).resolve().parents[2]
 CONTRACT_AOI = REPO / "contracts" / "aoi.json"
-FRAME_OVERRIDE = REPO / "pipeline" / "aoi_frame.json"
 
 # Mars 2000 IAU sphere, the datum of the USGS products and of crs.proj4.
 MARS_LONLAT = "+proj=longlat +R=3396190 +no_defs"
@@ -83,11 +81,9 @@ class Frame:
         return 0.0 <= x <= self.size_m[0] and 0.0 <= y <= self.size_m[1]
 
 
-def load_frame(contract: Path = CONTRACT_AOI, override: Path | None = FRAME_OVERRIDE) -> Frame:
+def load_frame(contract: Path = CONTRACT_AOI) -> Frame:
     aoi = json.loads(contract.read_text(encoding="utf-8"))
     origin = aoi["origin_lonlat"]
-    if override is not None and override.exists():
-        origin = json.loads(override.read_text(encoding="utf-8")).get("origin_lonlat", origin)
     return Frame(
         proj4=aoi["crs"]["proj4"],
         origin_lonlat=(float(origin[0]), float(origin[1])),

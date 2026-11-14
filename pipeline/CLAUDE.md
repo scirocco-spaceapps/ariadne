@@ -32,8 +32,7 @@ rasterio has no wheel for newer versions yet), then
    and `pred_2m.i32` from the safe haven.
 7. `scripts/06_variants.py`: `cost_to_home_flat_2m.f32`, the "without the terrain model" variant (task Y9 compares).
 
-**AOI frame:** `scripts/aoi.py` reads `contracts/aoi.json`; `aoi_frame.json` overrides `origin_lonlat`
-until the real origin is in the contract.
+**AOI frame:** `scripts/aoi.py` reads `contracts/aoi.json` (proj4, origin, size); no local override.
 
 **Test:** `cd pipeline && python -m pytest`; outputs must pass the size rules in `contracts/check.py`
 when pointed at a real AOI.

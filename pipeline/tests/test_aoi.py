@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from aoi import CONTRACT_AOI, FRAME_OVERRIDE, load_frame, pixel_centre, xy_to_pixel
+from aoi import CONTRACT_AOI, load_frame, pixel_centre, xy_to_pixel
 
 
 @pytest.fixture(scope="module")
@@ -10,9 +10,7 @@ def frame():
     return load_frame()
 
 
-# The effective frame must be the same whether the moved origin lives in pipeline/aoi_frame.json
-# (before contracts PR #17) or in contracts/aoi.json (after it), so these tests check the frame,
-# not which file holds the origin.
+# contracts/aoi.json carries the origin moved 100 m south in task A1 (PR #17).
 TASK_BOOK_ORIGIN = (77.27666, 18.47203)  # AOI centred on sol 1250 (task book), before the A1 shift
 SOL_1250 = (77.29887363, 18.48891695)
 
@@ -28,14 +26,6 @@ def test_sol_1250_sits_mid_east_west_and_100_m_north_of_centre(frame):
     x, y = frame.lonlat_to_aoi(*SOL_1250)
     assert x == pytest.approx(frame.size_m[0] / 2, abs=2)
     assert y == pytest.approx(frame.size_m[1] / 2 + 100, abs=2)
-
-
-def test_override_if_present_agrees_with_or_replaces_the_contract():
-    contract = load_frame(override=None)
-    effective = load_frame()
-    assert effective.proj4 == contract.proj4 and effective.size_m == contract.size_m
-    if not FRAME_OVERRIDE.exists():
-        assert effective.origin_lonlat == contract.origin_lonlat
 
 
 def test_lonlat_round_trip(frame):
