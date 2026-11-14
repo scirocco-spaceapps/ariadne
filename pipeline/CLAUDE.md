@@ -31,6 +31,8 @@ rasterio has no wheel for newer versions yet), then
    `aoi_sites_proposal.json` for the aoi.json PR. `scripts/05_cost_to_home.py [--haven X,Y]`: `cost_to_home_2m.f32`
    and `pred_2m.i32` from the safe haven.
 7. `scripts/06_variants.py`: `cost_to_home_flat_2m.f32`, the "without the terrain model" variant (task Y9 compares).
+8. `scripts/07_bundle.sh [aoi.json]`: zip of `aoi.json` + `DATA_DIR/<assets_base>` for the live host
+   (`~/ariadne-data/bundles/`); the receiver points `ASSETS_DIR` at the unpacked folder.
 
 **AOI frame:** `scripts/aoi.py` reads `contracts/aoi.json` (proj4, origin, size); no local override.
 
