@@ -1,3 +1,4 @@
 # AI use — Bunyamin
 
 - 2026-11-14 | model/b1-params (#15) | Claude Code | searched and quoted sources for each walk-model parameter, proposed values, wrote params.json and docs/model.md, built a synthetic sandbox to test budget vs route time | chose and approved every value (caution 15°, budget 360, reserve 60, dwell 20); Tobler, Hassler, Bell and Apollo 15 sources still to be opened and checked
+- 2026-11-14 | content/b2-sites (#27) | Claude Code | matched stop sols to NASA pages and the Hurowitz 2025 paper, pulled positions from M20_waypoints.json, ranked rover parking spots as safe-haven candidates, wrote index.json and the "Why this site" paragraph, tested the file with 05a_sites.convert | chose the haven and the five stops; Masonic Temple position and the haven slope on the real raster still to be checked
