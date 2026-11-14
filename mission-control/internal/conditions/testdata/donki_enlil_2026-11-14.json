@@ -1,0 +1,280 @@
+[
+ {
+  "simulationID": "WSA-ENLIL/49216/1",
+  "modelCompletionTime": "2026-10-23T12:09Z",
+  "au": 2.0,
+  "cmeInputs": [
+   {
+    "cmeStartTime": "2026-10-23T04:18Z",
+    "latitude": 36.0,
+    "longitude": 71.0,
+    "speed": 597.0,
+    "halfAngle": 26.0,
+    "time21_5": "2026-10-23T10:04Z",
+    "featureCode": "LE",
+    "isMostAccurate": true,
+    "levelOfData": 0,
+    "ipsList": [],
+    "CMEID": "2026-10-23T04:18:00-CME-001"
+   }
+  ],
+  "estimatedShockArrivalTime": null,
+  "isEarthGB": false,
+  "isEarthMinorImpact": false,
+  "rmin_re": null,
+  "kp_18": null,
+  "kp_90": null,
+  "kp_135": null,
+  "kp_180": null,
+  "estimatedDuration": null,
+  "impactList": [
+   {
+    "location": "Mars",
+    "arrivalTime": "2026-10-27T12:00Z",
+    "isGlancingBlow": false,
+    "isMinorImpact": true
+   },
+   {
+    "location": "Psyche",
+    "arrivalTime": "2026-10-28T09:00Z",
+    "isGlancingBlow": false,
+    "isMinorImpact": true
+   },
+   {
+    "location": "Solar Orbiter",
+    "arrivalTime": "2026-10-25T22:00Z",
+    "isGlancingBlow": true,
+    "isMinorImpact": false
+   },
+   {
+    "location": "STEREO A",
+    "arrivalTime": "2026-10-25T16:00Z",
+    "isGlancingBlow": false,
+    "isMinorImpact": true
+   }
+  ],
+  "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/49216/-1"
+ },
+ {
+  "simulationID": "WSA-ENLIL/49248/1",
+  "modelCompletionTime": "2026-10-25T21:45Z",
+  "au": 2.0,
+  "cmeInputs": [
+   {
+    "cmeStartTime": "2026-10-25T19:24Z",
+    "latitude": -7.0,
+    "longitude": 60.0,
+    "speed": 275.0,
+    "halfAngle": 27.0,
+    "time21_5": "2026-10-26T08:29Z",
+    "featureCode": "LE",
+    "isMostAccurate": true,
+    "levelOfData": 0,
+    "ipsList": [],
+    "CMEID": "2026-10-25T19:24:00-CME-001"
+   }
+  ],
+  "estimatedShockArrivalTime": null,
+  "isEarthGB": false,
+  "isEarthMinorImpact": false,
+  "rmin_re": null,
+  "kp_18": null,
+  "kp_90": null,
+  "kp_135": null,
+  "kp_180": null,
+  "estimatedDuration": null,
+  "impactList": [
+   {
+    "location": "Mars",
+    "arrivalTime": "2026-11-01T01:00Z",
+    "isGlancingBlow": false,
+    "isMinorImpact": true
+   },
+   {
+    "location": "Psyche",
+    "arrivalTime": "2026-11-01T12:00Z",
+    "isGlancingBlow": false,
+    "isMinorImpact": true
+   },
+   {
+    "location": "Solar Orbiter",
+    "arrivalTime": "2026-10-29T12:00Z",
+    "isGlancingBlow": false,
+    "isMinorImpact": true
+   },
+   {
+    "location": "STEREO A",
+    "arrivalTime": "2026-10-29T18:00Z",
+    "isGlancingBlow": false,
+    "isMinorImpact": true
+   }
+  ],
+  "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/49248/-1"
+ },
+ {
+  "simulationID": "WSA-ENLIL/49251/1",
+  "modelCompletionTime": "2026-10-26T12:37Z",
+  "au": 2.0,
+  "cmeInputs": [
+   {
+    "cmeStartTime": "2026-10-26T09:48Z",
+    "latitude": -8.0,
+    "longitude": 48.0,
+    "speed": 681.0,
+    "halfAngle": 24.0,
+    "time21_5": "2026-10-26T14:45Z",
+    "featureCode": "LE",
+    "isMostAccurate": true,
+    "levelOfData": 0,
+    "ipsList": [],
+    "CMEID": "2026-10-26T09:48:00-CME-001"
+   }
+  ],
+  "estimatedShockArrivalTime": null,
+  "isEarthGB": false,
+  "isEarthMinorImpact": false,
+  "rmin_re": null,
+  "kp_18": null,
+  "kp_90": null,
+  "kp_135": null,
+  "kp_180": null,
+  "estimatedDuration": null,
+  "impactList": [
+   {
+    "location": "Juice",
+    "arrivalTime": "2026-10-29T07:00Z",
+    "isGlancingBlow": true,
+    "isMinorImpact": false
+   },
+   {
+    "location": "Mars",
+    "arrivalTime": "2026-10-30T18:00Z",
+    "isGlancingBlow": true,
+    "isMinorImpact": false
+   },
+   {
+    "location": "Psyche",
+    "arrivalTime": "2026-10-31T12:00Z",
+    "isGlancingBlow": true,
+    "isMinorImpact": false
+   },
+   {
+    "location": "Solar Orbiter",
+    "arrivalTime": "2026-10-29T02:32Z",
+    "isGlancingBlow": false,
+    "isMinorImpact": false
+   },
+   {
+    "location": "STEREO A",
+    "arrivalTime": "2026-10-28T23:42Z",
+    "isGlancingBlow": false,
+    "isMinorImpact": false
+   }
+  ],
+  "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/49251/-1"
+ },
+ {
+  "simulationID": "WSA-ENLIL/49141/1",
+  "modelCompletionTime": "2026-10-16T17:39Z",
+  "au": 2.0,
+  "cmeInputs": [
+   {
+    "cmeStartTime": "2026-10-16T12:38Z",
+    "latitude": 31.0,
+    "longitude": -15.0,
+    "speed": 247.0,
+    "halfAngle": 29.0,
+    "time21_5": "2026-10-17T02:45Z",
+    "featureCode": "LE",
+    "isMostAccurate": true,
+    "levelOfData": 0,
+    "ipsList": [
+     {
+      "catalog": null,
+      "activityID": "2026-10-20T11:23:00-IPS-001",
+      "location": "Earth",
+      "eventTime": "2026-10-20T11:23Z",
+      "instruments": [
+       {
+        "displayName": "SOLAR-1: MAG"
+       },
+       {
+        "displayName": "ACE: SWEPAM"
+       },
+       {
+        "displayName": "SOLAR-1: SWiPS"
+       },
+       {
+        "displayName": "IMAP: MAG"
+       },
+       {
+        "displayName": "IMAP: SWAPI"
+       }
+      ],
+      "linkedEvents": [],
+      "sentNotifications": [],
+      "link": null,
+      "submissionTime": null,
+      "versionId": 0
+     }
+    ],
+    "CMEID": "2026-10-16T12:38:00-CME-001"
+   }
+  ],
+  "estimatedShockArrivalTime": "2026-10-20T18:00Z",
+  "isEarthGB": true,
+  "isEarthMinorImpact": false,
+  "rmin_re": null,
+  "kp_18": null,
+  "kp_90": 3,
+  "kp_135": 4,
+  "kp_180": 4,
+  "estimatedDuration": null,
+  "impactList": [
+   {
+    "location": "Europa Clipper",
+    "arrivalTime": "2026-10-20T12:00Z",
+    "isGlancingBlow": true,
+    "isMinorImpact": false
+   },
+   {
+    "location": "Juice",
+    "arrivalTime": "2026-10-20T08:00Z",
+    "isGlancingBlow": true,
+    "isMinorImpact": false
+   }
+  ],
+  "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/49141/-1"
+ },
+ {
+  "simulationID": "WSA-ENLIL/49122/1",
+  "modelCompletionTime": "2026-10-15T02:04Z",
+  "au": 2.0,
+  "cmeInputs": [
+   {
+    "cmeStartTime": "2026-10-14T23:12Z",
+    "latitude": 36.0,
+    "longitude": -137.0,
+    "speed": 360.0,
+    "halfAngle": 28.0,
+    "time21_5": "2026-10-15T09:09Z",
+    "featureCode": "LE",
+    "isMostAccurate": true,
+    "levelOfData": 0,
+    "ipsList": [],
+    "CMEID": "2026-10-14T23:12:00-CME-001"
+   }
+  ],
+  "estimatedShockArrivalTime": null,
+  "isEarthGB": false,
+  "isEarthMinorImpact": false,
+  "rmin_re": null,
+  "kp_18": null,
+  "kp_90": null,
+  "kp_135": null,
+  "kp_180": null,
+  "estimatedDuration": null,
+  "impactList": null,
+  "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/49122/-1"
+ }
+]

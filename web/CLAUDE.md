@@ -16,7 +16,14 @@
 | `src/stops/` | stop cards and content — Furkan |
 
 **Run:** `cd web && npm install && npm run dev` (http://localhost:5173; proxies `/api/planner` to
-8000, `/api/mc` and `/ws` to 8080).
+8000, `/api/mc` and `/ws` to 8080). `npm run dev:lan` also serves on the LAN so a phone on the
+same network or hotspot can open it.
+
+**Pairing (N3):** the console's "Create session" posts the store's route (the SYNTHETIC fixture
+route until the planner is wired in) to mission-control and puts `?s=<id>` in the URL; "Pair cuff"
+shows a QR for `/cuff?s=<id>` (`/cuff?demo=1` in DEMO mode). Open the console on the LAN address,
+not `localhost`, or the phone cannot reach the QR's URL. The DEMO replay is locked to the wall
+clock, so every screen in DEMO mode shows the same frame.
 
 **Test:** `cd web && npm run check` (typecheck, vitest, build).
 
