@@ -94,3 +94,12 @@ answered in `docs/notes/furkan.md`. Still open for N4 and N6:
 - **Why:** the console draws the astronaut only on the WebGL map, so the demo90 e2e test reads
   the console's position from its store through the Vite dev server. A readout would let the test
   check the screen instead and also run against a built site. LATER, not needed for the demo.
+
+## 2026-11-14 — from Yusuf: MPC replan suggestion on the console (FYI)
+
+The team took MPC in as a console suggestion (DECISIONS.md). Yusuf builds it inside `web/src/map/`:
+a small overlay on the map that says, for example, "Plan no longer fits: skip Cheyava Falls, home
+with 62 min reserve", plus, if Bunyamin picks that trigger, a what-if walking-speed control. It
+calls the planner's `POST /route` through the existing `plannerUrl`, and does not change the session
+or the cuff. Nothing needed from you now; if you want the control in the session bar instead of the
+map overlay for N6, say so in `docs/notes/yusuf.md`.

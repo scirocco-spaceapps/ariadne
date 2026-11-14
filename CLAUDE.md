@@ -85,7 +85,8 @@ A task is done when all three hold:
 2. A small PR is open.
 3. One line is added to `docs/ai-use/<name>.md`.
 
-Use the `pr-ac` skill (`.claude/skills/pr-ac/SKILL.md`) to do all three.
+Use the `pr-ac` skill (`.claude/skills/pr-ac/SKILL.md`) to do all three. If the task is listed in
+`docs/TASKS.md`, tick its box (`[x]` and the PR number) in the same PR.
 
 ## Ports and local URLs
 
