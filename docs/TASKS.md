@@ -36,6 +36,10 @@ MPC-2 is not merged by **Sun 09:30**; the Sun 11:00 feature freeze holds.
   Bug fixes only, no new endpoints. Services run on Nuri's laptop: Yusuf fixes the code, Nuri
   restarts the service. Before the demo, restart it and keep one session open. Done when the
   service ran through the rehearsals and the judging.
+- Note (Sat 21:00, Yusuf): the services moved from Nuri's laptop to the Hetzner server (root
+  `CLAUDE.md`, Live services). A fix merged into `mission-control/` now redeploys by itself (no
+  restart by Nuri) and drops the open session: merge before a rehearsal, then open a fresh session.
+  Manual restart: `ssh deploy@2.31.2.199`.
 
 ## Yusuf's remaining cards (unchanged, listed for one view)
 

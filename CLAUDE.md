@@ -96,6 +96,27 @@ Use the `pr-ac` skill (`.claude/skills/pr-ac/SKILL.md`) to do all three. If the 
 | mission-control | 8080 | `/api/mc/*`, `/ws` |
 | web | 5173 | — |
 
+## Live services (since 2026-11-14)
+
+- **Where:** the web app is on Vercel (`https://ariadne-gilt-tau.vercel.app`). Planner,
+  mission-control and the assets run on the Hetzner server, not on a laptop:
+  `https://api.2-31-2-199.sslip.io`, `https://mc.2-31-2-199.sslip.io` (also `wss://…/ws`) and
+  `https://assets.2-31-2-199.sslip.io/`. Details are in the last hosting entry of
+  `docs/DECISIONS.md`. Nuri's laptop + Tailscale Funnel (`infra/funnel.sh`) is only the fallback.
+- **Merges redeploy:** a merge to `main` that touches `planner/`, `mission-control/` or `infra/`
+  (other than `.md` files) rebuilds the server within a few minutes (`.github/workflows/deploy.yml`).
+  Mission-control keeps sessions in memory, so such a merge drops the open session and the cuff
+  pairing. A merge into `web/`, `contracts/` or `content/` redeploys the Vercel site
+  (`.github/workflows/web-deploy.yml`).
+- **Merge freeze:** no merges into those three folders during a live run, a rehearsal, the video
+  shoot or the judging. After the Sun 11:00 feature freeze, merge there only bug fixes, and tell
+  the group before merging.
+- **New asset bundles** (`pipeline/scripts/07_bundle.sh`) go to the server's `/srv/assets`, followed
+  by a planner restart; not to a laptop. Steps: `infra/CLAUDE.md` ("New asset bundle"). Server access: Yusuf and
+  Nuri (`ssh deploy@2.31.2.199`).
+- **Secrets:** server secrets live only in the server's `infra/.env`, CI secrets only in the repo
+  settings. Never in git.
+
 ## Checks per directory
 
 | Directory | Check |
