@@ -1,0 +1,42 @@
+{
+  "id": "tuff-cliff",
+  "name": "Tuff Cliff",
+  "kind": "stop",
+  "science_question": "Jones et al. place the Tuff Cliff member at the base of the Bright Angel formation: thin, planar layers with pebbles up to 2.5 cm, which may have formed on land or at the edge of a lake, before the lake deepened into the mudstones above. Do these layers record the start of the lake?",
+  "tasks": [
+    "Photograph the outcrop face from about 5 m to show its layering.",
+    "Measure the thickness of three layers with a scale bar in the frame.",
+    "Look for sub-rounded pebbles (up to about 2.5 cm) in the layers and photograph any you find with a scale bar."
+  ],
+  "photos": [
+    {
+      "file": "photos/tuff-cliff_1.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1169_0770718530_081EBY_N0525032ZCAM09207_1100LMJ",
+      "sol": 1169,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "View from the Tuff Cliff stop on sol 1169."
+    },
+    {
+      "file": "photos/tuff-cliff_2.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1170_0770805868_988EBY_N0525032ZCAM09208_0630LMJ",
+      "sol": 1170,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "Thin, parallel rock slabs at the Tuff Cliff stop."
+    }
+  ],
+  "unit": "Bright Angel formation, Tuff Cliff member",
+  "provenance": "Observed",
+  "sources": [
+    {
+      "title": "NASA's Perseverance Fords an Ancient River to Reach Science Target (NASA/JPL, 13 June 2024)",
+      "url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/"
+    },
+    {
+      "title": "Jones et al. 2025, A fluvio-lacustrine environment preserved in the Jezero crater inlet channel, Neretva Vallis (Mars), EPSC-DPS 2025 abstract EPSC-DPS2025-888",
+      "url": "https://meetingorganizer.copernicus.org/EPSC-DPS2025/EPSC-DPS2025-888.html"
+    }
+  ],
+  "draft": false
+}
