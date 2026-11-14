@@ -23,8 +23,8 @@ Captions describe only what is visible. Reviewed and approved by Bunyamin on 202
 Views toward the four `kind: target` areas (`notebooks/out/targets.geojson`), taken from waypoints in
 `notebooks/out/targets_seen_from.csv`; `distance_m` is that waypoint's distance from the CSV. Each image was
 checked to point at the target: the target point (AOI metres, ground height from `dem_4m.f32`) was projected
-into the image with NASA's camera model and rover attitude from the raw-image API. Status: draft, waiting
-for Bunyamin's review.
+into the image with NASA's camera model and rover attitude from the raw-image API. Reviewed and approved
+by Bunyamin on 2026-11-14 (PR #56).
 
 | File | Sol | Date (UTC) | Camera | Credit | site_drive | distance_m | Page | Caption |
 |---|---|---|---|---|---|---|---|---|
