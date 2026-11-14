@@ -139,7 +139,7 @@ export function SessionBar() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const url = cuffUrl(location.origin, id, demo)
+  const url = cuffUrl(location.origin, id, demo, route)
 
   return (
     <footer className="cx-bar" aria-label="Session controls">

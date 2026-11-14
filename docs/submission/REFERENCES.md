@@ -76,8 +76,35 @@ game plan and are not confirmed. Fill in URL and credit when the source is added
 | MRO HiRISE DTM mosaic of Jezero, 1 m (USGS) | TBD | TBD | Terrain, slope and walking cost |
 | MRO CTX DTM, 20 m (USGS) | TBD | TBD | Backup terrain model if the HiRISE DTM has gaps |
 | Mars 2020 traverse and waypoints (`M20_traverse.json`, `M20_waypoints.json`) | TBD | TBD | Rover track, site location and sols |
-| Mars 2020 raw images, Navcam and Mastcam-Z | TBD | TBD | Stop photos |
+| Mars 2020 raw images, Navcam and Mastcam-Z | https://mars.nasa.gov/mars2020/multimedia/raw-images/ | NASA/JPL-Caltech/ASU (Mastcam-Z) | Stop photos; each image is listed under "Stop photos" below |
 | Mars 2020 MEDA weather data (NASA PDS) | TBD | TBD | Conditions panel: temperature, pressure, dust |
 | MSL RAD surface dose rate (Hassler et al. 2014) | TBD | TBD | Modeled radiation dose rate |
 | DONKI WSA-ENLIL CME arrival forecasts (api.nasa.gov) | TBD | TBD | Storm arrival forecast |
 | USGS SIM 3464, Jezero crater geologic map | TBD | TBD | Geology layer |
+
+## Stop photos (`content/photos/`)
+
+Perseverance raw images, Mastcam-Z right camera, NASA's 1200 px JPG browse version. The credit is
+copied from NASA's raw-image record of each image.
+
+| Resource | URL | Licence or credit | Used for |
+|---|---|---|---|
+| `mount-washburn_1.jpg`, sol 1164 (ZR0_1164_0770274620_848EBY_N0524312ZCAM03910_1100LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1164_0770274620_848EBY_N0524312ZCAM03910_1100LMJ | NASA/JPL-Caltech/ASU | Stop card `mount-washburn` |
+| `mount-washburn_2.jpg`, sol 1164 (ZR0_1164_0770275801_910EBY_N0524312ZCAM03911_0340LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1164_0770275801_910EBY_N0524312ZCAM03911_0340LMJ | NASA/JPL-Caltech/ASU | Stop card `mount-washburn` |
+| `tuff-cliff_1.jpg`, sol 1169 (ZR0_1169_0770718530_081EBY_N0525032ZCAM09207_1100LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1169_0770718530_081EBY_N0525032ZCAM09207_1100LMJ | NASA/JPL-Caltech/ASU | Stop card `tuff-cliff` |
+| `tuff-cliff_2.jpg`, sol 1170 (ZR0_1170_0770805868_988EBY_N0525032ZCAM09208_0630LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1170_0770805868_988EBY_N0525032ZCAM09208_0630LMJ | NASA/JPL-Caltech/ASU | Stop card `tuff-cliff` |
+| `bright-angel_1.jpg`, sol 1176 (ZR0_1176_0771341345_098EBY_N0530000ZCAM09216_0630LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1176_0771341345_098EBY_N0530000ZCAM09216_0630LMJ | NASA/JPL-Caltech/ASU | Stop card `bright-angel` |
+| `bright-angel_2.jpg`, sol 1176 (ZR0_1176_0771341966_098EBY_N0530000ZCAM09216_0630LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1176_0771341966_098EBY_N0530000ZCAM09216_0630LMJ | NASA/JPL-Caltech/ASU | Stop card `bright-angel` |
+| `cheyava-falls_1.jpg`, sol 1217 (ZR0_1217_0774980023_770EBY_N0560000ZCAM09264_1100LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1217_0774980023_770EBY_N0560000ZCAM09264_1100LMJ | NASA/JPL-Caltech/ASU | Stop card `cheyava-falls` |
+| `cheyava-falls_2.jpg`, sol 1217 (ZR0_1217_0774980058_772EBY_N0560000ZCAM09264_1100LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1217_0774980058_772EBY_N0560000ZCAM09264_1100LMJ | NASA/JPL-Caltech/ASU | Stop card `cheyava-falls` |
+| `masonic-temple_1.jpg`, sol 1240 (ZR0_1240_0777023997_598EBY_N0563438ZCAM09297_1100LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1240_0777023997_598EBY_N0563438ZCAM09297_1100LMJ | NASA/JPL-Caltech/ASU | Stop card `masonic-temple` |
+| `masonic-temple_2.jpg`, sol 1233 (ZR0_1233_0776404196_640EBY_N0563438ZCAM09285_0630LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1233_0776404196_640EBY_N0563438ZCAM09285_0630LMJ | NASA/JPL-Caltech/ASU | Stop card `masonic-temple` |
+
+## Stop science sources (`content/stops/`)
+
+| Resource | URL | Licence or credit | Used for |
+|---|---|---|---|
+| NASA's Perseverance Fords an Ancient River to Reach Science Target (NASA/JPL, 13 June 2024) | https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/ | NASA/JPL-Caltech | Science questions and tasks: Mount Washburn, Tuff Cliff, Bright Angel |
+| NASA's Perseverance Rover Scientists Find Intriguing Mars Rock (NASA/JPL, 25 July 2024) | https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-rover-scientists-find-intriguing-mars-rock/ | NASA/JPL-Caltech | Science question and tasks: Cheyava Falls |
+| Hurowitz et al. 2025, Redox-driven mineral and organic associations in Jezero Crater, Mars, Nature | https://doi.org/10.1038/s41586-025-09413-0 | Nature (citation) | Units, tasks and photo captions: Bright Angel, Cheyava Falls, Masonic Temple |
+| Jones et al. 2025, A fluvio-lacustrine environment preserved in the Jezero crater inlet channel, Neretva Vallis (Mars), EPSC-DPS 2025 abstract EPSC-DPS2025-888 | https://meetingorganizer.copernicus.org/EPSC-DPS2025/EPSC-DPS2025-888.html | © Author(s) 2025, CC BY 4.0 | Tuff Cliff member and lake reading (Tuff Cliff); Bright Angel younger than the Margin unit (Bright Angel) |
