@@ -2,8 +2,8 @@
 
 Owner: Furkan. Task F5. English.
 
-**Status: LOCK PENDING.** Variant A is the proposed lock. It becomes locked when the three human
-checks under "Locked script" are filled in.
+**Status: LOCKED (2026-11-14).** Variant A, Ali Koray's revision, approved by the team at the
+23:30 check. Change the wording only with the team's OK.
 
 ## Rules
 
@@ -79,7 +79,7 @@ Human checks (the card's steps 1 and 2). The script is locked when all three are
 - Read-aloud time, measured by Furkan: 27–28 s (must be ≤ 30 s, final card included)
 - Read by Ali Koray: done, wording changes applied
 - After his read, Furkan dropped "fastest" from A5: no shot shows that the way home is the fastest one
-- Read to the team at the 23:30 check: ___ (OK / changes)
+- Read to the team at the 23:30 check: OK, no changes
 
 ### Backup cuts (only if a take runs over 30 s)
 
