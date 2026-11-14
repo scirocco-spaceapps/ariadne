@@ -5,3 +5,4 @@
 - 2026-11-14 | contracts/v1 | Claude Code | decided the 34 Y1 contract-tour items at the team's request and applied them (GeoJSON schemas, abort semantics, 2 Hz, vertex limit, asset paths, photo citations, fixture vectors) | read every decision, ran all directory checks
 - 2026-11-14 | repo/plan-changes | Claude Code | wrote docs/PLAN_CHANGES.md from the Y0/Y1 changes against the three plan documents; let pr-ac accept multi-folder task cards | read the per-card list against the task book
 - 2026-11-14 | web/y2-map-canvas (#5) | Claude Code | built the deck.gl map canvas in AOI metres (MapView, LayerToggle, layer registry, world/raster conversion with tests) | checked the fixture ortho, pan, zoom, scale bar, cursor readout and toggle in the browser; ran npm run check
+- 2026-11-14 | repo/notes-for-owners | Claude Code | set up docs/notes/ and wrote Nuri's note (invite, Y2 mount, CI and contract details for N1–N6) | read the note against PLAN_CHANGES and the task book

@@ -5,6 +5,7 @@
 |---|---|
 | `DECISIONS.md`, `DATA_SOURCES.md` | shared, append-only |
 | `ai-use/<name>.md` | each person appends to their own file |
+| `notes/<name>.md` | anyone appends notes for that person; only that person deletes handled notes |
 | `model.md`, `validation.md` | Bunyamin |
 | `submission/` | Furkan, except `submission/science.md` (Bunyamin) |
 | everything else | Yusuf |
