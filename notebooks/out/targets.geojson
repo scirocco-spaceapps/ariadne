@@ -1,0 +1,71 @@
+{
+ "type": "FeatureCollection",
+ "provenance": "Derived",
+ "source": "Viewsheds (gdal_viewshed, observer 2.0 m, 600 m) from Perseverance waypoints on the HiRISE 1 m DTM; ground seen from within 150 m, minus 10 m around the rover track, in 50 m tiles; notebooks/viewshed.ipynb (task B3)",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     1675.0,
+     1574.9
+    ]
+   },
+   "properties": {
+    "id": "target-cheyava-falls",
+    "area_m2": 2444.0,
+    "distance_m": 63.8,
+    "sol": 1182
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     1425.0,
+     1275.0
+    ]
+   },
+   "properties": {
+    "id": "target-masonic-temple",
+    "area_m2": 2500.0,
+    "distance_m": 52.0,
+    "sol": 1231
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     1975.4,
+     1426.2
+    ]
+   },
+   "properties": {
+    "id": "target-mount-washburn",
+    "area_m2": 2344.0,
+    "distance_m": 65.0,
+    "sol": 1170
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     2020.7,
+     1219.9
+    ]
+   },
+   "properties": {
+    "id": "target-closest-pass",
+    "area_m2": 1672.0,
+    "distance_m": 24.4,
+    "sol": 1158
+   }
+  }
+ ]
+}

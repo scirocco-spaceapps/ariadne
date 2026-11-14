@@ -1,0 +1,26 @@
+{
+  "sol": 1215,
+  "values": {
+    "air_temp_min": 192.0,
+    "air_temp_max": 259.6,
+    "pressure": 744.7,
+    "dust_opacity": null
+  },
+  "units": {
+    "air_temp_min": "K",
+    "air_temp_max": "K",
+    "pressure": "Pa",
+    "dust_opacity": "1"
+  },
+  "source": "Mars 2020 MEDA, NASA PDS Atmospheres Node (dataset doi:10.17189/1522849), sol 1215. Air temperature: CAL_ATS, daily min/max of the median of the three mast sensors. Pressure: DER_PS, mean over the sol. Dust opacity: no MEDA opacity product in PDS, left null.",
+  "source_url": "https://doi.org/10.17189/1522849",
+  "provenance": "Derived",
+  "files": [
+    "https://pds-atmospheres.nmsu.edu/PDS/data/PDS4/Mars2020/mars2020_meda/data_calibrated_env/sol_1140_1259/sol_1215/WE__1215___________CAL_ATS_________________P01.CSV",
+    "https://pds-atmospheres.nmsu.edu/PDS/data/PDS4/Mars2020/mars2020_meda/data_derived_env/sol_1140_1259/sol_1215/WE__1215___________DER_PS__________________P01.CSV"
+  ],
+  "samples": {
+    "air_temp": 18739,
+    "pressure": 17957
+  }
+}
