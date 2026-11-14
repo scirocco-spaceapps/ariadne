@@ -10,7 +10,8 @@ WebSocket: `contracts/ws-messages.md`. All simulated state carries `provenance: 
 **Run:** `cd mission-control && go run .` (port from `PORT`, default 8080)
 
 **Env:** `PORT` (8080), `WEB_ORIGIN` (CORS allow list, comma-separated; default
-`http://localhost:5173`).
+`http://localhost:5173`), `PLANNER_URL` (planner base URL for `POST /abort` on a storm alert;
+empty or failing → the request's `abort_path`, else the way already walked, reversed).
 
 **Docker:** `docker build -t ariadne-mission-control mission-control` (context = this folder).
 
