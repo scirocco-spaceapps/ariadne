@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useMission } from '../app/store'
-import { ApiError, missionControl } from '../lib/api'
+import { ApiError, missionControl, planner } from '../lib/api'
 import { aoi, fixtures } from '../lib/fixtures'
 import { PairCuff } from './PairCuff'
 import { cuffUrl } from './pairing'
@@ -20,8 +20,10 @@ import {
 } from './session'
 import './console.css'
 
-function errorText(err: unknown): string {
-  return err instanceof ApiError ? err.detail : 'mission-control is unreachable'
+function errorText(err: unknown, service = 'mission-control'): string {
+  if (err instanceof ApiError) return err.detail
+  if (err instanceof Error && !(err instanceof TypeError)) return err.message
+  return `${service} is unreachable`
 }
 
 /**
@@ -67,7 +69,22 @@ export function SessionBar() {
     setBusy(true)
     setError(null)
     try {
-      const { id: newId } = await missionControl.createSession(sessionBody(route ?? fixtures.route, budget, aoi))
+      // The SYNTHETIC fixture route lives in the 500 x 400 m fixture AOI: on the real map the
+      // astronaut would wander off the plan. Without a planned route, ask the planner for one
+      // (stops in aoi.json order, back to the safe haven) and show it before the session starts.
+      if (route === fixtures.route) {
+        throw new Error('The SYNTHETIC fixture route does not belong to this map. Plan the route first.')
+      }
+      let plan = route
+      if (!plan) {
+        try {
+          plan = await planner.route({ stops: aoi.stops.map((s) => s.id), return_home: true })
+        } catch (err) {
+          throw new Error(`Could not plan a route: ${errorText(err, 'planner')}.`)
+        }
+        useMission.getState().setRoute(plan)
+      }
+      const { id: newId } = await missionControl.createSession(sessionBody(plan, budget, aoi))
       useMission.getState().setSessionId(newId)
       // Keep the id in the URL so a reload rejoins the same session.
       setParams(
@@ -219,8 +236,9 @@ export function SessionBar() {
               ? 'DEMO replay: session controls need mission-control.'
               : id
                 ? 'S start / pause · A storm alert · C clear'
-                : 'Plan a route, then create a session.'}
-            {!demo && route === null && <span className="cx-tag cx-tag-warn">Route: SYNTHETIC fixture</span>}
+                : route
+                  ? 'Create a session to walk the planned route.'
+                  : 'Create session plans the route (stops in order, back to the safe haven) and starts a session.'}
           </p>
         )}
       </div>

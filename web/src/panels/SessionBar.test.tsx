@@ -92,21 +92,54 @@ describe('session helpers', () => {
 })
 
 describe('SessionBar', () => {
-  it('creates a session from the fixture route and puts the id in the store and URL', async () => {
-    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(201, { id: 'sess-9' }))
+  it('plans the route when there is none, then creates the session and puts the id in the URL', async () => {
+    useMission.getState().setAoi(aoi)
+    const planned = { ...fixtures.route, provenance: 'Modeled' as const }
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) =>
+      String(url).endsWith('/route') ? jsonResponse(200, planned) : jsonResponse(201, { id: 'sess-9' }),
+    )
     renderBar()
-    expect(screen.getByText('Route: SYNTHETIC fixture')).toBeTruthy()
     expect((screen.getByRole('button', { name: /Start/ }) as HTMLButtonElement).disabled).toBe(true)
 
     fireEvent.click(screen.getByRole('button', { name: 'Create session' }))
     await waitFor(() => expect(useMission.getState().session.id).toBe('sess-9'))
+    expect(bodies(fetchMock, '/route')).toEqual([{ stops: aoi.stops.map((st) => st.id), return_home: true }])
+    expect(useMission.getState().route).toEqual(planned)
     expect(bodies(fetchMock, '/sessions')).toEqual([
-      { route: fixtures.route, budget_min: 240, reserve_min: 30, dwell_min: aoi.model.dwell_min },
+      { route: planned, budget_min: 240, reserve_min: 30, dwell_min: aoi.model.dwell_min },
     ])
     await waitFor(() => expect(search).toBe('?s=sess-9'))
   })
 
+  it('uses an already planned route without asking the planner again', async () => {
+    const planned = { ...fixtures.route, provenance: 'Modeled' as const }
+    useMission.getState().setRoute(planned)
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(201, { id: 'sess-8' }))
+    renderBar()
+    fireEvent.click(screen.getByRole('button', { name: 'Create session' }))
+    await waitFor(() => expect(useMission.getState().session.id).toBe('sess-8'))
+    expect(bodies(fetchMock, '/route')).toEqual([])
+  })
+
+  it('refuses to start a live session on the SYNTHETIC fixture route', async () => {
+    useMission.getState().setRoute(fixtures.route)
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(201, { id: 'x' }))
+    renderBar()
+    fireEvent.click(screen.getByRole('button', { name: 'Create session' }))
+    expect((await screen.findByRole('alert')).textContent).toContain('Plan the route first')
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('shows why when the planner cannot plan', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(422, { detail: 'stop tuff-cliff is unreachable' }))
+    renderBar()
+    fireEvent.click(screen.getByRole('button', { name: 'Create session' }))
+    expect((await screen.findByRole('alert')).textContent).toBe('Could not plan a route: stop tuff-cliff is unreachable.')
+    expect(useMission.getState().session.id).toBeNull()
+  })
+
   it('shows the service error on a failed create', async () => {
+    useMission.getState().setRoute({ ...fixtures.route, provenance: 'Modeled' })
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(400, { detail: 'route has no legs' }))
     renderBar()
     fireEvent.click(screen.getByRole('button', { name: 'Create session' }))
