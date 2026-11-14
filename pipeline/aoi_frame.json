@@ -1,0 +1,5 @@
+{
+  "_comment": "Proposed real AOI origin, used by pipeline scripts until contracts/aoi.json carries it (PR to Yusuf in A2). Same crs.proj4 and size_m as the contract; the south-west corner moves 100 m south so the whole Neretva Vallis campaign (sols 1170-1288 in M20_waypoints.json) is inside: with the contract origin, the waypoints of sols 1283-1288 lie 11-25 m south of the AOI. Delete this file once the contract has the new origin.",
+  "origin_lonlat": [77.27666, 18.4703429],
+  "source": "contracts/aoi.json origin_lonlat moved 100 m south on the Mars 2000 sphere (task A1)"
+}
