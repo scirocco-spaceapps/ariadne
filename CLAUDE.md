@@ -10,8 +10,8 @@ safe haven. NASA Space Apps 2026.
 |---|---|---|
 | `contracts/` | Yusuf | AOI, OpenAPI, WebSocket messages, fixtures. Frozen after `contracts-v1`. |
 | `pipeline/` | Ali Koray | Scripts that turn NASA products into the rasters/vectors in `contracts/aoi.json`. |
-| `planner/` | Ali Koray | FastAPI service: `/route`, `/abort`. Port 8001. |
-| `mission-control/` | Mazlum | Go + Fiber service: conditions, sessions, `/ws`. Port 8002. |
+| `planner/` | Ali Koray | FastAPI service: `/route`, `/abort`. Port 8000. |
+| `mission-control/` | Mazlum | Go + Fiber service: conditions, sessions, `/ws`. Port 8080. |
 | `web/` | Nuri | Vite + React + deck.gl client. Port 5173. |
 | `web/src/map/` | Yusuf | Map layers. |
 | `web/src/stops/` | Furkan | Stop cards and content views. |
@@ -63,6 +63,8 @@ Exact ownership is in `.github/CODEOWNERS`. Each directory has its own `CLAUDE.m
 ### Shared files
 - `docs/DATA_SOURCES.md` and `docs/DECISIONS.md` are append-only: anyone may add lines at the end,
   nobody rewrites or deletes existing lines. Correct a line by appending a new one that supersedes it.
+- New idea mid-task: append one `- LATER: <what> — <why> — <hours> — <name>` line to
+  `docs/DECISIONS.md` and go back to your task. Yusuf makes the scope call.
 
 ### Branches and PRs
 - Branch names: `<directory>/<short-task-name>`, always from fresh `main`
@@ -81,8 +83,8 @@ Use the `pr-ac` skill (`.claude/skills/pr-ac/SKILL.md`) to do all three.
 
 | Service | Port | Dev proxy from web |
 |---|---|---|
-| planner | 8001 | `/api/planner/*` |
-| mission-control | 8002 | `/api/mc/*`, `/ws` |
+| planner | 8000 | `/api/planner/*` |
+| mission-control | 8080 | `/api/mc/*`, `/ws` |
 | web | 5173 | — |
 
 ## Checks per directory

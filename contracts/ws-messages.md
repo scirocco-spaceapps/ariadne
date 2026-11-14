@@ -1,6 +1,6 @@
 # WebSocket messages — mission-control
 
-Endpoint: `ws://localhost:8002/ws?s=<session id>&role=console|cuff`
+Endpoint: `ws://localhost:8080/ws?s=<session id>&role=console|cuff`
 (through the web dev proxy: `ws://localhost:5173/ws?...`).
 
 Schemas for every message below are in `openapi.yaml` under `components/schemas`

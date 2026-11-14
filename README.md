@@ -17,14 +17,14 @@ All positions are metres in a local plane (x east, y north, from the AOI south-w
 
 ## Run locally
 
-Requirements: Node 22+, Python 3.12, Go 1.23+.
+Requirements: Node 22+, Python 3.11+, Go 1.23+.
 
 ```bash
-# planner (port 8001)
+# planner (port 8000)
 cd planner && python -m venv .venv && . .venv/Scripts/activate && pip install -r requirements-dev.txt
-uvicorn app.main:app --reload --port 8001
+uvicorn app.main:app --reload --port 8000
 
-# mission-control (port 8002)
+# mission-control (port 8080)
 cd mission-control && go run .
 
 # web (port 5173, proxies /api/planner, /api/mc and /ws)

@@ -10,9 +10,9 @@ Fixture AOI: 500 x 400 m (`../aoi.json`), same keys and pixel sizes as `contract
 | `ortho_50cm.jpg` | 1000 x 800 | RGB gradient (red east, green north), "SYNTHETIC" burned in |
 | `ortho_1m.jpg` | 500 x 400 | same |
 | `hillshade_2m.png` | 250 x 200 | grey hillshade of the DEM, sun az 315°, alt 45° |
-| `dem_4m.f32` | 125 x 100 | tilted plane + one hill at (400, 100); formula in sidecar `.json` |
+| `dem_4m.f32` | 125 x 100 | tilted plane + one 30 m hill at (400, 100); formula, min and max in sidecar `.json` |
 | `slope_2m.png` | 250 x 200 | RGB, coloured by the `slope.legend` bins |
-| `traversability_2m.png` | 250 x 200 | 8-bit grey, 255 = easiest, 0 = impassable (slope ≥ 30°) |
+| `traversability_2m.png` | 250 x 200 | RGB, coloured by the `traversability.legend` classes; fixture thresholds go < 15° ≤ caution < 25° ≤ no-go (Assumed) |
 | `cost_to_home_2m.f32` | 250 x 200 | straight-line distance to the safe haven / 50 m·min⁻¹, minutes |
 
 Optional rasters (`cost_to_home_flat`, `seen_not_touched`) are deliberately absent so clients

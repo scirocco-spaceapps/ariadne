@@ -3,9 +3,9 @@
   "name": "SYNTHETIC fixture AOI",
   "placeholder": true,
   "crs": {
-    "proj4": "+proj=eqc +lat_ts=18.43 +lat_0=0 +lon_0=77.39 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs"
+    "proj4": "+proj=eqc +lat_ts=18.4889 +lat_0=0 +lon_0=77.2989 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs"
   },
-  "origin_lonlat": [77.39, 18.43],
+  "origin_lonlat": [77.27666, 18.47203],
   "size_m": [500, 400],
   "assets_base": "rasters/",
   "rasters": {
@@ -23,7 +23,15 @@
         { "max_deg": 90, "color": "#a50026", "label": ">30°" }
       ]
     },
-    "traversability": { "file": "traversability_2m.png", "px_m": 2 },
+    "traversability": {
+      "file": "traversability_2m.png",
+      "px_m": 2,
+      "legend": [
+        { "class": "go", "color": "#1a9850", "label": "Go" },
+        { "class": "caution", "color": "#fee08b", "label": "Caution" },
+        { "class": "no-go", "color": "#a50026", "label": "No-go" }
+      ]
+    },
     "cost_to_home": { "file": "cost_to_home_2m.f32", "px_m": 2, "dtype": "float32", "unit": "min", "nodata": "NaN" },
     "cost_to_home_flat": { "file": "cost_to_home_flat_2m.f32", "px_m": 2, "dtype": "float32", "unit": "min", "nodata": "NaN", "optional": true },
     "seen_not_touched": { "file": "seen_not_touched_2m.png", "px_m": 2, "optional": true }
@@ -31,7 +39,8 @@
   "vectors": {
     "track": "track.geojson",
     "waypoints": "waypoints.geojson",
-    "targets": { "file": "targets.geojson", "optional": true }
+    "targets": { "file": "targets.geojson", "optional": true },
+    "geology": { "file": "geology.geojson", "optional": true }
   },
   "safe_haven": { "id": "haven", "name": "SYNTHETIC safe haven", "xy": [60, 60] },
   "stops": [

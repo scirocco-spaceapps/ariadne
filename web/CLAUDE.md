@@ -16,7 +16,7 @@
 | `src/stops/` | stop cards and content — Furkan |
 
 **Run:** `cd web && npm install && npm run dev` (http://localhost:5173; proxies `/api/planner` to
-8001, `/api/mc` and `/ws` to 8002).
+8000, `/api/mc` and `/ws` to 8080).
 
 **Test:** `cd web && npm run check` (typecheck, vitest, build).
 

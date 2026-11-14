@@ -2,21 +2,21 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-// Ports: see root CLAUDE.md. planner 8001, mission-control 8002.
+// Ports: see root CLAUDE.md. planner 8000, mission-control 8080.
 export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
     proxy: {
       '/api/planner': {
-        target: 'http://localhost:8001',
+        target: 'http://localhost:8000',
         rewrite: (p) => p.replace(/^\/api\/planner/, ''),
       },
       '/api/mc': {
-        target: 'http://localhost:8002',
+        target: 'http://localhost:8080',
         rewrite: (p) => p.replace(/^\/api\/mc/, ''),
       },
-      '/ws': { target: 'ws://localhost:8002', ws: true },
+      '/ws': { target: 'ws://localhost:8080', ws: true },
     },
   },
   test: {

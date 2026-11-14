@@ -7,7 +7,7 @@ radiation, space weather, partner data), holds sessions, advances the clock, and
 console and the cuff over WebSocket. HTTP API: `contracts/openapi.yaml` (tag `mission-control`).
 WebSocket: `contracts/ws-messages.md`. All simulated state carries `provenance: "Simulation"`.
 
-**Run:** `cd mission-control && go run .` (port from `PORT`, default 8002)
+**Run:** `cd mission-control && go run .` (port from `PORT`, default 8080)
 
 **Test:** `cd mission-control && go vet ./... && go test ./...`
 

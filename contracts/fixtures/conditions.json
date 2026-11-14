@@ -2,17 +2,26 @@
   "weather": {
     "provenance": "Simulation",
     "source": "SYNTHETIC fixture, not real data",
-    "fetched_at": "2026-11-14T08:00:00Z",
+    "mode": "archive",
     "sol": 1300,
-    "temp_min_c": -80,
-    "temp_max_c": -10,
-    "pressure_pa": 720,
-    "wind_mps": null
+    "values": {
+      "air_temp_min": -80,
+      "air_temp_max": -10,
+      "pressure": 720,
+      "dust_opacity": null
+    },
+    "units": {
+      "air_temp_min": "degC",
+      "air_temp_max": "degC",
+      "pressure": "Pa",
+      "dust_opacity": "tau"
+    }
   },
   "radiation": null,
   "space_weather": {
     "provenance": "Simulation",
     "source": "SYNTHETIC fixture, not real data",
+    "mode": "live",
     "fetched_at": "2026-11-14T08:00:00Z",
     "events": [
       { "id": "fx-cme-1", "mars_arrival_utc": "2026-11-14T10:30:00Z", "source": "SYNTHETIC fixture" }
@@ -22,11 +31,15 @@
   "partner": {
     "provenance": "Simulation",
     "source": "SYNTHETIC fixture, not real data",
-    "fetched_at": "2026-11-14T08:00:00Z",
-    "name": "SYNTHETIC partner feed",
-    "data": { "note": "placeholder" }
+    "source_url": "https://example.invalid/synthetic-partner",
+    "mode": "archive",
+    "agency": "SYNTHETIC agency",
+    "mission": "SYNTHETIC mission",
+    "value": 0.5,
+    "unit": "tau",
+    "description": "SYNTHETIC placeholder context value"
   },
   "missing": {
-    "radiation": "SYNTHETIC: example of a part that could not be fetched (upstream timeout)"
+    "radiation": "SYNTHETIC: example of a part that could not be loaded (params file not mounted)"
   }
 }
