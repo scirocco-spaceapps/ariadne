@@ -107,6 +107,14 @@ export function envelopeMode(state: WsState | null): EnvelopeMode {
   return state?.alert ? { kind: 'storm', minutes_left: timeToStorm(state.alert, state.t_min) } : { kind: 'normal' }
 }
 
+/** cost_to_home (minutes to the haven) at [x, y]; null outside the AOI or where the way home is blocked. */
+export function costToHomeAt(cost: CostRaster, x: number, y: number): number | null {
+  const cell = worldToRaster([x, y], cost.size_m, cost.px_m)
+  if (!cell) return null
+  const c = cost.data[cell.row * cost.cols + cell.col]
+  return Number.isFinite(c) ? c : null
+}
+
 /** Minutes to spare walking home from [x, y] before the storm; null outside the AOI or blocked. */
 export function stormMarginAt(cost: CostRaster, x: number, y: number, minutes_left: number): number | null {
   const cell = worldToRaster([x, y], cost.size_m, cost.px_m)

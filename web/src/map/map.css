@@ -118,3 +118,29 @@
 @media (max-width: 900px) {
   .am-compare-caption { top: auto; bottom: 96px; max-width: calc(100% - 24px); font-size: 13px; }
 }
+
+/* Replanning suggestion (MPC-2): a what-if panel under the map title, live sessions only. */
+.am-replan {
+  position: absolute;
+  top: 64px;
+  left: 12px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(17, 22, 29, 0.85);
+  color: #e8edf3;
+  font: 12px/1.3 system-ui, sans-serif;
+  pointer-events: auto;
+}
+.am-replan-head { display: flex; align-items: center; justify-content: space-between; font-weight: 600; }
+.am-replan-row { display: flex; flex-wrap: wrap; align-items: center; column-gap: 6px; }
+.am-replan-row input[type='range'] { order: 3; flex: 1 0 100%; margin: 2px 0 0; accent-color: #d9a877; }
+.am-replan-row .am-replan-val { order: 2; margin-left: auto; font-variant-numeric: tabular-nums; opacity: 0.85; }
+.am-replan-out { display: flex; flex-direction: column; gap: 3px; border-top: 1px solid #273a42; padding-top: 6px; }
+.am-replan-action { font-size: 13px; color: #d9a877; }
+.am-replan-none { color: #46c58b; }
+.am-replan-go_home_now { color: #ff5d6c; }
+.am-replan-low { color: #ff5d6c; }

@@ -25,6 +25,7 @@ export type LayerId =
   | 'waypoints'
   | 'route'
   | 'thread'
+  | 'suggestion'
   | 'targets'
   | 'places'
   | 'astronaut'
@@ -42,6 +43,7 @@ export const LAYER_ORDER: LayerId[] = [
   'waypoints',
   'route',
   'thread',
+  'suggestion',
   'targets',
   'places',
   'astronaut',
@@ -60,6 +62,8 @@ const SEEN_RGB: Rgba = [255, 140, 0, 255]
 /** Planned route colour (visual brief: --ink #e7efec); the red thread is kept for the way home (Y6). */
 const ROUTE_RGB: Rgba = [231, 239, 236, 255]
 const CASING_RGB: Rgba = [10, 17, 20, 200]
+/** MPC-2 suggested way (visual brief: --sand #d9a877). */
+const SUGGESTION_RGB: Rgba = [217, 168, 119, 255]
 /** The way home during a storm alert (visual brief: --thread #ff5d6c). */
 const THREAD_RGB: Rgba = [255, 93, 108, 255]
 const HAVEN_RGB: Rgba = [46, 204, 113, 255]
@@ -82,6 +86,8 @@ export type MissionLayers = {
   alert?: { path: XY[] | null; pulse: number } | null
   /** Selected B3 target id (Y7). */
   selectedTarget?: string | null
+  /** MPC-2 replanning suggestion: the suggested way (dropped stops or home now), AOI metres. */
+  suggestion?: XY[][] | null
 }
 
 /** Which mission layers exist, for the toggles. */
@@ -95,6 +101,8 @@ export type MissionEntries = {
   alert?: boolean
   /** The envelope is drawn from the flat-ground variant (Y9 comparison). */
   flat?: boolean
+  /** A replanning suggestion path is shown (MPC-2). */
+  suggestion?: boolean
 }
 
 /** Below this map width the small ortho is used (fewer pixels, safer on phone GPUs). */
@@ -210,6 +218,9 @@ export function layerEntries(source: AssetSource, data: SiteData, mission?: Miss
       provenance: synthetic ? 'Simulation' : mission.routeProvenance,
       visible: true,
     })
+  }
+  if (mission?.suggestion) {
+    entries.push({ id: 'suggestion', label: 'Replanning suggestion (what if)', provenance: 'Simulation', visible: true })
   }
   if (mission?.alert) {
     entries.push({ id: 'thread', label: 'Way home before the storm', provenance: 'Simulation', visible: true })
@@ -414,6 +425,24 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
           path('route-walked-casing', walked, CASING_RGB, 6.5),
           path('route-walked', walked, ROUTE_RGB, 4),
         )
+        break
+      }
+      case 'suggestion': {
+        const ways = mission?.suggestion?.filter((p) => p.length >= 2)
+        if (!ways || ways.length === 0) break
+        const dashed = ways.flatMap((p) => dashes(p, mission!.dash_m, mission!.dash_m * 0.6))
+        const sug = (sid: string, color: Rgba, width: number) =>
+          new PathLayer<XY[]>({
+            id: sid,
+            data: dashed,
+            getPath: (p) => p,
+            positionFormat: 'XY',
+            getColor: color,
+            getWidth: width,
+            widthUnits: 'pixels',
+            capRounded: true,
+          })
+        out.push(sug('suggestion-casing', CASING_RGB, 6), sug('suggestion', SUGGESTION_RGB, 3.5))
         break
       }
       case 'thread': {

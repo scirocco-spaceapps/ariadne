@@ -21,7 +21,7 @@ MPC-2 is not merged by **Sun 09:30**; the Sun 11:00 feature freeze holds.
 - [x] **MUST 6 check · Yusuf · while MPC-1 runs** — gate for merging MPC-2. (#63)
   The e2e demo90 test is green on main, and the storm scenario runs once on the live app
   (alert, thread home on the console, alert screen on the cuff, clear).
-- [ ] **MPC-2 · Yusuf · after MPC-1 and the MUST 6 check, before Sat 23:30** — the rule on the console.
+- [x] **MPC-2 · Yusuf · after MPC-1 and the MUST 6 check, before Sat 23:30** — the rule on the console. (#68)
   Work only inside `web/src/map/`. A suggestion overlay on the map ("skip X, home with N min
   reserve") and the two what-if controls (suit leak, dust/visibility); replans call the existing
   `POST /route` with `[current stop, …remaining]`. Hidden in DEMO mode (no planner). Done when the

@@ -39,3 +39,6 @@ export {
 export { envelopeMode, minutesToStorm, stormMarginAt, timeToStorm, type EnvelopeMode } from './envelope'
 export { selectFromPick, stopIdFromPick, targetIdFromPick } from './route'
 export { targetLabel } from './buildLayers'
+export { decide, sessionReplan, suggestionText, REPLAN_CONTROLS, type ReplanResult, type ReplanInput } from './replan'
+export { useReplan, useReplanControls } from './useReplan'
+export { ReplanPanel } from './ReplanPanel'

@@ -112,7 +112,7 @@ describe('buildLayers', () => {
 describe('layerEntries', () => {
   it('lists only layers with data, in stacking order', () => {
     const ids = layerEntries(source(false), { ...FULL, geology: null }).map((e) => e.id)
-    const absent = ['geology', 'route', 'astronaut', 'envelope', 'thread', 'seen', 'targets']
+    const absent = ['geology', 'route', 'astronaut', 'envelope', 'thread', 'seen', 'targets', 'suggestion']
     expect(ids).toEqual(LAYER_ORDER.filter((id) => !absent.includes(id)))
   })
 
@@ -366,5 +366,24 @@ describe('seen, not touched (Y7)', () => {
   it('names targets from their id', () => {
     expect(targetLabel('target-cheyava-falls', 1182)).toBe('Target · Cheyava Falls · sol 1182')
     expect(targetLabel('t1', null)).toBe('Target · T1')
+  })
+})
+
+describe('replanning suggestion (MPC-2)', () => {
+  const base: MissionLayers = { geom: null, progress_m: 0, marker: null, numbers: {}, selectedStop: null, dash_m: 10 }
+  const way: [number, number][] = [
+    [0, 0],
+    [100, 0],
+  ]
+
+  it('draws the suggested way dashed above the thread and lists it only while shown', () => {
+    const ids = buildLayers({ source: source(false), data: FULL, isVisible: all, narrow: false, mission: { ...base, suggestion: [way] } }).map((l) => l.id)
+    expect(ids).toContain('suggestion')
+    expect(ids.indexOf('suggestion')).toBeLessThan(ids.indexOf('places'))
+    const entries = layerEntries(source(false), FULL, { route: true, astronaut: true, routeProvenance: 'Modeled', suggestion: true })
+    expect(entries.find((e) => e.id === 'suggestion')?.provenance).toBe('Simulation')
+    expect(layerEntries(source(false), FULL).find((e) => e.id === 'suggestion')).toBeUndefined()
+    const none = buildLayers({ source: source(false), data: FULL, isVisible: all, narrow: false, mission: base }).map((l) => l.id)
+    expect(none).not.toContain('suggestion')
   })
 })

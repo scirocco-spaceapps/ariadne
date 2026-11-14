@@ -26,18 +26,3 @@ Delete each note in the PR that handles it.
 - **Also:** the Project link on the form is the repo, so it must be public before submission (Y8).
 - **Update (F6 review):** Bunyamin confirmed the MSL RAD DOI, https://doi.org/10.1126/science.1244797;
   the `radiation_dose_rate` DATA_SOURCES row can carry it. DONKI still has no row.
-
-## 2026-11-14 — from Bunyamin (MPC-1): the replanning rule is ready for MPC-2
-
-- **What:** the rule is `decide()` in `notebooks/replanning.py` (plain Python, port it line by line)
-  and in words in `docs/model.md`, "Replanning" (definitions of `D`, `margin`, `reserve_left`, the
-  9 rule lines with reasons).
-- **Test source:** MPC-2 tests run against `notebooks/out/route.json` (leg table `legs_min`, planner
-  commit) and `notebooks/out/replanning_cases.json` (11 cases, each with its own params, input
-  including x/y in metres, and expected decision), **not the live planner**. Matching rule in the
-  file: `action`, `reason`, `kept`, `dropped`, `dwell_min` exact; `margin_min`, `reserve_left_min`,
-  `end_min` within 0.5 min.
-- **Console controls:** defaults and ranges are in the cases file under `console` (Simulation):
-  `speed_factor` default 0.5, 0.3–1.0, step 0.1; `leak_min` default 120, 0–180, step 10.
-- **On the console:** `home_now_min` is `cost_to_home` at the astronaut's (x, y); `lead_min` = leg
-  time × remaining path length / leg path length; while a storm alert is active, show no suggestion.
