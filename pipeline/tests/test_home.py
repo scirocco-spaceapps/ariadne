@@ -80,3 +80,24 @@ def test_sites_conversion_flags_outside_and_impassable():
     assert [s["id"] for s in stops] == ["a", "b"]
     assert any("a (" in p and "impassable" in p for p in problems)
     assert any("b (" in p and "outside" in p for p in problems)
+
+
+def _variants_module():
+    spec = importlib.util.spec_from_file_location("variants", REPO / "pipeline" / "scripts" / "06_variants.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_flat_variant_ignores_terrain_and_is_a_disc():
+    variants = _variants_module()
+    mask = np.ones((21, 21), dtype=bool)
+    mask[0, 0] = False  # one no-data cell stays NaN
+    c = variants.flat_cost(mask, SPEED)
+    assert np.isnan(c[0, 0]) and np.nanmax(c) == pytest.approx(1 / SPEED)
+    minutes, _ = cost_to_home(c, PX, (10, 10))
+    # Uniform cost: straight neighbours 1 cell, diagonals sqrt(2) cells; knight-like moves use one of each.
+    assert minutes[10, 15] == pytest.approx(5 * PX / SPEED)
+    assert minutes[15, 15] == pytest.approx(5 * math.sqrt(2) * PX / SPEED)
+    # Symmetric around the haven (a disc-like envelope, no terrain walls).
+    assert minutes[10, 15] == pytest.approx(minutes[5, 10]) == pytest.approx(minutes[15, 10])

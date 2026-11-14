@@ -30,6 +30,7 @@ rasterio has no wheel for newer versions yet), then
 6. `scripts/05a_sites.py`: stops and safe haven from `content/stops/index.json` (B2) to AOI metres, passable check,
    `aoi_sites_proposal.json` for the aoi.json PR. `scripts/05_cost_to_home.py [--haven X,Y]`: `cost_to_home_2m.f32`
    and `pred_2m.i32` from the safe haven.
+7. `scripts/06_variants.py`: `cost_to_home_flat_2m.f32`, the "without the terrain model" variant (task Y9 compares).
 
 **AOI frame:** `scripts/aoi.py` reads `contracts/aoi.json`; `aoi_frame.json` overrides `origin_lonlat`
 until the real origin is in the contract.

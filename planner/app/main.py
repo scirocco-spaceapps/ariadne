@@ -1,7 +1,8 @@
 """Ariadne planner service. Contract: contracts/openapi.yaml (tag planner).
 
 Env: DATA_DIR (assets root, default /srv/assets), AOI_PATH (default DATA_DIR/aoi.json),
-WEB_ORIGIN (comma-separated CORS origins, default http://localhost:5173).
+WEB_ORIGIN (comma-separated CORS origins, default http://localhost:5173),
+PLANNER_TIMEOUT_S (per-request limit, default 5 s; a slower request answers 422).
 """
 
 from __future__ import annotations
@@ -12,7 +13,10 @@ import time
 from contextlib import asynccontextmanager
 from typing import Annotated
 
+import asyncio
+
 from fastapi import FastAPI, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
@@ -22,6 +26,7 @@ from . import plan
 log = logging.getLogger("uvicorn.error")
 
 XY = Annotated[list[float], Field(min_length=2, max_length=2)]
+MAX_STOPS = 30  # a walk has a handful of stops; this bounds the work per request
 
 
 class RouteRequest(BaseModel):
@@ -85,11 +90,26 @@ def health() -> dict[str, str]:
     return {"status": "ok", "service": "planner"}
 
 
+def timeout_s() -> float:
+    return float(os.environ.get("PLANNER_TIMEOUT_S", "5"))
+
+
+async def _bounded(fn, *args) -> dict:
+    """Run a computation in the thread pool; answer 422 if it exceeds PLANNER_TIMEOUT_S.
+    (The thread finishes in the background; the client gets a clear answer instead of hanging.)"""
+    try:
+        return await asyncio.wait_for(run_in_threadpool(fn, *args), timeout=timeout_s())
+    except asyncio.TimeoutError:
+        raise plan.PlanError(f"planning took longer than {timeout_s():g} s; try fewer stops") from None
+
+
 @app.post("/route")
-def route(req: RouteRequest) -> dict:
-    return plan.plan_route(_data(), req.stops, req.return_home)
+async def route(req: RouteRequest) -> dict:
+    if len(req.stops) > MAX_STOPS:
+        raise plan.PlanError(f"at most {MAX_STOPS} stops per route, got {len(req.stops)}")
+    return await _bounded(plan.plan_route, _data(), req.stops, req.return_home)
 
 
 @app.post("/abort")
-def abort(req: AbortRequest) -> dict:
-    return plan.plan_abort(_data(), (req.from_[0], req.from_[1]))
+async def abort(req: AbortRequest) -> dict:
+    return await _bounded(plan.plan_abort, _data(), (req.from_[0], req.from_[1]))

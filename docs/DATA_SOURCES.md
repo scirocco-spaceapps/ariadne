@@ -39,3 +39,4 @@ data by a deterministic method), **Modeled** (output of our or a published model
 | `model/params.json` speed_vs_slope | Tobler 1993 hiking function, normalised | Modeled |
 | `model/params.json` radiation_dose_rate 210 uGy/day | Hassler et al. 2014, MSL RAD at Gale | Modeled |
 | `model/params.json` observer_height_m 2.0 | Bell et al. 2021, Mastcam-Z | Observed |
+| `cost_to_home_flat_2m.f32` ("without the terrain model" variant): every data cell walked at `walk_speed_flat_m_per_min`, no slope, nothing impassable, same MCP from the safe haven; the envelope becomes a disc. Dev run (placeholder haven, dev params): 99.2 % of the AOI within 52.5 min vs 90.0 % with the terrain model | pipeline/scripts/06_variants.py (task A7) | Modeled (Assumed until B1/B2) |
