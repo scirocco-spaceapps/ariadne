@@ -15,3 +15,14 @@ Owner of this file: Furkan (`content/`, `web/src/stops/`, `e2e/`, `docs/submissi
   Tailscale rows stay as the fallback is your call.
 - **Check after Nuri switches Vercel to the server:** the HiRISE layer in the browser (your open
   point 5).
+
+## 2026-11-14 — from Yusuf: "After the all-clear, the plan goes on" (page.md line 79)
+
+- **What:** in the live storm run on the server (Sat ~21:00), the alert sent the astronaut home;
+  once there, Clear ended the walk: the cuff said "Home: the walk is done." and Start did not
+  resume. That is how mission-control works (`internal/sim/sim.go`, `Clear`): if the astronaut is
+  already home, the walk ends; if not, the astronaut walks back to where the plan was left and the
+  plan goes on. The demo90 script clears only after arriving home, so the demo and the video
+  never show the plan going on.
+- **Suggested wording:** "After the all-clear, the plan goes on from where it was left, unless the
+  astronaut is already home." Or describe only what the video shows.
