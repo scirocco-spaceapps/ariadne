@@ -50,5 +50,5 @@
     { "id": "s2", "name": "Stop 2 (placeholder)", "xy": [1500, 1100] },
     { "id": "s3", "name": "Stop 3 (placeholder)", "xy": [2000, 1600] }
   ],
-  "model": { "budget_min": 240, "reserve_min": 30, "dwell_min": 20 }
+  "model": { "budget_min": 360, "reserve_min": 60, "dwell_min": 20 }
 }
