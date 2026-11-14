@@ -6,7 +6,7 @@
   "tasks": [
     "Photograph the outcrop face from about 5 m to show its layering.",
     "Measure the thickness of three layers with a scale bar in the frame.",
-    "Look for rounded pebbles (up to about 2.5 cm) in the layers and photograph any you find with a scale bar."
+    "Look for sub-rounded pebbles (up to about 2.5 cm) in the layers and photograph any you find with a scale bar."
   ],
   "photos": [
     {
@@ -38,5 +38,5 @@
       "url": "https://meetingorganizer.copernicus.org/EPSC-DPS2025/EPSC-DPS2025-888.html"
     }
   ],
-  "draft": true
+  "draft": false
 }

@@ -3,7 +3,7 @@
 Perseverance raw images (Mastcam-Z right camera, colour), downloaded as NASA's 1200 px JPG browse
 version. Every image was taken with the rover at the stop's position: the `site_drive` below equals
 the stop's `rmc` in `stops/index.json` (from NASA's raw-image API fields `site` and `drive`).
-Captions describe only what is visible. Status: draft, waiting for Bunyamin's review.
+Captions describe only what is visible. Reviewed and approved by Bunyamin on 2026-11-14 (PR #50).
 
 | File | Sol | Date (UTC) | Camera | Credit | site_drive | Page | Caption |
 |---|---|---|---|---|---|---|---|
