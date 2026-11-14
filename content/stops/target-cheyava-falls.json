@@ -1,0 +1,48 @@
+{
+  "id": "target-cheyava-falls",
+  "name": "Unvisited ground near Cheyava Falls",
+  "kind": "target",
+  "science_question": "The rover saw this ground, 79 m from Cheyava Falls, but never drove onto it. Do the layers with 'leopard spots' continue beyond the sampled rock?",
+  "tasks": [
+    "Walk to the target area and photograph it from about 5 m.",
+    "Look in reddish rock for millimetre-size light spots with dark rims and photograph any you find with a scale bar.",
+    "Note whether white calcium sulfate veins cross the rock here, as at Cheyava Falls."
+  ],
+  "photos": [
+    {
+      "file": "photos/target-cheyava-falls_1.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_1206_0774007545_050ECM_N0550340NCAM02206_01_195J",
+      "sol": 1206,
+      "camera": "Navcam Left",
+      "credit": "NASA/JPL-Caltech",
+      "caption": "View across the channel slope; the target area is at the right of the frame (projected from rover position and camera pointing).",
+      "distance_m": 69.0
+    },
+    {
+      "file": "photos/target-cheyava-falls_2.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_1195_0773024714_972ECM_N0550000NCAM02195_01_195J",
+      "sol": 1195,
+      "camera": "Navcam Left",
+      "credit": "NASA/JPL-Caltech",
+      "caption": "View up the channel slope; the target area is at the left of the frame (projected from rover position and camera pointing).",
+      "distance_m": 80.7
+    }
+  ],
+  "unit": "Unvisited; near the Cheyava Falls rock of the Bright Angel formation",
+  "provenance": "Derived",
+  "sources": [
+    {
+      "title": "Ariadne B3 viewshed notebook: targets seen but not touched (notebooks/viewshed.ipynb, Chosen targets table)",
+      "url": "https://github.com/scirocco-spaceapps/ariadne/blob/main/notebooks/viewshed.ipynb"
+    },
+    {
+      "title": "NASA's Perseverance Rover Scientists Find Intriguing Mars Rock (NASA/JPL, 25 July 2024)",
+      "url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-rover-scientists-find-intriguing-mars-rock/"
+    },
+    {
+      "title": "Hurowitz et al. 2025, Redox-driven mineral and organic associations in Jezero Crater, Mars, Nature",
+      "url": "https://doi.org/10.1038/s41586-025-09413-0"
+    }
+  ],
+  "draft": false
+}

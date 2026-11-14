@@ -1,0 +1,44 @@
+{
+  "id": "target-closest-pass",
+  "name": "Closest pass",
+  "kind": "target",
+  "science_question": "The rover stopped 24 m from this ground on sol 1158 and drove on without touching it. What does the rock look like up close?",
+  "tasks": [
+    "The slope here is about 18.6°, in the caution class (15–20°): approach along the gentlest line.",
+    "Photograph the target area from about 5 m.",
+    "Photograph one rock surface up close with a scale bar."
+  ],
+  "photos": [
+    {
+      "file": "photos/target-closest-pass_1.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1159_0769818090_473EBY_N0523018ZCAM09196_0630LMJ",
+      "sol": 1159,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "Close view of wind-eroded rock and sand; the target area is at the right of the frame (projected from rover position and camera pointing).",
+      "distance_m": 26.4
+    },
+    {
+      "file": "photos/target-closest-pass_2.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1155_0769468610_818EBY_N0522644ZCAM09193_0480LMJ",
+      "sol": 1155,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "View over rocky ground toward the channel wall; the target area is at the lower right of the frame (projected from rover position and camera pointing).",
+      "distance_m": 57.1
+    }
+  ],
+  "unit": "Unvisited; beside the rover traverse, about 23 m from the track",
+  "provenance": "Derived",
+  "sources": [
+    {
+      "title": "Ariadne B3 viewshed notebook: targets seen but not touched (notebooks/viewshed.ipynb, Chosen targets table)",
+      "url": "https://github.com/scirocco-spaceapps/ariadne/blob/main/notebooks/viewshed.ipynb"
+    },
+    {
+      "title": "Ariadne walk model parameters: caution_slope_deg 15 and max_slope_deg 20 (model/params.json)",
+      "url": "https://github.com/scirocco-spaceapps/ariadne/blob/main/model/params.json"
+    }
+  ],
+  "draft": false
+}
