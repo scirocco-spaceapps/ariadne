@@ -52,3 +52,19 @@ answered in `docs/notes/furkan.md`. Still open for N4 and N6:
 - **Reusable for N4/N6:** `routeGeometry`, `progressAtTime`, `progressFromState`, `nextProgress`,
   `pointAt`, `stopNumbers`, `arrivalTicks` from `web/src/map`.
 - **No action needed** unless you want the store field above.
+
+## 2026-11-14 — from Yusuf (task Y5): `marginAt` for the cuff (N4)
+
+- **What:** the return envelope is on the map, and the pieces for the cuff are exported from
+  `web/src/map`:
+  - `useCostToHome(source)` → `CostRaster | null` (fetches `rasters.cost_to_home` once per URL;
+    null while loading or if the file is missing). Use the same `source` as the console
+    (`fixtureSource()` in DEMO, `remoteSource(aoi, assetsUrl)` live).
+  - `makeMarginAt(cost, aoi.model)` → `(x, y, t) => minutes | null`; or `marginAt(cost, model, x, y, t)`.
+    margin = `(budget_min - t) - reserve_min - cost_to_home`; null outside the AOI or where the way
+    home is blocked (NaN).
+  - `marginClass(margin, aoi.model)` → `'safe' | 'tight' | 'out'` (safe ≥ reserve, tight 0…reserve,
+    out < 0 or null) and `ENVELOPE_COLORS` for the same three classes, so cuff and map agree.
+- **Example:** `const m = makeMarginAt(cost, aoi.model)(state.pos[0], state.pos[1], state.t_min)`.
+  Provenance on screen: `Modeled` (`Simulation` on fixtures).
+- This closes the "Coming from Yusuf" line about Y5 above (you delete it when you like).

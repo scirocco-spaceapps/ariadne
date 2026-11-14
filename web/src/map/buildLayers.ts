@@ -7,6 +7,7 @@ import type { Provenance } from '../lib/types'
 import type { AssetSource } from './assets'
 import type { XY } from './coords'
 import { linePaths, pointFeatures, polygonLabelPoint, unitPolygons, type UnitPolygon } from './geo'
+import { ENVELOPE_COLORS, envelopeThresholds } from './envelope'
 import type { LayerEntry, LegendItem } from './layers'
 import { dashes, splitAt, type RouteGeometry } from './route'
 import type { SiteData } from './useSiteData'
@@ -16,6 +17,7 @@ export type LayerId =
   | 'hillshade'
   | 'slope'
   | 'traversability'
+  | 'envelope'
   | 'geology'
   | 'track'
   | 'waypoints'
@@ -29,6 +31,7 @@ export const LAYER_ORDER: LayerId[] = [
   'hillshade',
   'slope',
   'traversability',
+  'envelope',
   'geology',
   'track',
   'waypoints',
@@ -56,7 +59,13 @@ export type MissionLayers = {
 }
 
 /** Which mission layers exist, for the toggles. */
-export type MissionEntries = { route: boolean; astronaut: boolean; routeProvenance: Provenance }
+export type MissionEntries = {
+  route: boolean
+  astronaut: boolean
+  routeProvenance: Provenance
+  /** The cost-to-home raster loaded, so the return envelope can be drawn (Y5). */
+  envelope?: boolean
+}
 
 /** Below this map width the small ortho is used (fewer pixels, safer on phone GPUs). */
 export const NARROW_PX = 768
@@ -109,6 +118,20 @@ export function layerEntries(source: AssetSource, data: SiteData, mission?: Miss
       legend: legend(aoi.rasters.traversability.legend),
     },
   ]
+  if (mission?.envelope) {
+    const { safe_min, tight_min } = envelopeThresholds(aoi.model)
+    entries.push({
+      id: 'envelope',
+      label: 'Return envelope (time left to walk home)',
+      provenance: prov(source, 'Modeled'),
+      visible: true,
+      legend: [
+        { color: ENVELOPE_COLORS.safe, label: `Back with ≥ ${safe_min} min to spare` },
+        { color: ENVELOPE_COLORS.tight, label: `Back with ${tight_min}–${safe_min} min to spare` },
+        { color: ENVELOPE_COLORS.out, label: 'Cannot get back in time' },
+      ],
+    })
+  }
   if (data.geology) {
     entries.push({ id: 'geology', label: 'Geologic units', provenance: prov(source, 'Observed'), visible: true })
   }
@@ -157,10 +180,12 @@ export type BuildInput = {
   isVisible: (id: LayerId) => boolean
   narrow: boolean
   mission?: MissionLayers
+  /** The return envelope at the current time, drawn on an offscreen canvas (Y5). */
+  envelope?: { image: HTMLCanvasElement } | null
 }
 
 /** deck.gl layers, bottom to top, for the visible layers whose data is present. */
-export function buildLayers({ source, data, isVisible, narrow, mission }: BuildInput): Layer[] {
+export function buildLayers({ source, data, isVisible, narrow, mission, envelope }: BuildInput): Layer[] {
   const { aoi } = source
   const [w, h] = aoi.size_m
   const bounds: [number, number, number, number] = [0, 0, w, h]
@@ -183,6 +208,10 @@ export function buildLayers({ source, data, isVisible, narrow, mission }: BuildI
         break
       case 'traversability':
         out.push(bitmap('traversability', aoi.rasters.traversability.file, 0.6))
+        break
+      case 'envelope':
+        if (!envelope) break
+        out.push(new BitmapLayer({ id: 'envelope', image: envelope.image, bounds }))
         break
       case 'geology': {
         if (!data.geology) break

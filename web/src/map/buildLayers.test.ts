@@ -104,7 +104,7 @@ describe('buildLayers', () => {
 describe('layerEntries', () => {
   it('lists only layers with data, in stacking order', () => {
     const ids = layerEntries(source(false), { ...FULL, geology: null }).map((e) => e.id)
-    expect(ids).toEqual(LAYER_ORDER.filter((id) => !['geology', 'route', 'astronaut'].includes(id)))
+    expect(ids).toEqual(LAYER_ORDER.filter((id) => !['geology', 'route', 'astronaut', 'envelope'].includes(id)))
   })
 
   it('labels SYNTHETIC data as Simulation and placeholder places as Assumed', () => {
@@ -175,5 +175,42 @@ describe('route, numbered stops and astronaut (Y4)', () => {
   it('draws no route or astronaut without a mission', () => {
     const ids = buildLayers({ source: source(false), data: FULL, isVisible: all, narrow: false }).map((l) => l.id)
     expect(ids.some((id) => id.startsWith('route') || id.startsWith('astronaut'))).toBe(false)
+  })
+})
+
+describe('return envelope (Y5)', () => {
+  const image = {} as HTMLCanvasElement
+
+  it('stacks the envelope over the rasters and under the vectors', () => {
+    const ids = buildLayers({ source: source(false), data: FULL, isVisible: all, narrow: false, envelope: { image } }).map(
+      (l) => l.id,
+    )
+    expect(ids.indexOf('envelope')).toBe(ids.indexOf('traversability') + 1)
+    expect(ids.indexOf('envelope')).toBeLessThan(ids.indexOf('geology'))
+  })
+
+  it('draws nothing until the raster is loaded', () => {
+    const ids = buildLayers({ source: source(false), data: FULL, isVisible: all, narrow: false, envelope: null }).map(
+      (l) => l.id,
+    )
+    expect(ids).not.toContain('envelope')
+  })
+
+  it('builds the legend from the reserve in aoi.model', () => {
+    const entries = layerEntries(source(false), FULL, {
+      route: false,
+      astronaut: false,
+      routeProvenance: 'Modeled',
+      envelope: true,
+    })
+    const env = entries.find((e) => e.id === 'envelope')
+    expect(env?.provenance).toBe('Modeled')
+    expect(env?.legend?.map((l) => l.label)).toEqual([
+      'Back with ≥ 30 min to spare',
+      'Back with 0–30 min to spare',
+      'Cannot get back in time',
+    ])
+    const synth = layerEntries(source(true), FULL, { route: false, astronaut: false, routeProvenance: 'Modeled', envelope: true })
+    expect(synth.find((e) => e.id === 'envelope')?.provenance).toBe('Simulation')
   })
 })
