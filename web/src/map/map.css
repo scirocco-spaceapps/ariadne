@@ -62,3 +62,29 @@
 .am-legend li { display: flex; align-items: center; gap: 6px; }
 .am-swatch { width: 12px; height: 12px; border-radius: 2px; border: 1px solid rgba(0, 0, 0, 0.35); flex: none; }
 .am-title { font-weight: 600; font-size: 13px; }
+
+/* Time bar (Y4): plan time in planning mode, the session clock otherwise. */
+.am-bottom-center { bottom: 12px; left: 12px; right: 12px; max-width: 720px; margin: 0 auto; }
+/* With a time bar the scale bar and cursor readout sit above it. */
+.am-has-timebar .am-bottom-left { bottom: 96px; }
+.am-timebar { display: flex; flex-direction: column; gap: 4px; }
+.am-timebar-head { display: flex; align-items: center; gap: 8px; }
+.am-timebar-clock { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13px; }
+.am-timebar-end { margin-left: auto; opacity: 0.75; font-variant-numeric: tabular-nums; }
+.am-timebar-track { position: relative; padding-bottom: 16px; }
+.am-timebar-track input[type='range'] { width: 100%; margin: 0; accent-color: #e7efec; }
+.am-timebar-track input[type='range']:disabled { opacity: 0.85; cursor: default; }
+.am-timebar-ticks { list-style: none; margin: 0; padding: 0; position: absolute; left: 7px; right: 7px; bottom: 0; height: 14px; }
+.am-timebar-ticks li {
+  position: absolute;
+  transform: translateX(-50%);
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  background: #fbbf24;
+  color: #11161d;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+}

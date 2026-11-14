@@ -4,17 +4,33 @@
 import { OrthographicView, type OrthographicViewState, type PickingInfo } from '@deck.gl/core'
 import { DeckGL } from '@deck.gl/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useMission } from '../app/store'
+import { fixtures } from '../lib/fixtures'
+import type { Provenance, WsState } from '../lib/types'
 import type { AssetSource } from './assets'
-import { buildLayers, layerEntries, NARROW_PX, type LayerId } from './buildLayers'
+import { buildLayers, layerEntries, NARROW_PX, type LayerId, type MissionLayers } from './buildLayers'
 import { inAoi, type SizeM, type XY } from './coords'
 import { useLayerRegistry } from './layers'
 import { CursorReadout, NorthArrow, ScaleBar } from './overlays'
-import { fitZoom } from './scale'
+import { usePlanClock } from './planClock'
+import {
+  nextProgress,
+  pointAt,
+  progressAtTime,
+  routeGeometry,
+  stopIdFromPick,
+  stopNumbers,
+  type Progress,
+  type RouteGeometry,
+} from './route'
+import { fitZoom, metresPerPixel } from './scale'
+import { TimeBar } from './TimeBar'
 import { useSiteData } from './useSiteData'
 import './map.css'
 
 const VIEW = new OrthographicView({ id: 'map', flipY: false, controller: true })
 const MAX_ZOOM = 4 // 16 screen px per metre
+const DASH_PX = 10 // dash length of the route ahead, screen pixels
 
 type Props = { source: AssetSource; className?: string }
 
@@ -37,6 +53,36 @@ export function MapView({ source, className }: Props) {
   const [cursor, setCursor] = useState<XY | null>(null)
 
   const data = useSiteData(source)
+
+  // Mission state (Y4): the planned route, the session state, the selected stop and the plan clock.
+  const route = useMission((s) => s.route)
+  const state = useMission((s) => s.session.state)
+  const selectedStop = useMission((s) => s.selectedStop)
+  const selectStop = useMission((s) => s.selectStop)
+  const planT = usePlanClock((s) => s.t_min)
+  const geom = useMemo(() => (route ? routeGeometry(route) : null), [route])
+  const numbers = useMemo(() => (route ? stopNumbers(route) : {}), [route])
+  const routeProvenance: Provenance =
+    source.synthetic || route === fixtures.route ? 'Simulation' : (route?.provenance ?? 'Modeled')
+  useEffect(() => usePlanClock.getState().setT(0), [route])
+
+  // With a session the state drives the marker and the walked part (kept monotonic per run, so the
+  // last state and its progress are remembered); without one the plan clock does (planning mode).
+  const [run, setRun] = useState<{ state: WsState | null; geom: RouteGeometry | null; p: Progress | null }>({
+    state: null,
+    geom: null,
+    p: null,
+  })
+  const fresh = state !== run.state || geom !== run.geom
+  const sessionProgress = state && geom ? (fresh ? nextProgress(run.p, geom, state) : run.p) : null
+  if (fresh) setRun({ state, geom, p: sessionProgress }) // adjust state while rendering (React docs pattern)
+  const progress_m = !geom || !route ? 0 : sessionProgress ? sessionProgress.s : progressAtTime(route, geom, planT)
+  const marker = useMemo<XY | null>(
+    () => (state ? [state.pos[0], state.pos[1]] : geom ? pointAt(geom, progress_m) : null),
+    [state, geom, progress_m],
+  )
+  const hasMarker = marker !== null
+
   const registered = useLayerRegistry((s) => s.layers)
   const register = useLayerRegistry((s) => s.register)
   const unregister = useLayerRegistry((s) => s.unregister)
@@ -45,12 +91,16 @@ export function MapView({ source, className }: Props) {
   // keeps each layer's visibility, so data arriving later does not reset the user's toggles.
   const ownIds = useRef<string[]>([])
   useEffect(() => {
-    const entries = layerEntries(source, data)
+    const entries = layerEntries(source, data, {
+      route: route !== null,
+      astronaut: hasMarker,
+      routeProvenance,
+    })
     const ids = entries.map((e) => e.id)
     ownIds.current.filter((id) => !ids.includes(id)).forEach(unregister)
     entries.forEach(register)
     ownIds.current = ids
-  }, [source, data, register, unregister])
+  }, [source, data, register, unregister, route, hasMarker, routeProvenance])
   useEffect(() => () => ownIds.current.forEach(unregister), [unregister])
 
   // Keep the AOI fitted to the container until the user pans or zooms
@@ -80,18 +130,29 @@ export function MapView({ source, className }: Props) {
     [w, h],
   )
 
+  const zoom = typeof viewState.zoom === 'number' ? viewState.zoom : viewState.zoom?.[0] ?? 0
+  // Dashes stay about DASH_PX on screen; zoom is quantised so panning does not rebuild them.
+  const dash_m = DASH_PX * metresPerPixel(Math.round(zoom * 4) / 4)
+
   // No layers until the real size is known, so a narrow map never downloads the big ortho first.
   const narrow = viewSize ? viewSize.width < NARROW_PX : null
   const layers = useMemo(() => {
     if (narrow === null) return []
     const visible = new Set(registered.filter((l) => l.visible).map((l) => l.id))
-    return buildLayers({ source, data, narrow, isVisible: (id: LayerId) => visible.has(id) })
-  }, [registered, source, data, narrow])
+    const mission: MissionLayers = { geom, progress_m, marker, numbers, selectedStop, dash_m }
+    return buildLayers({ source, data, narrow, mission, isVisible: (id: LayerId) => visible.has(id) })
+  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m])
 
-  const zoom = typeof viewState.zoom === 'number' ? viewState.zoom : viewState.zoom?.[0] ?? 0
+  const onClick = useCallback(
+    (info: PickingInfo) => {
+      const id = stopIdFromPick(info)
+      if (id) selectStop(id)
+    },
+    [selectStop],
+  )
 
   return (
-    <div className={`am-map ${className ?? ''}`}>
+    <div className={`am-map ${route ? 'am-has-timebar' : ''} ${className ?? ''}`}>
       <DeckGL
         views={VIEW}
         viewState={viewState}
@@ -103,8 +164,9 @@ export function MapView({ source, className }: Props) {
         }}
         layers={layers}
         onHover={onHover}
+        onClick={onClick}
         onResize={onResize}
-        getCursor={({ isDragging }) => (isDragging ? 'grabbing' : 'crosshair')}
+        getCursor={({ isDragging, isHovering }) => (isDragging ? 'grabbing' : isHovering ? 'pointer' : 'crosshair')}
       />
       <div className="am-overlay am-top-left">
         <span className="am-title">{aoi.name}</span>
@@ -120,6 +182,11 @@ export function MapView({ source, className }: Props) {
         <ScaleBar zoom={zoom} />
         <CursorReadout xy={cursor} />
       </div>
+      {route && (
+        <div className="am-overlay am-bottom-center">
+          <TimeBar route={route} state={state} provenance={routeProvenance} />
+        </div>
+      )}
     </div>
   )
 }
