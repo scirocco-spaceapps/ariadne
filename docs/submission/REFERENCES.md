@@ -131,3 +131,4 @@ Perseverance raw images, NASA's 1200 px JPG browse version. The credit is copied
 | Ariadne B3 viewshed notebook, Chosen targets table (Bunyamin) | https://github.com/scirocco-spaceapps/ariadne/blob/main/notebooks/viewshed.ipynb | Project work | Target choice, distances, sols, slope and science questions |
 | Mars 2020 raw image API (camera model, rover attitude) | https://mars.nasa.gov/rss/api/?feed=raw_images&category=mars2020&feedtype=json | NASA/JPL-Caltech | Checking that each target photo points at its target |
 | Mars 2020 waypoints (`M20_waypoints.json`) | https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json | NASA/JPL-Caltech | Rover positions and headings for the target photos |
+| Ariadne walk model parameters (`model/params.json`: caution_slope_deg 15, max_slope_deg 20) | https://github.com/scirocco-spaceapps/ariadne/blob/main/model/params.json | Project work (Bunyamin) | Slope class in the `target-closest-pass` task |
