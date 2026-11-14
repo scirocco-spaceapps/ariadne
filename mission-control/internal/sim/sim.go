@@ -127,6 +127,9 @@ func New(route contract.RouteResponse) *Sim {
 	return s
 }
 
+// Route returns the planned route. It never changes after New.
+func (s *Sim) Route() contract.RouteResponse { return s.route }
+
 // End returns the last minute of the plan.
 func (s *Sim) End() float64 { return s.end }
 
