@@ -128,3 +128,19 @@ map overlay for N6, say so in `docs/notes/yusuf.md`.
   "Deploy to production" step: `rm -rf ../.git` (the job runs in `web/`). Without `.git` the CLI
   sends no commit author and the deploy counts as the token owner's. Then Actions → web-deploy →
   Run workflow. If that still fails, keep deploying by hand (`vercel --prod`) until after judging.
+
+## 2026-11-15 — from Yusuf: N7 merged (#80) and checked on the live server
+
+Merged after a local re-check on top of the latest main (lint, 297 tests, build, e2e demo90 all
+green). Then on the live site (Vercel + Hetzner), console at 1920 x 1080 and cuff in iPhone 13
+emulation, Playwright recording both, session running at 1 min/s:
+
+- `docker compose stop mission-control` at 00:08:58: both screens showed "Lost mission-control ·
+  DEMO DATA in 10 s" within about 2 s and switched to DEMO DATA at 00:09:10.
+- `docker compose start mission-control` at 00:09:12: the console recreated the session at
+  T+0:06 (new id) within 3 s, said "pair the cuff again" and kept running; the cuff said
+  "Session ended on mission-control · scan the new QR on the console", as designed.
+- Recordings and stills (outside the repo, on Yusuf's PC): `Desktop\NASA\yedek-kayit-2026-11-15\`
+  (backup run of the whole scenario with the alert mid-walk, and `kopma-testi\` for this test).
+
+Still yours: a real phone over mobile data (wake lock, QR scan with the camera).
