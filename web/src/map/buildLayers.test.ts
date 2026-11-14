@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import type { Aoi, GeologyCollection, TrackCollection, WaypointCollection } from '../lib/types'
 import type { AssetSource } from './assets'
-import { buildLayers, LAYER_ORDER, layerEntries, orthoFile, type LayerId } from './buildLayers'
+import { fixtures } from '../lib/fixtures'
+import { buildLayers, LAYER_ORDER, layerEntries, orthoFile, type LayerId, type MissionLayers } from './buildLayers'
+import { routeGeometry, stopNumbers } from './route'
 import { EMPTY_SITE, type SiteData } from './useSiteData'
 
 const aoi = {
@@ -102,7 +104,7 @@ describe('buildLayers', () => {
 describe('layerEntries', () => {
   it('lists only layers with data, in stacking order', () => {
     const ids = layerEntries(source(false), { ...FULL, geology: null }).map((e) => e.id)
-    expect(ids).toEqual(LAYER_ORDER.filter((id) => id !== 'geology'))
+    expect(ids).toEqual(LAYER_ORDER.filter((id) => !['geology', 'route', 'astronaut'].includes(id)))
   })
 
   it('labels SYNTHETIC data as Simulation and placeholder places as Assumed', () => {
@@ -115,5 +117,63 @@ describe('layerEntries', () => {
   it('carries the legends from aoi.json', () => {
     const slope = layerEntries(source(false), FULL).find((e) => e.id === 'slope')
     expect(slope?.legend).toEqual([{ color: '#1a9850', label: '0-10°' }])
+  })
+})
+
+describe('route, numbered stops and astronaut (Y4)', () => {
+  const route = fixtures.route
+  const geom = routeGeometry(route)
+  const mission: MissionLayers = {
+    geom,
+    progress_m: geom.legs[0].length + 50,
+    marker: [260, 210],
+    numbers: stopNumbers(route),
+    selectedStop: 's1',
+    dash_m: 10,
+  }
+  const layers = buildLayers({ source: source(false), data: FULL, isVisible: all, narrow: false, mission })
+  const byId = Object.fromEntries(layers.map((l) => [l.id, l]))
+
+  it('draws the route under the stops and the astronaut on top', () => {
+    const ids = layers.map((l) => l.id)
+    expect(ids.slice(ids.indexOf('waypoints') + 1)).toEqual([
+      'route-ahead-casing',
+      'route-ahead',
+      'route-walked-casing',
+      'route-walked',
+      'places',
+      'places-numbers',
+      'places-labels',
+      'astronaut',
+      'astronaut-label',
+    ])
+  })
+
+  it('splits walked (solid) from ahead (dashed)', () => {
+    const walked = byId['route-walked'].props.data as unknown[]
+    const ahead = byId['route-ahead'].props.data as unknown[]
+    expect(walked).toHaveLength(2) // leg 0 and the walked part of leg 1
+    expect(ahead.length).toBeGreaterThan(5) // the rest of leg 1 cut into 10 m dashes
+  })
+
+  it('makes stops clickable, numbers route stops and rings the selected one', () => {
+    expect(byId['places'].props.pickable).toBe(true)
+    const numbered = byId['places-numbers'].props.data as { id: string; n: number }[]
+    expect(numbered.map((p) => p.n)).toEqual([1]) // only s1 is in this AOI
+    const places = byId['places'].props.data as { id: string; selected: boolean }[]
+    expect(places.find((p) => p.id === 's1')?.selected).toBe(true)
+  })
+
+  it('registers the route and the astronaut with their provenance', () => {
+    const entries = layerEntries(source(false), FULL, { route: true, astronaut: true, routeProvenance: 'Modeled' })
+    const prov = Object.fromEntries(entries.map((e) => [e.id, e.provenance]))
+    expect(prov).toMatchObject({ route: 'Modeled', astronaut: 'Simulation' })
+    const synth = layerEntries(source(true), FULL, { route: true, astronaut: true, routeProvenance: 'Modeled' })
+    expect(synth.find((e) => e.id === 'route')?.provenance).toBe('Simulation')
+  })
+
+  it('draws no route or astronaut without a mission', () => {
+    const ids = buildLayers({ source: source(false), data: FULL, isVisible: all, narrow: false }).map((l) => l.id)
+    expect(ids.some((id) => id.startsWith('route') || id.startsWith('astronaut'))).toBe(false)
   })
 })
