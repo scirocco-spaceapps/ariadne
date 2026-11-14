@@ -143,3 +143,10 @@ want me to.
   while the planner routes the real ones.
 - **Re-sends:** I rebuild with `pipeline/scripts/07_bundle.sh` whenever the assets change (e.g. if
   Bunyamin changes the 20° threshold).
+
+## 2026-11-14 — from Ali Koray: newer bundle, use this one
+
+- `ariadne-assets-20261114T1101Z.zip` (28 MB) replaces `…T1048Z`. Slope is now the 2 m mean (Bunyamin's
+  decision), so the slope, traversability and cost rasters changed; `aoi.json` is now straight from
+  `contracts/aoi.json` (real stops, since #32 merged).
+- Same steps as above. The check request now returns `eva_min` 219.65.

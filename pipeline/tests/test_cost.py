@@ -4,7 +4,7 @@ import math
 import numpy as np
 import pytest
 
-from slopecost import (CAUTION, GO, NOGO, aggregate_max, classify, colour_classes, colour_slope, cost_min_per_m,
+from slopecost import (CAUTION, GO, NOGO, aggregate, classify, colour_classes, colour_slope, cost_min_per_m,
                        load_params, slope_horn)
 
 # SYNTHETIC params for tests only.
@@ -43,9 +43,12 @@ def test_ramp_slope_matches_its_angle(deg):
     assert s2[1:-1, 1:-1] == pytest.approx(deg, abs=1e-6)
 
 
-def test_aggregate_takes_the_steepest_metre():
+def test_aggregate_mean_is_the_default_and_max_stays_available():
     a = np.array([[1, 2, 5, 5], [3, 4, 5, 9]], dtype="float64")
-    assert aggregate_max(a, 2).tolist() == [[4, 9]]
+    assert aggregate(a, 2).tolist() == [[2.5, 6.0]]
+    assert aggregate(a, 2, "max").tolist() == [[4, 9]]
+    a[0, 0] = np.nan
+    assert aggregate(a, 2).tolist() == [[3.0, 6.0]]  # NaN ignored
 
 
 def test_classes_follow_thresholds(model):
@@ -65,7 +68,7 @@ def test_cost_from_speed_curve_and_impassable_cells(model):
 def test_cost_on_ramp_end_to_end(model):
     deg = 10.0
     dem = np.tile(np.arange(40) * math.tan(math.radians(deg)), (40, 1))
-    s = aggregate_max(slope_horn(dem, 1.0), 2)
+    s = aggregate(slope_horn(dem, 1.0), 2)
     c = cost_min_per_m(s, classify(s, model), model)
     assert c[2:-2, 2:-2] == pytest.approx(1 / 45, rel=1e-6)
 
