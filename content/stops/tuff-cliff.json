@@ -2,11 +2,11 @@
   "id": "tuff-cliff",
   "name": "Tuff Cliff",
   "kind": "stop",
-  "science_question": "Jones et al. read the Tuff Cliff to Walhalla Glades layers as lake deposits. Do the layers here show a quiet lake rather than a flowing river?",
+  "science_question": "Jones et al. place the Tuff Cliff member at the base of the Bright Angel formation: thin, planar layers with pebbles up to 2.5 cm, which may have formed on land or at the edge of a lake, before the lake deepened into the mudstones above. Do these layers record the start of the lake?",
   "tasks": [
     "Photograph the outcrop face from about 5 m to show its layering.",
     "Measure the thickness of three layers with a scale bar in the frame.",
-    "Look for signs of transport by currents, such as cross-bedding, and photograph any you find."
+    "Look for rounded pebbles (up to about 2.5 cm) in the layers and photograph any you find with a scale bar."
   ],
   "photos": [
     {
@@ -15,7 +15,7 @@
       "sol": 1169,
       "camera": "Mastcam-Z Right",
       "credit": "NASA/JPL-Caltech/ASU",
-      "caption": "The rocky hill at Tuff Cliff."
+      "caption": "View from the Tuff Cliff stop on sol 1169."
     },
     {
       "file": "photos/tuff-cliff_2.jpg",
@@ -23,7 +23,7 @@
       "sol": 1170,
       "camera": "Mastcam-Z Right",
       "credit": "NASA/JPL-Caltech/ASU",
-      "caption": "Light-toned rock broken into thin, parallel slabs at Tuff Cliff."
+      "caption": "Thin, parallel rock slabs at the Tuff Cliff stop."
     }
   ],
   "unit": "Bright Angel formation, Tuff Cliff member",
