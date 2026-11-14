@@ -1,29 +1,4 @@
-/* Console session controls and the Pair cuff dialog. */
-.session-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-}
-.session-controls button {
-  min-height: 36px;
-  padding: 4px 14px;
-  font-size: 14px;
-  cursor: pointer;
-}
-.session-note {
-  font-size: 13px;
-  padding: 2px 8px;
-  border: 1px solid #b26a00;
-  border-radius: 4px;
-  color: #b26a00;
-}
-.session-error {
-  font-size: 13px;
-  color: #c62828;
-}
-
+/* Pair cuff dialog. Colours come from src/app/theme.css. */
 .pair-backdrop {
   position: fixed;
   inset: 0;
@@ -31,7 +6,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
 }
 .pair-dialog {
   display: flex;
@@ -41,8 +16,8 @@
   max-width: min(420px, calc(100vw - 32px));
   padding: 20px 24px;
   border-radius: 8px;
-  background: #fff;
-  color: #111;
+  background: var(--panel2);
+  color: var(--ink);
   text-align: center;
 }
 .pair-dialog h2 {
@@ -56,7 +31,7 @@
   font-size: 14px;
 }
 .pair-warn {
-  color: #b26a00;
+  color: var(--warn);
 }
 .pair-url {
   font-family: ui-monospace, monospace;
@@ -76,8 +51,8 @@
   flex-direction: column;
   gap: 8px;
   font-size: 13px;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color: #111;
+  font-family: var(--body);
+  color: var(--ink);
 }
 .pn-head {
   display: flex;
@@ -106,18 +81,18 @@
   line-height: 16px;
   white-space: nowrap;
 }
-.pn-prov-observed { color: #2f9e5b; }
-.pn-prov-derived { color: #2b7bb9; }
-.pn-prov-modeled { color: #8a5cc4; }
-.pn-prov-assumed { color: #b7791f; }
-.pn-prov-simulation { color: #c2410c; }
+.pn-prov-observed { color: var(--prov-observed); }
+.pn-prov-derived { color: var(--prov-derived); }
+.pn-prov-modeled { color: var(--prov-modeled); }
+.pn-prov-assumed { color: var(--prov-assumed); }
+.pn-prov-simulation { color: var(--prov-simulation); }
 .pn-mode {
   border-radius: 3px;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
-.pn-mode-live { color: #fff; background: #2f9e5b; border-color: #2f9e5b; }
-.pn-mode-archive { color: #555; background: #eee; border-color: #ccc; }
+.pn-mode-live { color: #04140c; background: var(--safe); border-color: var(--safe); }
+.pn-mode-archive { color: var(--muted); background: var(--panel); border-color: var(--line); }
 
 /* Error and notice lines keep their height when empty: no layout shift. */
 .pn-error,
@@ -125,12 +100,12 @@
   margin: 0;
   min-height: 18px;
 }
-.pn-error { color: #c62828; }
-.pn-notice { color: #b26a00; }
+.pn-error { color: var(--thread); }
+.pn-notice { color: var(--warn); }
 .pn-hidden { visibility: hidden; }
 
 .pn-card {
-  border: 1px solid #ddd;
+  border: 1px solid var(--line);
   border-radius: 6px;
   padding: 8px 10px;
   /* Fixed heights (the column is a fixed 380 px): loading, missing, error and filled cards take
@@ -147,7 +122,7 @@
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #555;
+  color: var(--muted);
 }
 .pn-card-radiation { height: 200px; }
 .pn-card-space_weather { height: 220px; }
@@ -161,7 +136,7 @@
   justify-content: space-between;
   gap: 8px;
 }
-.pn-row dt { color: #555; }
+.pn-row dt { color: var(--muted); }
 .pn-row dd { margin: 0; font-variant-numeric: tabular-nums; }
 .pn-big {
   margin: 0;
@@ -171,19 +146,19 @@
 }
 .pn-sub {
   margin: 0;
-  color: #555;
+  color: var(--muted);
   font-size: 12px;
 }
 .pn-missing,
 .pn-placeholder {
   margin: 0;
-  color: #666;
+  color: var(--muted);
 }
 .pn-stale {
   margin: 0;
   padding: 2px 6px;
-  background: #fff4e5;
-  color: #b26a00;
+  background: rgba(242, 169, 59, 0.15);
+  color: var(--warn);
   border-radius: 3px;
 }
 .pn-events {
@@ -210,7 +185,7 @@
   gap: 2px;
 }
 .pn-stops li { padding-left: 2px; }
-.pn-stops li::marker { color: #888; }
+.pn-stops li::marker { color: var(--muted); }
 .pn-stops label,
 .pn-plan label {
   display: inline-flex;
@@ -249,7 +224,7 @@
 .pn-table th,
 .pn-table td {
   padding: 3px 4px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--line);
   text-align: right;
   white-space: nowrap;
 }
@@ -258,26 +233,26 @@
   text-align: left;
   white-space: normal;
 }
-.pn-table th { font-weight: 600; color: #555; font-size: 12px; }
+.pn-table th { font-weight: 600; color: var(--muted); font-size: 12px; }
 .pn-table tfoot td { font-weight: 600; border-bottom: 0; }
-.pn-empty-row td { color: #888; height: 22px; text-align: left; }
-.pn-reserve td:last-child { color: #c62828; font-weight: 700; }
+.pn-empty-row td { color: var(--muted); height: 22px; text-align: left; }
+.pn-reserve td:last-child { color: var(--thread); font-weight: 700; }
 
 .pn-elev { margin: 0; }
 .pn-elev figcaption {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #555;
+  color: var(--muted);
   font-size: 12px;
   margin-bottom: 2px;
 }
 .pn-elev-box {
   position: relative;
   height: 80px;
-  border: 1px solid #eee;
+  border: 1px solid var(--line);
   border-radius: 4px;
-  color: #2b7bb9;
+  color: var(--sand);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -293,25 +268,14 @@
 .pn-elev-t {
   position: absolute;
   font-size: 10px;
-  color: #555;
-  background: rgba(255, 255, 255, 0.8);
+  color: var(--muted);
+  background: rgba(17, 27, 32, 0.85);
   padding: 0 2px;
 }
 .pn-elev-max { top: 2px; left: 4px; }
 .pn-elev-min { bottom: 2px; left: 4px; }
 .pn-elev-t { bottom: 2px; right: 4px; }
 
-.pn-column {
-  width: 380px;
-  flex-shrink: 0;
-  overflow-y: auto;
-  padding: 8px 12px 16px;
-  border-left: 1px solid #ddd;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  box-sizing: border-box;
-}
 
 /* Notice and error lines keep two lines in every state; the full text is in the title. */
 .pn-notice,
@@ -321,4 +285,56 @@
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+}
+
+/* ---------- N6 theme: type and surfaces on the dark console ---------- */
+.pn-card {
+  background: var(--panel2);
+}
+.pn-head h2,
+.pn-card h3 {
+  font-family: var(--display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.pn-head h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+.pn-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.pn-big,
+.pn-row dd,
+.pn-event-time,
+.pn-elev-max,
+.pn-elev-min,
+.pn-elev-t {
+  font-family: var(--mono);
+}
+.pn-big {
+  color: var(--ink);
+}
+.pn-table tbody tr:hover td {
+  background: var(--tint);
+}
+.pn-elev-box {
+  background: var(--panel2);
+}
+.pn-stops li::marker {
+  font-family: var(--mono);
+}
+
+/* The table keeps the body face (narrower than mono) with fixed-width digits, so 7 columns fit. */
+.pn-table {
+  font-size: 12px;
+}
+.pn-table th,
+.pn-table td {
+  padding: 3px 3px;
+}
+.pn-table td:first-child {
+  min-width: 120px;
 }
