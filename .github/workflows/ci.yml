@@ -31,6 +31,7 @@ jobs:
       - run: npm ci
       - name: Generated types match contracts
         run: npm run gen:types && git diff --exit-code -- src/lib/types.ts
+      - run: npm run lint
       - run: npm run check
 
   planner:
@@ -45,6 +46,20 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements-dev.txt
       - run: python -m pytest
+
+  pipeline:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt pytest
+      # Exit code 5 = no tests collected yet; pass until pipeline/tests/ exists.
+      - run: python -m pytest || [ $? -eq 5 ]
 
   mission-control:
     runs-on: ubuntu-latest
