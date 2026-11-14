@@ -16,7 +16,9 @@ and mission-control keeps sessions in memory, so open sessions drop: no merges t
 during the demo, the video recording or judging.
 `.github/workflows/web-deploy.yml` publishes `web/` to Vercel production on pushes to main that
 touch `web/`, `contracts/` or `content/` (prebuilt via the Vercel CLI; needs the `VERCEL_TOKEN`
-secret; Actions → web-deploy → Run workflow redeploys by hand).
+secret; Actions → web-deploy → Run workflow redeploys by hand). A new deploy can break lazy loads
+(stop cards) in pages opened before it until they reload, so no merges to those folders during the
+demo, the video recording or judging either.
 
 **Server (live since 2026-11-14, see DECISIONS.md):** Hetzner CX23 at 2.31.2.199,
 `ssh deploy@2.31.2.199`, checkout `~/ariadne`. Hosts `https://api.2-31-2-199.sslip.io` (planner),

@@ -4,6 +4,8 @@ name: web-deploy
 # something the bundle is built from. The Vercel project is not Git-connected: the Hobby plan does
 # not deploy other people's commits from a private org repo, so CI builds here and uploads the
 # prebuilt output, the same as a manual `vercel deploy --prebuilt --prod`.
+# The deploy step removes .git first: with git metadata Vercel checks the commit author, who is
+# usually not on the Hobby team, and blocks the deployment (TEAM_ACCESS_REQUIRED).
 # The VITE_* production values come from the Vercel project's env (`vercel pull`).
 # Secret (repo settings → Secrets and variables → Actions):
 #   VERCEL_TOKEN (a token from vercel.com/account/tokens with access to the nuriokumus-projects team).
@@ -65,5 +67,6 @@ jobs:
       - name: Deploy to production
         if: env.VERCEL_TOKEN != ''
         run: |
+          rm -rf "$GITHUB_WORKSPACE/.git"
           npx --yes vercel@65.16.0 deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"
-          echo "Deployed main @ ${GITHUB_SHA::7} to https://ariadne-gilt-tau.vercel.app" >> "$GITHUB_STEP_SUMMARY"
+          echo "Deployed ${GITHUB_REF_NAME} @ ${GITHUB_SHA::7} to https://ariadne-gilt-tau.vercel.app" >> "$GITHUB_STEP_SUMMARY"
