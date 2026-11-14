@@ -10,6 +10,7 @@ import type { Provenance, WsState } from '../lib/types'
 import type { AssetSource } from './assets'
 import { buildLayers, layerEntries, NARROW_PX, type LayerId, type MissionLayers } from './buildLayers'
 import { inAoi, type SizeM, type XY } from './coords'
+import { envelopeCanvas, marginAt, quantizeT, useCostToHome } from './envelope'
 import { useLayerRegistry } from './layers'
 import { CursorReadout, NorthArrow, ScaleBar } from './overlays'
 import { usePlanClock } from './planClock'
@@ -83,6 +84,22 @@ export function MapView({ source, className }: Props) {
   )
   const hasMarker = marker !== null
 
+  // Return envelope (Y5): redrawn only when the time moves by at least 0.5 min.
+  const cost = useCostToHome(source)
+  const tNow = state ? state.t_min : planT
+  const tq = quantizeT(tNow)
+  const { budget_min, reserve_min } = aoi.model
+  const envelope = useMemo(() => {
+    if (!cost) return null
+    const image = envelopeCanvas(cost, { budget_min, reserve_min }, tq)
+    return image ? { image } : null
+  }, [cost, tq, budget_min, reserve_min])
+  const envelopeProvenance: Provenance = source.synthetic ? 'Simulation' : 'Modeled'
+  const cursorMargin =
+    cost && cursor
+      ? { minutes: marginAt(cost, { budget_min, reserve_min }, cursor[0], cursor[1], tNow), provenance: envelopeProvenance }
+      : null
+
   const registered = useLayerRegistry((s) => s.layers)
   const register = useLayerRegistry((s) => s.register)
   const unregister = useLayerRegistry((s) => s.unregister)
@@ -95,12 +112,13 @@ export function MapView({ source, className }: Props) {
       route: route !== null,
       astronaut: hasMarker,
       routeProvenance,
+      envelope: cost !== null,
     })
     const ids = entries.map((e) => e.id)
     ownIds.current.filter((id) => !ids.includes(id)).forEach(unregister)
     entries.forEach(register)
     ownIds.current = ids
-  }, [source, data, register, unregister, route, hasMarker, routeProvenance])
+  }, [source, data, register, unregister, route, hasMarker, routeProvenance, cost])
   useEffect(() => () => ownIds.current.forEach(unregister), [unregister])
 
   // Keep the AOI fitted to the container until the user pans or zooms
@@ -140,8 +158,8 @@ export function MapView({ source, className }: Props) {
     if (narrow === null) return []
     const visible = new Set(registered.filter((l) => l.visible).map((l) => l.id))
     const mission: MissionLayers = { geom, progress_m, marker, numbers, selectedStop, dash_m }
-    return buildLayers({ source, data, narrow, mission, isVisible: (id: LayerId) => visible.has(id) })
-  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m])
+    return buildLayers({ source, data, narrow, mission, envelope, isVisible: (id: LayerId) => visible.has(id) })
+  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope])
 
   const onClick = useCallback(
     (info: PickingInfo) => {
@@ -180,7 +198,7 @@ export function MapView({ source, className }: Props) {
       </div>
       <div className="am-overlay am-bottom-left">
         <ScaleBar zoom={zoom} />
-        <CursorReadout xy={cursor} />
+        <CursorReadout xy={cursor} margin={cursorMargin} />
       </div>
       {route && (
         <div className="am-overlay am-bottom-center">

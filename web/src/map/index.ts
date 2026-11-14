@@ -21,3 +21,15 @@ export {
   type Progress,
   type RouteGeometry,
 } from './route'
+export {
+  ENVELOPE_COLORS,
+  envelopeThresholds,
+  loadCostRaster,
+  makeMarginAt,
+  marginAt,
+  marginClass,
+  useCostToHome,
+  type CostRaster,
+  type EnvelopeModel,
+  type MarginClass,
+} from './envelope'
