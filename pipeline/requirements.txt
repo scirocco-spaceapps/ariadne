@@ -1,0 +1,5 @@
+# Pipeline dependencies. New entries need Ali Koray's OK.
+numpy>=1.26
+Pillow>=10.1
+pyproj>=3.6
+rasterio>=1.3

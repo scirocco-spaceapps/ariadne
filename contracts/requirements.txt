@@ -1,0 +1,6 @@
+# Used by contracts/check.py and contracts/tools/make_fixtures.py
+jsonschema>=4.23
+referencing>=0.35
+PyYAML>=6.0
+numpy>=1.26
+Pillow>=10.1

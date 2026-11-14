@@ -1,0 +1,30 @@
+{
+  "legs": [
+    {
+      "from": "haven",
+      "to": "s1",
+      "path": [[60, 60], [140, 120], [220, 180]],
+      "distance_m": 200,
+      "time_min": 4,
+      "climb_m": 10.4,
+      "max_slope_deg": 3.08
+    },
+    {
+      "from": "s1",
+      "to": "s2",
+      "path": [[220, 180], [300, 240], [380, 300]],
+      "distance_m": 200,
+      "time_min": 4,
+      "climb_m": 10.4,
+      "max_slope_deg": 3.08
+    }
+  ],
+  "timeline": [
+    { "kind": "walk", "leg": 0, "t0_min": 0, "t1_min": 4 },
+    { "kind": "dwell", "stop": "s1", "t0_min": 4, "t1_min": 24 },
+    { "kind": "walk", "leg": 1, "t0_min": 24, "t1_min": 28 },
+    { "kind": "dwell", "stop": "s2", "t0_min": 28, "t1_min": 48 }
+  ],
+  "totals": { "distance_m": 400, "walk_min": 8, "dwell_min": 40, "eva_min": 48 },
+  "provenance": "Modeled"
+}

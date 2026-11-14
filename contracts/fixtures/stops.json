@@ -1,0 +1,42 @@
+[
+  {
+    "id": "s1",
+    "name": "SYNTHETIC stop 1",
+    "kind": "stop",
+    "science_question": "SYNTHETIC placeholder: what does this outcrop record about past water?",
+    "tasks": [
+      "SYNTHETIC: photograph the outcrop face",
+      "SYNTHETIC: measure layer thickness"
+    ],
+    "photos": [
+      {
+        "file": "photos/fx_s1_a.jpg",
+        "sol": 1200,
+        "camera": "SYNTHETIC camera",
+        "credit": "SYNTHETIC placeholder",
+        "caption": "SYNTHETIC placeholder caption",
+        "distance_m": 3.5
+      }
+    ],
+    "unit": "SYNTHETIC unit",
+    "provenance": "Simulation"
+  },
+  {
+    "id": "t1",
+    "name": "SYNTHETIC target 1",
+    "kind": "target",
+    "science_question": "SYNTHETIC placeholder: seen from orbit, never touched. What is it?",
+    "tasks": ["SYNTHETIC: approach and image at close range"],
+    "photos": [
+      {
+        "file": "photos/fx_t1_a.jpg",
+        "sol": 1210,
+        "camera": "SYNTHETIC camera",
+        "credit": "SYNTHETIC placeholder",
+        "caption": "SYNTHETIC placeholder caption"
+      }
+    ],
+    "unit": "SYNTHETIC unit",
+    "provenance": "Simulation"
+  }
+]

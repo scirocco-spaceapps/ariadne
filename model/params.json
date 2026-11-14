@@ -1,0 +1,9 @@
+{
+  "_comment": "Walk model parameters. Fill every value with a source; a value without one is Assumed and gets a row in docs/DATA_SOURCES.md. Owner: Bunyamin.",
+  "walk_speed_flat_m_per_min": { "value": null, "unit": "m/min", "provenance": null, "source": null },
+  "slope_speed_factor": { "value": null, "unit": "per deg", "provenance": null, "source": null },
+  "max_slope_deg": { "value": null, "unit": "deg", "provenance": null, "source": null },
+  "dwell_min": { "value": null, "unit": "min", "provenance": null, "source": null },
+  "budget_min": { "value": null, "unit": "min", "provenance": null, "source": null },
+  "reserve_min": { "value": null, "unit": "min", "provenance": null, "source": null }
+}

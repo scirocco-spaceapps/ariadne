@@ -1,0 +1,43 @@
+{
+  "id": "bright-angel",
+  "name": "Bright Angel, Jezero crater",
+  "placeholder": true,
+  "crs": {
+    "proj4": "+proj=eqc +lat_ts=18.43 +lat_0=0 +lon_0=77.39 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs"
+  },
+  "origin_lonlat": [77.39, 18.43],
+  "size_m": [2500, 2000],
+  "assets_base": "/assets/bright-angel/",
+  "rasters": {
+    "ortho": { "file": "ortho_50cm.jpg", "px_m": 0.5 },
+    "ortho_small": { "file": "ortho_1m.jpg", "px_m": 1 },
+    "hillshade": { "file": "hillshade_2m.png", "px_m": 2 },
+    "dem": { "file": "dem_4m.f32", "px_m": 4, "dtype": "float32", "unit": "m" },
+    "slope": {
+      "file": "slope_2m.png",
+      "px_m": 2,
+      "legend": [
+        { "max_deg": 10, "color": "#1a9850", "label": "0-10°" },
+        { "max_deg": 20, "color": "#fee08b", "label": "10-20°" },
+        { "max_deg": 30, "color": "#f46d43", "label": "20-30°" },
+        { "max_deg": 90, "color": "#a50026", "label": ">30°" }
+      ]
+    },
+    "traversability": { "file": "traversability_2m.png", "px_m": 2 },
+    "cost_to_home": { "file": "cost_to_home_2m.f32", "px_m": 2, "dtype": "float32", "unit": "min", "nodata": "NaN" },
+    "cost_to_home_flat": { "file": "cost_to_home_flat_2m.f32", "px_m": 2, "dtype": "float32", "unit": "min", "nodata": "NaN", "optional": true },
+    "seen_not_touched": { "file": "seen_not_touched_2m.png", "px_m": 2, "optional": true }
+  },
+  "vectors": {
+    "track": "track.geojson",
+    "waypoints": "waypoints.geojson",
+    "targets": { "file": "targets.geojson", "optional": true }
+  },
+  "safe_haven": { "id": "haven", "name": "Safe haven (placeholder)", "xy": [400, 300] },
+  "stops": [
+    { "id": "s1", "name": "Stop 1 (placeholder)", "xy": [900, 700] },
+    { "id": "s2", "name": "Stop 2 (placeholder)", "xy": [1500, 1100] },
+    { "id": "s3", "name": "Stop 3 (placeholder)", "xy": [2000, 1600] }
+  ],
+  "model": { "budget_min": 240, "reserve_min": 30, "dwell_min": 20 }
+}

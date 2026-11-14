@@ -1,0 +1,598 @@
+openapi: 3.1.0
+info:
+  title: Ariadne services
+  version: 1.0.0
+  description: |
+    HTTP contracts of the two Ariadne services, plus shared schemas used by files and WebSocket
+    messages (Aoi, StopContent, WsState, WsEvent, WsHello).
+
+    One file, two services: every path item has a path-level `servers` entry and a tag naming the
+    service it belongs to. `/health` is served by both.
+
+    Coordinates: every `[x, y]` is metres in the local plane of the AOI (x east, y north, origin at
+    the AOI south-west corner). Never lon/lat, never Web Mercator.
+
+    Times are minutes from EVA start (`t_min`) unless named `*_utc` (ISO 8601, UTC).
+servers:
+  - url: http://localhost:8001
+    description: planner
+  - url: http://localhost:8002
+    description: mission-control
+tags:
+  - name: planner
+    description: Route and abort-path planning (Python, FastAPI).
+  - name: mission-control
+    description: Conditions, EVA sessions and the simulation clock (Go, Fiber). WebSocket protocol in ws-messages.md.
+
+paths:
+  /health:
+    servers:
+      - url: http://localhost:8001
+        description: planner
+      - url: http://localhost:8002
+        description: mission-control
+    get:
+      tags: [planner, mission-control]
+      operationId: health
+      summary: Liveness check (both services).
+      responses:
+        "200":
+          description: Service is up.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Health" }
+
+  /route:
+    servers:
+      - url: http://localhost:8001
+        description: planner
+    post:
+      tags: [planner]
+      operationId: planRoute
+      summary: Plan a walk through stops in the given order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RouteRequest" }
+      responses:
+        "200":
+          description: Planned route.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RouteResponse" }
+        "400":
+          description: Unknown stop id or no traversable path.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /abort:
+    servers:
+      - url: http://localhost:8001
+        description: planner
+    post:
+      tags: [planner]
+      operationId: planAbort
+      summary: Fastest path from a position back to the safe haven.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AbortRequest" }
+      responses:
+        "200":
+          description: Abort path.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AbortResponse" }
+        "400":
+          description: Position outside the AOI or not traversable.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /conditions:
+    servers:
+      - url: http://localhost:8002
+        description: mission-control
+    get:
+      tags: [mission-control]
+      operationId: getConditions
+      summary: Current weather, radiation, space weather and partner data.
+      responses:
+        "200":
+          description: Conditions. Parts that could not be fetched are null, with a reason in `missing`.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Conditions" }
+
+  /sessions:
+    servers:
+      - url: http://localhost:8002
+        description: mission-control
+    post:
+      tags: [mission-control]
+      operationId: createSession
+      summary: Create an EVA simulation session from a planned route.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SessionCreate" }
+      responses:
+        "201":
+          description: Session created. Connect to `/ws?s=<id>&role=console|cuff`.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SessionCreated" }
+        "400":
+          description: Invalid route or budget.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /sessions/{id}/control:
+    servers:
+      - url: http://localhost:8002
+        description: mission-control
+    parameters:
+      - $ref: "#/components/parameters/SessionId"
+    post:
+      tags: [mission-control]
+      operationId: controlSession
+      summary: Start, pause, reset or seek the simulation clock.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SessionControl" }
+      responses:
+        "200":
+          description: Accepted. The new state arrives over WebSocket.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ack" }
+        "400":
+          description: Invalid action or arguments.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Unknown session.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /sessions/{id}/events:
+    servers:
+      - url: http://localhost:8002
+        description: mission-control
+    parameters:
+      - $ref: "#/components/parameters/SessionId"
+    post:
+      tags: [mission-control]
+      operationId: injectSessionEvent
+      summary: Inject a storm alert or clear it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SessionEvent" }
+      responses:
+        "200":
+          description: Accepted. Clients receive an `event` and the next `state` reflects it.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ack" }
+        "400":
+          description: Invalid event.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Unknown session.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+components:
+  parameters:
+    SessionId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+
+  schemas:
+    # ---------- primitives ----------
+    XY:
+      description: Local metric position [x east, y north] in metres from the AOI south-west corner.
+      type: array
+      prefixItems:
+        - { type: number }
+        - { type: number }
+      minItems: 2
+      maxItems: 2
+      items: false
+    Path:
+      description: Polyline of local positions, first point = start.
+      type: array
+      items: { $ref: "#/components/schemas/XY" }
+    Provenance:
+      type: string
+      enum: [Observed, Derived, Modeled, Assumed, Simulation]
+    Health:
+      type: object
+      required: [status, service]
+      properties:
+        status: { type: string, const: ok }
+        service: { type: string, enum: [planner, mission-control] }
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail: { type: string }
+    Ack:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+
+    # ---------- planner ----------
+    RouteRequest:
+      type: object
+      additionalProperties: false
+      required: [stops, return_home]
+      properties:
+        stops:
+          description: Stop ids from aoi.json, in visiting order. The walk starts at the safe haven.
+          type: array
+          items: { type: string }
+          minItems: 1
+        return_home:
+          description: Append a final leg from the last stop back to the safe haven.
+          type: boolean
+    Leg:
+      type: object
+      additionalProperties: false
+      required: [from, to, path, distance_m, time_min, climb_m, max_slope_deg]
+      properties:
+        from: { type: string, description: Stop id or the safe haven id. }
+        to: { type: string, description: Stop id or the safe haven id. }
+        path: { $ref: "#/components/schemas/Path" }
+        distance_m: { type: number, minimum: 0 }
+        time_min: { type: number, minimum: 0 }
+        climb_m: { type: number, minimum: 0, description: Total ascent along the leg. }
+        max_slope_deg: { type: number, minimum: 0, maximum: 90 }
+    TimelineItem:
+      type: object
+      additionalProperties: false
+      required: [kind, t0_min, t1_min]
+      properties:
+        kind: { type: string, enum: [walk, dwell] }
+        leg: { type: integer, minimum: 0, description: "Index into legs; present when kind = walk." }
+        stop: { type: string, description: "Stop id; present when kind = dwell." }
+        t0_min: { type: number, minimum: 0 }
+        t1_min: { type: number, minimum: 0 }
+    Totals:
+      type: object
+      additionalProperties: false
+      required: [distance_m, walk_min, dwell_min, eva_min]
+      properties:
+        distance_m: { type: number, minimum: 0 }
+        walk_min: { type: number, minimum: 0 }
+        dwell_min: { type: number, minimum: 0 }
+        eva_min: { type: number, minimum: 0, description: walk_min + dwell_min. }
+    RouteResponse:
+      type: object
+      additionalProperties: false
+      required: [legs, timeline, totals, provenance]
+      properties:
+        legs:
+          type: array
+          items: { $ref: "#/components/schemas/Leg" }
+        timeline:
+          type: array
+          items: { $ref: "#/components/schemas/TimelineItem" }
+        totals: { $ref: "#/components/schemas/Totals" }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+    AbortRequest:
+      type: object
+      additionalProperties: false
+      required: [from]
+      properties:
+        from: { $ref: "#/components/schemas/XY" }
+    AbortResponse:
+      type: object
+      additionalProperties: false
+      required: [path, time_min, distance_m, provenance]
+      properties:
+        path: { $ref: "#/components/schemas/Path" }
+        time_min: { type: number, minimum: 0 }
+        distance_m: { type: number, minimum: 0 }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+
+    # ---------- mission-control: conditions ----------
+    ConditionSource:
+      description: Fields every non-null condition part carries.
+      type: object
+      required: [provenance, source, fetched_at]
+      properties:
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        source: { type: string, description: Human-readable source with URL. }
+        fetched_at: { type: string, format: date-time }
+    Weather:
+      allOf:
+        - $ref: "#/components/schemas/ConditionSource"
+        - type: object
+          properties:
+            sol: { type: [integer, "null"] }
+            temp_min_c: { type: [number, "null"] }
+            temp_max_c: { type: [number, "null"] }
+            pressure_pa: { type: [number, "null"] }
+            wind_mps: { type: [number, "null"] }
+    Radiation:
+      allOf:
+        - $ref: "#/components/schemas/ConditionSource"
+        - type: object
+          properties:
+            dose_rate_ugy_per_day: { type: [number, "null"] }
+            sol: { type: [integer, "null"] }
+    SpaceWeatherEvent:
+      type: object
+      additionalProperties: false
+      required: [id, mars_arrival_utc, source]
+      properties:
+        id: { type: string }
+        mars_arrival_utc: { type: string, format: date-time }
+        source: { type: string }
+    SpaceWeather:
+      allOf:
+        - $ref: "#/components/schemas/ConditionSource"
+        - type: object
+          required: [events, stale]
+          properties:
+            events:
+              type: array
+              items: { $ref: "#/components/schemas/SpaceWeatherEvent" }
+            stale: { type: boolean, description: True when the last successful fetch is older than the refresh interval. }
+    Partner:
+      allOf:
+        - $ref: "#/components/schemas/ConditionSource"
+        - type: object
+          required: [name, data]
+          properties:
+            name: { type: string }
+            data: { type: object, additionalProperties: true }
+    Conditions:
+      type: object
+      additionalProperties: false
+      required: [weather, radiation, space_weather, partner, missing]
+      properties:
+        weather:
+          anyOf: [{ $ref: "#/components/schemas/Weather" }, { type: "null" }]
+        radiation:
+          anyOf: [{ $ref: "#/components/schemas/Radiation" }, { type: "null" }]
+        space_weather:
+          anyOf: [{ $ref: "#/components/schemas/SpaceWeather" }, { type: "null" }]
+        partner:
+          anyOf: [{ $ref: "#/components/schemas/Partner" }, { type: "null" }]
+        missing:
+          description: Reason for every part that is null. Empty object when nothing is missing.
+          type: object
+          additionalProperties: false
+          properties:
+            weather: { type: string }
+            radiation: { type: string }
+            space_weather: { type: string }
+            partner: { type: string }
+
+    # ---------- mission-control: sessions ----------
+    SessionCreate:
+      type: object
+      additionalProperties: false
+      required: [route, budget_min, reserve_min, dwell_min]
+      properties:
+        route: { $ref: "#/components/schemas/RouteResponse" }
+        budget_min: { type: number, exclusiveMinimum: 0 }
+        reserve_min: { type: number, minimum: 0 }
+        dwell_min: { type: number, minimum: 0 }
+    SessionCreated:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string }
+    SessionControl:
+      type: object
+      additionalProperties: false
+      required: [action]
+      properties:
+        action: { type: string, enum: [start, pause, reset, seek] }
+        t_min: { type: number, minimum: 0, description: Required for seek. }
+        speed: { type: number, exclusiveMinimum: 0, description: "Simulated minutes per real second; optional on start." }
+    SessionEvent:
+      type: object
+      additionalProperties: false
+      required: [type]
+      properties:
+        type: { type: string, enum: [storm_alert, clear] }
+        lead_min: { type: number, minimum: 0, description: Minutes until the storm arrives; storm_alert only. }
+        abort_path: { $ref: "#/components/schemas/Path" }
+
+    # ---------- WebSocket (see ws-messages.md) ----------
+    WsAlert:
+      type: object
+      additionalProperties: false
+      required: [type, lead_min, since_t]
+      properties:
+        type: { type: string, enum: [storm_alert] }
+        lead_min: { type: number, minimum: 0 }
+        since_t: { type: number, minimum: 0, description: t_min when the alert was raised. }
+    WsState:
+      type: object
+      additionalProperties: false
+      required: [type, session, t_min, running, speed, pos, leg, at_stop, visited, alert, abort_path, provenance]
+      properties:
+        type: { type: string, const: state }
+        session: { type: string }
+        t_min: { type: number, minimum: 0 }
+        running: { type: boolean }
+        speed: { type: number, minimum: 0 }
+        pos: { $ref: "#/components/schemas/XY" }
+        leg: { type: [integer, "null"], minimum: 0, description: Index into route legs; null while dwelling or before start. }
+        at_stop: { type: [string, "null"] }
+        visited: { type: array, items: { type: string } }
+        alert:
+          anyOf: [{ $ref: "#/components/schemas/WsAlert" }, { type: "null" }]
+        abort_path:
+          anyOf: [{ $ref: "#/components/schemas/Path" }, { type: "null" }]
+        provenance: { type: string, const: Simulation }
+    WsEvent:
+      type: object
+      additionalProperties: false
+      required: [type, name, t_min]
+      properties:
+        type: { type: string, const: event }
+        name: { type: string, enum: [storm_alert, clear, arrived] }
+        t_min: { type: number, minimum: 0 }
+    WsServerMessage:
+      oneOf:
+        - $ref: "#/components/schemas/WsState"
+        - $ref: "#/components/schemas/WsEvent"
+    WsHello:
+      type: object
+      additionalProperties: false
+      required: [type, role]
+      properties:
+        type: { type: string, const: hello }
+        role: { type: string, enum: [console, cuff] }
+
+    # ---------- files: aoi.json ----------
+    RasterRef:
+      type: object
+      additionalProperties: false
+      required: [file, px_m]
+      properties:
+        file: { type: string, description: Relative to assets_base. }
+        px_m: { type: number, exclusiveMinimum: 0 }
+        dtype: { type: string, enum: [float32], description: "Binary rasters: little-endian, row-major, no header." }
+        unit: { type: string }
+        nodata: { type: string, enum: [NaN] }
+        optional: { type: boolean, description: "File may be absent; clients must handle that." }
+        legend:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [max_deg, color, label]
+            properties:
+              max_deg: { type: number }
+              color: { type: string, pattern: "^#[0-9a-fA-F]{6}$" }
+              label: { type: string }
+    VectorRef:
+      anyOf:
+        - type: string
+        - type: object
+          additionalProperties: false
+          required: [file]
+          properties:
+            file: { type: string }
+            optional: { type: boolean }
+    Place:
+      type: object
+      additionalProperties: false
+      required: [id, name, xy]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        xy: { $ref: "#/components/schemas/XY" }
+    Aoi:
+      type: object
+      additionalProperties: false
+      required: [id, name, crs, origin_lonlat, size_m, assets_base, rasters, vectors, safe_haven, stops, model]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        placeholder: { type: boolean, description: True while values are not from real data. }
+        crs:
+          type: object
+          additionalProperties: false
+          required: [proj4]
+          properties:
+            proj4: { type: string }
+        origin_lonlat:
+          description: Planetocentric lon/lat (degrees, east-positive) of the AOI south-west corner. Pipeline use only.
+          type: array
+          prefixItems: [{ type: number }, { type: number }]
+          minItems: 2
+          maxItems: 2
+          items: false
+        size_m:
+          description: "[width east, height north] in metres."
+          type: array
+          prefixItems: [{ type: number }, { type: number }]
+          minItems: 2
+          maxItems: 2
+          items: false
+        assets_base: { type: string }
+        rasters:
+          type: object
+          additionalProperties: false
+          required: [ortho, ortho_small, hillshade, dem, slope, traversability, cost_to_home]
+          properties:
+            ortho: { $ref: "#/components/schemas/RasterRef" }
+            ortho_small: { $ref: "#/components/schemas/RasterRef" }
+            hillshade: { $ref: "#/components/schemas/RasterRef" }
+            dem: { $ref: "#/components/schemas/RasterRef" }
+            slope: { $ref: "#/components/schemas/RasterRef" }
+            traversability: { $ref: "#/components/schemas/RasterRef" }
+            cost_to_home: { $ref: "#/components/schemas/RasterRef" }
+            cost_to_home_flat: { $ref: "#/components/schemas/RasterRef" }
+            seen_not_touched: { $ref: "#/components/schemas/RasterRef" }
+        vectors:
+          type: object
+          additionalProperties: false
+          required: [track, waypoints]
+          properties:
+            track: { $ref: "#/components/schemas/VectorRef" }
+            waypoints: { $ref: "#/components/schemas/VectorRef" }
+            targets: { $ref: "#/components/schemas/VectorRef" }
+        safe_haven: { $ref: "#/components/schemas/Place" }
+        stops:
+          type: array
+          items: { $ref: "#/components/schemas/Place" }
+        model:
+          type: object
+          additionalProperties: false
+          required: [budget_min, reserve_min, dwell_min]
+          properties:
+            budget_min: { type: number }
+            reserve_min: { type: number }
+            dwell_min: { type: number }
+
+    # ---------- files: stop content ----------
+    Photo:
+      type: object
+      additionalProperties: false
+      required: [file, sol, camera, credit, caption]
+      properties:
+        file: { type: string }
+        sol: { type: integer, minimum: 0 }
+        camera: { type: string }
+        credit: { type: string }
+        caption: { type: string }
+        distance_m: { type: number, minimum: 0, description: Distance from camera to subject, if known. }
+    StopContent:
+      type: object
+      additionalProperties: false
+      required: [id, name, kind, science_question, tasks, photos, unit, provenance]
+      properties:
+        id: { type: string, description: Matches a stop id in aoi.json (kind stop) or a target id (kind target). }
+        name: { type: string }
+        kind: { type: string, enum: [stop, target] }
+        science_question: { type: string }
+        tasks: { type: array, items: { type: string } }
+        photos: { type: array, items: { $ref: "#/components/schemas/Photo" } }
+        unit: { type: string, description: Geologic unit the stop sits on. }
+        provenance: { $ref: "#/components/schemas/Provenance" }

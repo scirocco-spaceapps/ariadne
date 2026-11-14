@@ -1,0 +1,13 @@
+{
+  "synthetic": true,
+  "label": "SYNTHETIC",
+  "width": 250,
+  "height": 200,
+  "px_m": 2,
+  "dtype": "float32",
+  "byte_order": "little",
+  "layout": "row-major, row 0 = north edge, no header",
+  "unit": "min",
+  "formula": "hypot(x - haven_x, y - haven_y) / 50",
+  "provenance": "Simulation"
+}

@@ -1,0 +1,38 @@
+# Last matching pattern wins: broad rules first, carve-outs after.
+# TODO: replace the @TODO-* placeholders with real GitHub handles before enabling branch protection.
+
+# Default: anything not listed below (root files, .claude/, docs/ remainder)
+*                               @ozyusuf
+
+# Yusuf
+/contracts/                     @ozyusuf
+
+# Nuri
+/web/                           @TODO-nuri
+/infra/                         @TODO-nuri
+/.github/                       @TODO-nuri
+
+# Yusuf carve-out inside web
+/web/src/map/                   @ozyusuf
+
+# Furkan
+/web/src/stops/                 @TODO-furkan
+/e2e/                           @TODO-furkan
+/content/                       @TODO-furkan
+/docs/submission/               @TODO-furkan
+
+# Mazlum
+/mission-control/               @TODO-mazlum
+
+# Ali Koray
+/pipeline/                      @TODO-alikoray
+/planner/                       @TODO-alikoray
+
+# Bunyamin (after Furkan's broader content/ and docs/submission/ rules)
+/model/                         @TODO-bunyamin
+/notebooks/                     @TODO-bunyamin
+/docs/model.md                  @TODO-bunyamin
+/docs/validation.md             @TODO-bunyamin
+/docs/submission/science.md     @TODO-bunyamin
+/content/stops/index.json       @TODO-bunyamin
+/content/conditions/            @TODO-bunyamin

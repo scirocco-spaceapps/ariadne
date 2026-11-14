@@ -1,0 +1,32 @@
+{
+  "weather": {
+    "provenance": "Simulation",
+    "source": "SYNTHETIC fixture, not real data",
+    "fetched_at": "2026-11-14T08:00:00Z",
+    "sol": 1300,
+    "temp_min_c": -80,
+    "temp_max_c": -10,
+    "pressure_pa": 720,
+    "wind_mps": null
+  },
+  "radiation": null,
+  "space_weather": {
+    "provenance": "Simulation",
+    "source": "SYNTHETIC fixture, not real data",
+    "fetched_at": "2026-11-14T08:00:00Z",
+    "events": [
+      { "id": "fx-cme-1", "mars_arrival_utc": "2026-11-14T10:30:00Z", "source": "SYNTHETIC fixture" }
+    ],
+    "stale": false
+  },
+  "partner": {
+    "provenance": "Simulation",
+    "source": "SYNTHETIC fixture, not real data",
+    "fetched_at": "2026-11-14T08:00:00Z",
+    "name": "SYNTHETIC partner feed",
+    "data": { "note": "placeholder" }
+  },
+  "missing": {
+    "radiation": "SYNTHETIC: example of a part that could not be fetched (upstream timeout)"
+  }
+}
