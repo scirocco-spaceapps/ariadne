@@ -19,6 +19,8 @@ parameter has a `provenance` and a `source` there.
 | `reserve_min` | 60 min | Assumed | Mars PLSS study (1 h secondary life support for 4-8 h EVAs); xEVA 1 h contingency | Contingency duration used as walk-home reserve, held inside the budget. |
 | `radiation_dose_rate` | 210 uGy/day | Modeled | Hassler et al. 2014, Science 343, 1244797 (MSL RAD, Gale) | Measured at Gale; used as a model value for Jezero. |
 | `observer_height_m` | 2.0 m | Observed | Bell et al. 2021, Space Sci. Rev. 217:24 (Mastcam-Z) | Rover camera height; no carry-over needed. |
+| `replan_interval_min` | 5 min | Assumed | Team choice, no source | How often replanning re-checks the plan (see Replanning). |
+| `min_dwell_min` | 10 min | Assumed | Team choice: half of `dwell_min`, no source (the shortest Apollo 15 station took 12 min) | Shortest dwell replanning may suggest before it drops a stop. |
 
 "Assumed" with a source means a published requirement or design case that we adopted; it is not a
 measurement.
@@ -85,6 +87,60 @@ t ≈ 279 min: about 179 min walking plus 100 min dwell. With 240 min budget and
 astronaut could not get home; with 360 min the reserve stays intact. Repeat this check with the
 real stops (B2) and the real cost raster (A4): the planned route must end before
 `budget_min - reserve_min`.
+
+## Replanning
+
+Receding-horizon replanning re-checks the rest of the walk while it runs and suggests the smallest
+change that still gets the astronaut home with the reserve intact. It is a **suggestion on the
+console**: the crew decides, and the simulated astronaut does not follow it on its own.
+
+**Triggers.** Two what-if controls on the console, both Simulation inputs, not measurements:
+
+- **Suit leak:** the consumables budget drops by `leak_min`, so the deadline
+  `budget_min - leak_min - reserve_min` moves earlier.
+- **Dust / low visibility:** walking slows by `speed_factor` (0.5 = half speed); dwells do not
+  change. Wind is modelled this way, not as a force on the astronaut: at Jezero's air density (about
+  0.018 kg/m³, from the sol 1215 MEDA pressure and temperature, our calculation) a 20 m/s wind pushes
+  like a 2–3 m/s breeze on Earth. Its real effect is dust and poor visibility.
+
+**When it runs.** Every `replan_interval_min` (5 min) of walk time, on arrival at each stop, and
+whenever a trigger changes.
+
+**The rule.** Remaining time = walking (lead to the current or next stop, the legs between the kept
+stops and the leg home, all divided by `speed_factor`) + the remaining dwells. Then, in this order:
+
+1. If `t` + remaining time ≤ deadline: no suggestion.
+2. Otherwise shorten all remaining dwells by the same amount, in whole minutes, not below
+   `min_dwell_min` (the dwell already spent at the current stop counts).
+3. If that is not enough, drop one remaining stop (try each and keep the order of the others), then
+   two, and so on; dwells may be shortened as well. The plan that keeps the most stops wins, then
+   the one with the longest dwell, then the one with the larger margin.
+4. If nothing fits: go home now, along `cost_to_home` from the current position.
+
+Stops are never reordered. The stop the astronaut is walking to is never dropped mid-leg, because
+the planner routes between stops, not from an arbitrary point; "go home now" is always available.
+Legs come from the planner (`POST /route`, the existing contract), home from the current position
+from `cost_to_home_2m.f32`; on the real route the raster equals the planner's walk home at all five
+stops.
+
+**What it does on the real route** (`notebooks/replanning.ipynb`, `notebooks/out/replanning_cases.json`):
+
+| Trigger | Where | Suggestion | Margin above reserve |
+|---|---|---|---|
+| none | Tuff Cliff | none | 80.4 min |
+| dust, speed × 0.5 | arrival at Mount Washburn | shorten dwells to 16 min | 3.3 min |
+| dust, speed × 0.4 | arrival at Mount Washburn | skip Masonic Temple | 6.5 min |
+| suit leak −90 min | arrival at Tuff Cliff | shorten dwells to 17 min | 2.4 min |
+| suit leak −120 min | arrival at Bright Angel | skip Masonic Temple | 1.0 min |
+| suit leak −150 min | arrival at Cheyava Falls | go home now | −9.0 min (9 min of the reserve used) |
+
+A speed factor of 0.6 or a 60 min leak never triggers a suggestion: the plan has 80 min to spare.
+The rule picks the longest dwell that fits, so the margin above the reserve after a suggestion is
+small by design; the 60 min reserve is the safety, not that margin.
+
+**Limits.** The rule weighs all stops the same (it does not know that Cheyava Falls matters more
+than the others), and it changes which stops are visited, not the path: a suit fault that lowers
+the slope limit would need a new cost raster and is not covered.
 
 ## Not yet verified
 
