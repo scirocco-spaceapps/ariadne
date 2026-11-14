@@ -7,7 +7,9 @@ that start all services. CI lives in `.github/workflows/`.
 
 **Files:** `docker-compose.yml` (planner :8000, mission-control :8080, Caddy :80/:443),
 `Caddyfile` (`API_HOST` → planner, `MC_HOST` → mission-control incl. WebSocket, `ASSETS_HOST` →
-file server on `/srv/assets` with CORS for `WEB_ORIGIN`), `.env.example`, `deploy.sh`.
+file server on `/srv/assets` with CORS for `WEB_ORIGIN`, plus the repo's `content/` read-only at
+`/content/` for stop photos; only existing files get the 1 h cache, 404s are `no-store`),
+`.env.example`, `deploy.sh`.
 `.github/workflows/deploy.yml` runs `deploy.sh` over SSH on pushes to main that touch
 `planner/`, `mission-control/` or `infra/`.
 
