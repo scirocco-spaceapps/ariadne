@@ -11,7 +11,7 @@ end of their section). Mazlum has no tasks here: Yusuf took over his remaining c
 Decision: `docs/DECISIONS.md` (2026-11-14, MPC). Rule brief: `docs/notes/bunyamin.md`. Dropped if
 MPC-2 is not merged by **Sun 09:30**; the Sun 11:00 feature freeze holds.
 
-- [ ] **MPC-1 · Bünyamin · Sat now → ~21:00 (2 h box)** — the rule in a notebook.
+- [x] **MPC-1 · Bünyamin · Sat now → ~21:00 (2 h box)** (#62) — the rule in a notebook.
   Work only inside `notebooks/`, `model/params.json`, `docs/model.md` (plus notes and this line).
   Triggers: suit leak (budget drops) and dust/visibility (speed factor). Real route from the live
   planner, saved to `notebooks/out/route.json`. Deliver `notebooks/replanning.ipynb`, a figure in
