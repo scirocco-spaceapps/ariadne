@@ -4,6 +4,10 @@ Ariadne is a walking-scale Mars EVA map for Bright Angel in Jezero crater. It la
 plans a science walk, and shows at every moment whether the astronaut can still get back to the
 safe haven. NASA Space Apps 2026.
 
+**Before you start a task card, read `docs/PLAN_CHANGES.md`.** It lists where the repo differs
+from the task book (Görev Kitabı), the game plan and the visual brief. When they disagree:
+`contracts/` > `docs/PLAN_CHANGES.md` > the task prompt.
+
 ## Directory map
 
 | Directory | Owner | What lives there |
