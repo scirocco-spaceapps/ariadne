@@ -24,17 +24,17 @@ The real time comes from reading the script aloud (see "Locked script").
 
 ## Three variants
 
-### Variant A — "a thread home" (proposed lock)
+### Variant A — "a thread home" (locked wording, Ali Koray's revision)
 
 | # | Beat | Est. time | Sentence | Words |
 |---|---|---|---|---|
-| A1 | name and team | 0:00.0–0:01.6 | We are team Scirocco. | 4 |
-| A2 | the challenge | 0:02.0–0:04.8 | A Mars walk needs a way back. | 7 |
-| A3 | name and tagline | 0:05.2–0:10.0 | This is Ariadne: a thread home from every step of the walk. | 12 |
-| A4 | how it works, NASA data | 0:10.4–0:16.0 | It maps Jezero crater from NASA HiRISE images and terrain and plans the stops. | 14 |
-| A5 | how it works | 0:16.4–0:20.8 | When a storm alert comes, both screens point the way home. | 11 |
-| A6 | what it could become | 0:21.2–0:28.0 | Next, it could guide real crews on the Moon and Mars, one safe step at a time. | 17 |
-| | **Total** | **28.0 s** | | **65** |
+| A1 | name and team | 0:00.0–0:01.2 | We’re Team Scirocco. | 3 |
+| A2 | the challenge | 0:01.6–0:04.4 | Every Mars walk needs a way back. | 7 |
+| A3 | name and tagline | 0:04.8–0:08.4 | This is Ariadne: a thread home from every step. | 9 |
+| A4 | how it works, NASA data | 0:08.8–0:16.0 | Built on NASA HiRISE images and terrain of Jezero crater, it plans a route through stops Perseverance studied. | 18 |
+| A5 | how it works | 0:16.4–0:21.6 | When a storm alert comes in, both screens show the fastest way home. | 13 |
+| A6 | what it could become | 0:22.0–0:28.4 | Tomorrow, it could guide crews on the Moon and Mars, one safe step at a time. | 16 |
+| | **Total** | **28.4 s** | | **66** |
 
 ### Variant B — "the science walk"
 
@@ -60,23 +60,24 @@ The real time comes from reading the script aloud (see "Locked script").
 | C6 | what it could become | 0:20.8–0:25.2 | Next, it could plan real walks on the Moon and Mars. | 11 |
 | | **Total** | **25.2 s** | | **58** |
 
-Why A: its beats land closest to the guide's marks (0:02, 0:05, 0:10, 0:20). It names the NASA
-data and the storm alert, and it leaves about 2 s for the end card. B and C end around 0:25, so
-their last shot has to be held longer.
+Why A: it names the NASA data and the storm alert, and it leaves about 1.5 s for the end card.
+B and C end around 0:25, so their last shot has to be held longer. In Ali Koray's revision the
+beats start a little early (0:01.6, 0:04.8, 0:08.8) and the last beat starts at 0:22.0, not 0:20,
+because the NASA-data sentence is longer (18 words, about 7 s).
 
 ## Locked script
 
-> We are team Scirocco. A Mars walk needs a way back. This is Ariadne: a thread home from every
-> step of the walk. It maps Jezero crater from NASA HiRISE images and terrain and plans the stops.
-> When a storm alert comes, both screens point the way home. Next, it could guide real crews on the
-> Moon and Mars, one safe step at a time.
+> We’re Team Scirocco. Every Mars walk needs a way back. This is Ariadne: a thread home from every
+> step. Built on NASA HiRISE images and terrain of Jezero crater, it plans a route through stops
+> Perseverance studied. When a storm alert comes in, both screens show the fastest way home.
+> Tomorrow, it could guide crews on the Moon and Mars, one safe step at a time.
 
-65 words, about 28 s (estimate).
+66 words, about 28.4 s (estimate).
 
 Human checks (the card's steps 1 and 2). The script is locked when all three are filled in:
 
 - Read-aloud time, measured by Furkan: ___ s (must be ≤ 30 s, final card included)
-- Read by Ali Koray: ___ s
+- Read by Ali Koray: done, wording changes applied
 - Read to the team at the 23:30 check: ___ (OK / changes)
 
 ## Shot list (Variant A)
@@ -101,13 +102,13 @@ image did not render because the assets host was offline. Record when it is back
 
 | Sentence | Shot | Source | On screen | Caption / credit |
 |---|---|---|---|---|
-| A1 We are team Scirocco. | S1 | e2e console video, first 2 s (console loads) | Header "ARIADNE MISSION CONSOLE · Bright Angel · Jezero crater", "DEMO DATA" badge | Text overlay "Team Scirocco · NASA Space Apps 2026" (text only, no logo) |
-| A2 A Mars walk needs a way back. | S2 | e2e console video around T+0:05 (= `01-running-console.png`) | Astronaut leaving the safe haven on the planned route; return-envelope legend "Back with ≥ 30 min to spare" | "Synthetic demo data" |
-| A3 This is Ariadne: a thread home from every step of the walk. | S3 | e2e console + cuff side by side around T+0:05 (= `01-running-console.png` + `01-running-cuff.png`) | Same clock on both screens; cuff "MARGIN TO HOME +201 min · Safe to continue" | Title "Ariadne" over the shot; "Synthetic demo data" |
-| A4 It maps Jezero crater from NASA HiRISE images and terrain and plans the stops. | R1 — **TO RECORD** | Real-data console: layers Orthoimage MRO HiRISE (Observed) and Hillshade from DEM (Derived) on, Fit AOI, then **Plan route** with the five stops (Mount Washburn, Tuff Cliff, Bright Angel, Cheyava Falls, Masonic Temple) | HiRISE map of Bright Angel with the route drawn and the leg table filled in | HiRISE credit as filled in `REFERENCES.md`. That row is still TBD: fill it before the video is cut |
-| (A4, optional cutaway ≤ 1.5 s) | R2 — **TO RECORD** | Real-data console, STOP tab on `bright-angel` | Stop card with Perseverance photo `bright-angel_1.jpg` and its credit line | "NASA/JPL-Caltech/ASU" (in the card) |
-| A5 When a storm alert comes, both screens point the way home. | S4 | e2e console + cuff side by side, T+0:30 → T+0:33 (= `02-alert-console.png` + `02-alert-cuff.png`) | Console: red strip "STORM ALERT · time to storm", red thread "Way home before the storm". Cuff: "STORM ALERT · Follow the thread home" | "Simulated storm alert · synthetic demo data" |
-| A6 Next, it could guide real crews on the Moon and Mars, one safe step at a time. | S5 → end card | e2e console + cuff T+0:38 (= `02b-home-*`), then T+0:50+ (= `03-clear-cuff.png`) | Astronaut reaches the safe haven; after the clear the cuff shows "Safe to continue · Home: the walk is done." End card for the last ~2 s: text "Ariadne · team Scirocco" | "Synthetic demo data" on S5; end card is text only |
+| A1 We’re Team Scirocco. | S1 | e2e console video, first 2 s (console loads) | Header "ARIADNE MISSION CONSOLE · Bright Angel · Jezero crater", "DEMO DATA" badge | Text overlay "Team Scirocco · NASA Space Apps 2026" (text only, no logo) |
+| A2 Every Mars walk needs a way back. | S2 | e2e console video around T+0:05 (= `01-running-console.png`) | Astronaut leaving the safe haven on the planned route; return-envelope legend "Back with ≥ 30 min to spare" | "Synthetic demo data" |
+| A3 This is Ariadne: a thread home from every step. | S3 | e2e console + cuff side by side around T+0:05 (= `01-running-console.png` + `01-running-cuff.png`) | Same clock on both screens; cuff "MARGIN TO HOME +201 min · Safe to continue" | Title "Ariadne" over the shot; "Synthetic demo data" |
+| A4 Built on NASA HiRISE images and terrain of Jezero crater, … | R1 — **TO RECORD**, about 4.5 s | Real-data console: layers Orthoimage MRO HiRISE (Observed) and Hillshade from DEM (Derived) on, Fit AOI, then **Plan route** with the five stops (Mount Washburn, Tuff Cliff, Bright Angel, Cheyava Falls, Masonic Temple) | HiRISE map of Bright Angel with the route drawn and the leg table filled in | HiRISE credit as filled in `REFERENCES.md`. That row is still TBD: fill it before the video is cut |
+| A4 … it plans a route through stops Perseverance studied. | R2 — **TO RECORD**, about 2.5 s | Real-data console, STOP tab on `bright-angel` | Stop card with Perseverance photo `bright-angel_1.jpg` and its credit line | "NASA/JPL-Caltech/ASU" (in the card) |
+| A5 When a storm alert comes in, both screens show the fastest way home. | S4 | e2e console + cuff side by side, T+0:30 → T+0:33 (= `02-alert-console.png` + `02-alert-cuff.png`) | Console: red strip "STORM ALERT · time to storm", red thread "Way home before the storm". Cuff: "STORM ALERT · Follow the thread home" | "Simulated storm alert · synthetic demo data" |
+| A6 Tomorrow, it could guide crews on the Moon and Mars, one safe step at a time. | S5 → end card | e2e console + cuff T+0:38 (= `02b-home-*`), then T+0:50+ (= `03-clear-cuff.png`) | Astronaut reaches the safe haven; after the clear the cuff shows "Safe to continue · Home: the walk is done." End card for the last ~2 s: text "Ariadne · team Scirocco" | "Synthetic demo data" on S5; end card is text only |
 
 ## Claim check (Variant A)
 
@@ -116,11 +117,13 @@ image did not render because the assets host was offline. Record when it is back
 | Jezero crater, Bright Angel | S1 header; R1 | `docs/DATA_SOURCES.md` AOI and stop rows |
 | NASA HiRISE images | R1 (layer "Orthoimage, MRO HiRISE", Observed) | `DATA_SOURCES.md` row `ortho_50cm.jpg`, `ortho_1m.jpg` (USGS Mars 2020 TRN HiRISE orthomosaic) |
 | NASA HiRISE terrain | R1 (layer "Hillshade (from DEM)", Derived) | `DATA_SOURCES.md` rows `dem_4m.f32` / `hillshade_2m.png` (USGS HiRISE DTM 1 m) |
-| plans the stops | R1 (Plan route, leg table) | `DATA_SOURCES.md` planned-walk row (planner /route), Modeled |
+| plans a route through stops | R1 (Plan route, leg table) | `DATA_SOURCES.md` planned-walk row (planner /route), Modeled |
+| stops Perseverance studied | R2 (stop card with Perseverance photo) | `DATA_SOURCES.md` stop-position row (M20_waypoints.json, sols 1162–1231); `REFERENCES.md` stop photos |
 | a thread home from every step | S3 (cuff margin to home); S2 (return-envelope legend) | Return envelope = `cost_to_home_2m.f32`, Modeled. Shown here on synthetic data |
 | storm alert reaches both screens | S4 | F4 e2e test asserts it on both contexts. Alert is simulated (fixture `ws-state.jsonl`) |
-| both screens point the way home | S4: console red thread; cuff "Follow the thread home" | F4 e2e test (red-thread pixel check) |
-| could guide real crews on the Moon and Mars | — (future, said as "could") | Not a demo claim |
+| both screens show the way home | S4: console red thread; cuff "Follow the thread home" and walk-home minutes (the cuff shows no map) | F4 e2e test (red-thread pixel check) |
+| the fastest way home | Not shown as "fastest" on screen. In S4 the thread comes from the synthetic fixture, not from the planner | In a live session the abort path is the least-time path under the walk model (planner `/abort`, same MCP set-up as `cost_to_home`), Modeled. See `DATA_SOURCES.md` cost-to-home row |
+| could guide crews on the Moon and Mars | — (future, said as "could") | Not a demo claim |
 
 Not claimed anywhere in the script: a live or forecast storm (DONKI), live weather, partner data,
 or any number from the synthetic fixture.
@@ -128,7 +131,7 @@ or any number from the synthetic fixture.
 ## Before the cut
 
 - [ ] Read-aloud time ≤ 30 s, end card included
-- [ ] ≤ 70 words (A: 65)
+- [ ] ≤ 70 words (A: 66)
 - [ ] No person on screen; voice only
 - [ ] No NASA logo or mission patch anywhere, including browser tabs and favicons in the capture
 - [ ] "DEMO DATA" badge visible and "Synthetic demo data" caption on S1–S5
