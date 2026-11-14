@@ -15,28 +15,47 @@
         "camera": "SYNTHETIC camera",
         "credit": "SYNTHETIC placeholder",
         "caption": "SYNTHETIC placeholder caption",
-        "distance_m": 3.5
+        "distance_m": 3.5,
+        "page_url": "https://example.invalid/synthetic/s1/0"
       }
     ],
     "unit": "SYNTHETIC unit",
-    "provenance": "Simulation"
+    "provenance": "Simulation",
+    "sources": [
+      {
+        "title": "SYNTHETIC placeholder source",
+        "url": "https://example.invalid/synthetic/s1"
+      }
+    ],
+    "draft": true
   },
   {
     "id": "t1",
     "name": "SYNTHETIC target 1",
     "kind": "target",
-    "science_question": "SYNTHETIC placeholder: seen from orbit, never touched. What is it?",
-    "tasks": ["SYNTHETIC: approach and image at close range"],
+    "science_question": "SYNTHETIC placeholder: seen by the rover, never visited. What is it?",
+    "tasks": [
+      "SYNTHETIC: approach and image at close range"
+    ],
     "photos": [
       {
         "file": "photos/fx_t1_a.jpg",
-        "sol": 1210,
+        "sol": 1205,
         "camera": "SYNTHETIC camera",
         "credit": "SYNTHETIC placeholder",
-        "caption": "SYNTHETIC placeholder caption"
+        "caption": "SYNTHETIC placeholder caption",
+        "page_url": "https://example.invalid/synthetic/t1/0",
+        "distance_m": 100.0
       }
     ],
     "unit": "SYNTHETIC unit",
-    "provenance": "Simulation"
+    "provenance": "Simulation",
+    "sources": [
+      {
+        "title": "SYNTHETIC placeholder source",
+        "url": "https://example.invalid/synthetic/t1"
+      }
+    ],
+    "draft": true
   }
 ]

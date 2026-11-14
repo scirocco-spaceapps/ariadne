@@ -45,6 +45,8 @@ Exact ownership is in `.github/CODEOWNERS`. Each directory has its own `CLAUDE.m
   `x = (col + 0.5) * px_m`, `y = size_m[1] - (row + 0.5) * px_m`.
 - `.f32` rasters are little-endian float32, row-major, no header; width = `size_m[0] / px_m`.
 - Never Web Mercator. Never lon/lat inside services; `crs.proj4` in `aoi.json` is for the pipeline only.
+- GeoJSON files (`track`, `waypoints`, `targets`, `geology`) are in AOI metres too, not lon/lat.
+- Asset paths: web = `VITE_ASSETS_URL + assets_base + file`; planner/pipeline = `DATA_DIR + assets_base + file`.
 
 ### Provenance
 - Every value shown to a user carries provenance: `Observed`, `Derived`, `Modeled`, `Assumed` or

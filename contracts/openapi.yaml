@@ -13,6 +13,10 @@ info:
     the AOI south-west corner). Never lon/lat, never Web Mercator.
 
     Times are minutes from EVA start (`t_min`) unless named `*_utc` (ISO 8601, UTC).
+
+    Servers below are local development addresses. Deployed hostnames are not part of the
+    contract: the web app reads VITE_PLANNER_URL, VITE_MC_URL and VITE_ASSETS_URL, and infra/
+    maps hostnames to the same ports.
 servers:
   - url: http://localhost:8000
     description: planner
@@ -297,7 +301,10 @@ components:
       properties:
         from: { type: string, description: Stop id or the safe haven id. }
         to: { type: string, description: Stop id or the safe haven id. }
-        path: { $ref: "#/components/schemas/Path" }
+        path:
+          $ref: "#/components/schemas/Path"
+          maxItems: 300
+          description: Simplified to at most 300 vertices; first point = from, last point = to.
         distance_m: { type: number, minimum: 0 }
         time_min: { type: number, minimum: 0 }
         climb_m: { type: number, minimum: 0, description: Total ascent along the leg. }
@@ -345,7 +352,10 @@ components:
       additionalProperties: false
       required: [path, time_min, distance_m, provenance]
       properties:
-        path: { $ref: "#/components/schemas/Path" }
+        path:
+          $ref: "#/components/schemas/Path"
+          maxItems: 300
+          description: From the requested position to the safe haven, simplified to at most 300 vertices.
         time_min: { type: number, minimum: 0 }
         distance_m: { type: number, minimum: 0 }
         provenance: { $ref: "#/components/schemas/Provenance" }
@@ -462,7 +472,11 @@ components:
       properties:
         action: { type: string, enum: [start, pause, reset, seek] }
         t_min: { type: number, minimum: 0, description: Required for seek. }
-        speed: { type: number, exclusiveMinimum: 0, description: "Simulated minutes per real second; optional on start." }
+        speed: { type: number, exclusiveMinimum: 0, description: "Simulated minutes per real second; default 6; optional on start." }
+      if:
+        properties: { action: { const: seek } }
+      then:
+        required: [t_min]
     SessionEvent:
       type: object
       additionalProperties: false
@@ -529,13 +543,21 @@ components:
 
     # ---------- files: aoi.json ----------
     RasterRef:
+      description: |
+        One raster, north-up, covering exactly size_m from the AOI south-west corner.
+        .jpg/.png are display images. Classified PNGs (slope, traversability) are RGB(A) with
+        exactly the legend colours, no anti-aliasing, alpha 0 where there is no data.
+        .f32 is raw float32 (see dtype). .tif is a GeoTIFF in crs.proj4, for notebooks only.
       type: object
       additionalProperties: false
       required: [file, px_m]
       properties:
         file: { type: string, description: Relative to assets_base. }
         px_m: { type: number, exclusiveMinimum: 0 }
-        dtype: { type: string, enum: [float32], description: "Binary rasters: little-endian, row-major, no header." }
+        dtype:
+          type: string
+          enum: [float32]
+          description: "Binary rasters: little-endian, row-major, row 0 = north, no header. Each has a sidecar <file>.json {width, height, px_m, min, max}."
         unit: { type: string }
         nodata: { type: string, enum: [NaN] }
         optional: { type: boolean, description: "File may be absent; clients must handle that." }
@@ -596,7 +618,11 @@ components:
           minItems: 2
           maxItems: 2
           items: false
-        assets_base: { type: string }
+        assets_base:
+          type: string
+          description: |
+            Folder of this AOI's files relative to the asset root. Web: VITE_ASSETS_URL + assets_base + file.
+            planner and pipeline: DATA_DIR + assets_base + file. Fixtures: relative to contracts/fixtures/.
         rasters:
           type: object
           additionalProperties: false
@@ -611,6 +637,8 @@ components:
             cost_to_home: { $ref: "#/components/schemas/RasterRef" }
             cost_to_home_flat: { $ref: "#/components/schemas/RasterRef" }
             seen_not_touched: { $ref: "#/components/schemas/RasterRef" }
+            slope_values: { $ref: "#/components/schemas/RasterRef" }
+            dem_geotiff: { $ref: "#/components/schemas/RasterRef" }
         vectors:
           type: object
           additionalProperties: false
@@ -637,9 +665,10 @@ components:
     Photo:
       type: object
       additionalProperties: false
-      required: [file, sol, camera, credit, caption]
+      required: [file, sol, camera, credit, caption, page_url]
       properties:
-        file: { type: string }
+        file: { type: string, description: "Relative to content/, e.g. photos/<name>.jpg." }
+        page_url: { type: string, format: uri, description: NASA page of the raw image. }
         sol: { type: integer, minimum: 0 }
         camera: { type: string }
         credit: { type: string }
@@ -648,9 +677,9 @@ components:
     StopContent:
       type: object
       additionalProperties: false
-      required: [id, name, kind, science_question, tasks, photos, unit, provenance]
+      required: [id, name, kind, science_question, tasks, photos, unit, provenance, sources]
       properties:
-        id: { type: string, description: Matches a stop id in aoi.json (kind stop) or a target id (kind target). }
+        id: { type: string, description: "Matches a stop id in aoi.json (kind stop) or properties.id in targets.geojson (kind target)." }
         name: { type: string }
         kind: { type: string, enum: [stop, target] }
         science_question: { type: string }
@@ -658,3 +687,133 @@ components:
         photos: { type: array, items: { $ref: "#/components/schemas/Photo" } }
         unit: { type: string, description: Geologic unit the stop sits on. }
         provenance: { $ref: "#/components/schemas/Provenance" }
+        sources:
+          description: Pages that back the science question and tasks.
+          type: array
+          minItems: 1
+          items:
+            type: object
+            additionalProperties: false
+            required: [title, url]
+            properties:
+              title: { type: string }
+              url: { type: string, format: uri }
+        draft: { type: boolean, description: True until Bunyamin has reviewed the science text. }
+
+    # ---------- files: vectors ----------
+    # GeoJSON files in AOI metres [x, y], NOT lon/lat: a deliberate deviation from RFC 7946.
+    # Each collection carries the top-level foreign members provenance and source.
+    PointGeometry:
+      type: object
+      required: [type, coordinates]
+      properties:
+        type: { type: string, const: Point }
+        coordinates: { $ref: "#/components/schemas/XY" }
+    LineGeometry:
+      type: object
+      required: [type, coordinates]
+      properties:
+        type: { type: string, enum: [LineString, MultiLineString] }
+        coordinates:
+          description: "LineString = [XY, ...]; MultiLineString = [[XY, ...], ...]."
+          type: array
+          items:
+            anyOf:
+              - $ref: "#/components/schemas/XY"
+              - { type: array, items: { $ref: "#/components/schemas/XY" } }
+    PolygonGeometry:
+      type: object
+      required: [type, coordinates]
+      properties:
+        type: { type: string, enum: [Polygon, MultiPolygon] }
+        coordinates: { type: array, description: "Rings of XY with RFC 7946 nesting, in AOI metres." }
+    TrackCollection:
+      description: track.geojson, the rover traverse.
+      type: object
+      required: [type, features, provenance, source]
+      properties:
+        type: { type: string, const: FeatureCollection }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        source: { type: string }
+        features:
+          type: array
+          items:
+            type: object
+            required: [type, geometry, properties]
+            properties:
+              type: { type: string, const: Feature }
+              geometry: { $ref: "#/components/schemas/LineGeometry" }
+              properties:
+                type: object
+                properties:
+                  sol: { type: integer, description: Sol of this drive segment, if known. }
+    WaypointCollection:
+      description: waypoints.geojson, rover stops with their sol.
+      type: object
+      required: [type, features, provenance, source]
+      properties:
+        type: { type: string, const: FeatureCollection }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        source: { type: string }
+        features:
+          type: array
+          items:
+            type: object
+            required: [type, geometry, properties]
+            properties:
+              type: { type: string, const: Feature }
+              geometry: { $ref: "#/components/schemas/PointGeometry" }
+              properties:
+                type: object
+                required: [sol]
+                properties:
+                  sol: { type: integer, minimum: 0 }
+                  site: { type: integer }
+                  drive: { type: integer }
+                  name: { type: string }
+    TargetCollection:
+      description: targets.geojson, seen-not-touched targets (task B3).
+      type: object
+      required: [type, features, provenance, source]
+      properties:
+        type: { type: string, const: FeatureCollection }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        source: { type: string }
+        features:
+          type: array
+          items:
+            type: object
+            required: [type, geometry, properties]
+            properties:
+              type: { type: string, const: Feature }
+              geometry: { $ref: "#/components/schemas/PointGeometry" }
+              properties:
+                type: object
+                required: [id, area_m2, distance_m, sol]
+                properties:
+                  id: { type: string, description: Matches a StopContent id of kind target. }
+                  area_m2: { type: number, minimum: 0 }
+                  distance_m: { type: number, minimum: 0, description: Distance to the nearest rover waypoint. }
+                  sol: { type: integer, minimum: 0, description: Sol of that waypoint. }
+    GeologyCollection:
+      description: geology.geojson, mapped geologic units.
+      type: object
+      required: [type, features, provenance, source]
+      properties:
+        type: { type: string, const: FeatureCollection }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        source: { type: string }
+        features:
+          type: array
+          items:
+            type: object
+            required: [type, geometry, properties]
+            properties:
+              type: { type: string, const: Feature }
+              geometry: { $ref: "#/components/schemas/PolygonGeometry" }
+              properties:
+                type: object
+                required: [unit, name]
+                properties:
+                  unit: { type: string, description: Unit code from the source map. }
+                  name: { type: string }

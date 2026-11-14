@@ -1,0 +1,140 @@
+{
+ "type": "FeatureCollection",
+ "provenance": "Simulation",
+ "source": "SYNTHETIC fixture, not real data",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      30,
+      40
+     ],
+     [
+      90,
+      70
+     ]
+    ]
+   },
+   "properties": {
+    "sol": 1200
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      90,
+      70
+     ],
+     [
+      150,
+      140
+     ]
+    ]
+   },
+   "properties": {
+    "sol": 1201
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      150,
+      140
+     ],
+     [
+      200,
+      150
+     ]
+    ]
+   },
+   "properties": {
+    "sol": 1202
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      200,
+      150
+     ],
+     [
+      260,
+      210
+     ]
+    ]
+   },
+   "properties": {
+    "sol": 1203
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      260,
+      210
+     ],
+     [
+      330,
+      250
+     ]
+    ]
+   },
+   "properties": {
+    "sol": 1204
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      330,
+      250
+     ],
+     [
+      400,
+      320
+     ]
+    ]
+   },
+   "properties": {
+    "sol": 1205
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      400,
+      320
+     ],
+     [
+      470,
+      370
+     ]
+    ]
+   },
+   "properties": {
+    "sol": 1206
+   }
+  }
+ ]
+}
