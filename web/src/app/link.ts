@@ -157,7 +157,8 @@ export function enterFallback(): void {
   if (useLink.getState().fallback) return
   const m = useMission.getState()
   snapshot = { route: m.route, conditions: m.conditions, budget: m.budget }
-  stopDemo = startDemo()
+  // Calm part only: an outage must not put a storm alert on screen that nobody triggered.
+  stopDemo = startDemo({ calm: true })
   useLink.setState({ fallback: true })
 }
 
