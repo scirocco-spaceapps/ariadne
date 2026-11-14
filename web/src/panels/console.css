@@ -64,7 +64,9 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 0;
+  /* Fits the longest label ("Reconnecting"), so a status change does not move the header. */
+  min-width: 9em;
+  justify-content: center;
 }
 .cx-pill-ok { color: var(--safe); }
 .cx-pill-warn { color: var(--warn); }

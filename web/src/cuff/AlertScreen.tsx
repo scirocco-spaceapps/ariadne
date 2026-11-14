@@ -10,6 +10,8 @@ interface AlertScreenProps {
   margin: number | null
   /** Provenance of the cost-to-home numbers. */
   modelProv: Provenance
+  /** SYNTHETIC replay (DEMO mode or the fallback): the alert must still say so. */
+  demo?: boolean
 }
 
 function Prov({ p }: { p: Provenance }) {
@@ -17,9 +19,14 @@ function Prov({ p }: { p: Provenance }) {
 }
 
 /** Full-screen storm alert: the one thing the astronaut must read and act on. */
-export function AlertScreen({ timeToStorm, returnMin, margin, modelProv }: AlertScreenProps) {
+export function AlertScreen({ timeToStorm, returnMin, margin, modelProv, demo = false }: AlertScreenProps) {
   return (
     <section className="cf-alert" role="alert" aria-live="assertive" data-testid="cuff-alert">
+      {demo && (
+        <span className="cuff-demo cf-alert-demo" title="SYNTHETIC fixtures, not real data">
+          DEMO DATA
+        </span>
+      )}
       <p className="cf-alert-title">STORM ALERT</p>
       <p className="cf-alert-sub">Follow the thread home</p>
       <dl className="cf-alert-grid">

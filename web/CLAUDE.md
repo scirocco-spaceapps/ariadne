@@ -26,6 +26,12 @@ shows a QR for `/cuff?s=<id>` (`/cuff?demo=1` in DEMO mode). Open the console on
 not `localhost`, or the phone cannot reach the QR's URL. The DEMO replay is locked to the wall
 clock, so every screen in DEMO mode shows the same frame.
 
+**Link to mission-control (N7, `src/app/link.ts`):**
+- **Detection:** while a live session is open, a banner reports a lost link. A running session that sends no frame for 3 s, or `/health` not answering within 4 s, counts as lost.
+- **Fallback:** 10 s after the last sign of life the screen switches to the DEMO replay with the DEMO DATA badge, and the socket keeps reconnecting.
+- **Recovery:** the first live frame restores the live session.
+- **Restart:** if mission-control restarted and lost the session (4404), the console recreates it at the same time, speed and storm alert and updates `?s=`. The cuff shows "scan the new QR".
+
 **Test:** `cd web && npm run check` (typecheck, vitest, build).
 
 **Env:** `VITE_PLANNER_URL`, `VITE_MC_URL`, `VITE_ASSETS_URL` (default: the dev proxy and `/`),

@@ -18,11 +18,17 @@ export interface SocketOptions {
 /** Close codes after which reconnecting cannot help. */
 const FATAL_CODES: Record<number, string> = { 4404: 'unknown session', 4400: 'bad role' }
 
+export interface SessionSocket {
+  close: () => void
+  /** Drop the current socket and reconnect now (a link that looks dead without a close event). */
+  kick: () => void
+}
+
 /**
  * Opens the socket, sends hello, and reconnects with exponential backoff until close() is called.
  * No replay on reconnect: the first state after hello is the truth.
  */
-export function connectSession(opts: SocketOptions): { close: () => void } {
+export function connectSession(opts: SocketOptions): SessionSocket {
   const Impl = opts.WebSocketImpl ?? WebSocket
   const minDelay = opts.minDelayMs ?? 500
   const maxDelay = opts.maxDelayMs ?? 5000
@@ -67,6 +73,20 @@ export function connectSession(opts: SocketOptions): { close: () => void } {
       if (timer) clearTimeout(timer)
       ws?.close()
       opts.onStatus?.('closed')
+    },
+    kick: () => {
+      if (stopped) return
+      if (timer) clearTimeout(timer)
+      timer = null
+      delay = minDelay
+      const old = ws
+      ws = null // the old socket's late close or frames are ignored from here on
+      if (old) {
+        old.onopen = null
+        old.onmessage = null
+        old.close()
+      }
+      open(false)
     },
   }
 }

@@ -109,6 +109,35 @@ describe('socket', () => {
     expect(statuses.at(-1)).toBe('closed')
   })
 
+  it('kick drops the current socket and reconnects at once', () => {
+    vi.useFakeTimers()
+    FakeSocket.all = []
+    const got: unknown[] = []
+    const statuses: SocketStatus[] = []
+    const sock = connectSession({
+      url: 'ws://x',
+      role: 'console',
+      onMessage: (m) => got.push(m),
+      onStatus: (s) => statuses.push(s),
+      WebSocketImpl: FakeSocket as unknown as typeof WebSocket,
+      minDelayMs: 100,
+    })
+    const first = FakeSocket.all[0]
+    first.onopen?.()
+    sock.kick()
+    expect(FakeSocket.all).toHaveLength(2)
+    // The dropped socket's close does not schedule another reconnect, and its frames are ignored.
+    vi.advanceTimersByTime(10_000)
+    expect(FakeSocket.all).toHaveLength(2)
+    first.onmessage?.({ data: JSON.stringify(fixtures.frames[0]) })
+    expect(got).toHaveLength(0)
+    FakeSocket.all[1].onopen?.()
+    expect(statuses).toEqual(['connecting', 'open', 'reconnecting', 'open'])
+    sock.close()
+    sock.kick()
+    expect(FakeSocket.all).toHaveLength(2)
+  })
+
   it('stops on 4404', () => {
     vi.useFakeTimers()
     FakeSocket.all = []

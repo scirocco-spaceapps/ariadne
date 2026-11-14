@@ -111,10 +111,17 @@ export function Cuff() {
   return (
     <main className={demo ? 'cuff cuff--demo' : 'cuff'}>
       <header className="cuff-top">
-        <span className="cuff-title">Ariadne</span>
-        <span className={`cuff-pill cuff-pill--${statusTone(status)}`} data-testid="cuff-status" role="status">
-          {STATUS_LABEL[status]}
-          {detail && status === 'rejected' && <>: {detail}</>}
+        {/* In DEMO the badge takes the title's slot, so switching to the fallback moves nothing. */}
+        {demo ? (
+          <span className="cuff-demo" title="SYNTHETIC fixtures, not real data">
+            DEMO DATA
+          </span>
+        ) : (
+          <span className="cuff-title">Ariadne</span>
+        )}
+        <span className={`cuff-pill cuff-pill--${demo ? 'warn' : statusTone(status)}`} data-testid="cuff-status" role="status">
+          {demo ? 'DEMO replay' : STATUS_LABEL[status]}
+          {!demo && detail && status === 'rejected' && <>: {detail}</>}
         </span>
       </header>
       <h1 className="visually-hidden">Ariadne cuff</h1>
@@ -156,7 +163,7 @@ export function Cuff() {
         )}
       </section>
 
-      <section className="cf-block" aria-label="Next stop" data-testid="cuff-next">
+      <section className="cf-block cf-next" aria-label="Next stop" data-testid="cuff-next">
         <span className="cf-label">{state?.alert ? 'Heading to' : target?.here ? 'At' : 'Next stop'}</span>
         {target ? (
           <>
@@ -201,7 +208,9 @@ export function Cuff() {
         {id && <p className="cuff-session">Session {id}</p>}
       </section>
 
-      {storm !== null && <AlertScreen timeToStorm={storm} returnMin={returnMin} margin={margin} modelProv={modelProv} />}
+      {storm !== null && (
+        <AlertScreen timeToStorm={storm} returnMin={returnMin} margin={margin} modelProv={modelProv} demo={demo} />
+      )}
     </main>
   )
 }
