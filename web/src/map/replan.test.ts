@@ -14,6 +14,7 @@ import {
   replanKey,
   routeStops,
   sessionReplan,
+  trackArrival,
   type Legs,
   type ReplanInput,
   type ReplanParams,
@@ -116,5 +117,58 @@ describe('sessionReplan (live state -> rule input)', () => {
     expect(replanKey(a, 0.5, 0)).not.toBe(replanKey(a, 1, 0))
     expect(replanKey(sessionReplan(route, at(4), 4), 1, 0)).not.toBe(replanKey(b, 1, 0))
     expect(replanKey(null, 1, 0)).toBe('none')
+  })
+})
+
+describe('trackArrival (MPC-3: arrival after a seek or a reload)', () => {
+  const route = fixtures.route // s1 planned dwell 4-24 min
+  const states = fixtures.frames.filter((f): f is WsState => f.type === 'state')
+  const at = (t: number) => states.find((s) => s.t_min === t)!
+  const seen = (s: WsState) => ({ session: s.session, t_min: s.t_min, at_stop: s.at_stop })
+  const key = `${at(4).session}|s1`
+
+  it('a seen arrival is now (previous frame was walking, clock moved on by one step)', () => {
+    expect(trackArrival(null, seen(at(3)), at(4), route)).toEqual({ key, t: 4 })
+  })
+
+  it('a seen arrival up to one step after the planned start snaps back to it (speed 6: 3 min per frame)', () => {
+    const prev = { ...seen(at(3)), t_min: 1.5 }
+    expect(trackArrival(null, prev, { ...at(4), t_min: 4.5, speed: 6 }, route)).toEqual({ key, t: 4 })
+    // More than one step after the planned start (on a delayed plan): the seen time stays.
+    expect(trackArrival(null, { ...prev, t_min: 10.5 }, { ...at(10), t_min: 11, speed: 1 }, route)).toEqual({ key, t: 11 })
+  })
+
+  it('keeps the arrival through the dwell and returns the same object', () => {
+    const a = { key, t: 4 }
+    expect(trackArrival(a, seen(at(4)), at(5), route)).toBe(a)
+    expect(trackArrival(a, seen(at(5)), at(10), route)).toBe(a)
+  })
+
+  it('a reload during the dwell takes the planned dwell start', () => {
+    expect(trackArrival(null, null, at(10), route)).toEqual({ key, t: 4 })
+  })
+
+  it('a seek into the dwell takes the planned dwell start, not the seek time', () => {
+    expect(trackArrival(null, seen(at(3)), { ...at(10), speed: 1 }, route)).toEqual({ key, t: 4 })
+  })
+
+  it('a seek back inside the same dwell is re-estimated from the plan', () => {
+    expect(trackArrival({ key, t: 10 }, seen(at(10)), at(5), route)).toEqual({ key, t: 4 })
+  })
+
+  it('outside the planned window (session clock ahead after a storm detour) counts no dwell done', () => {
+    const late = { ...at(10), t_min: 30 } // at s1 at t 30, past its planned 4-24 window
+    expect(trackArrival(null, null, late, route)).toEqual({ key, t: 30 })
+    expect(sessionReplan(route, late, 30)!.dwell_done_min).toBe(0)
+  })
+
+  it('a seen arrival after a detour is still now, not the earlier plan time', () => {
+    const prev = { session: at(4).session, t_min: 37.5, at_stop: null }
+    const arrive = { ...at(10), t_min: 38 }
+    expect(trackArrival(null, prev, arrive, route)).toEqual({ key, t: 38 })
+  })
+
+  it('no stop, no arrival', () => {
+    expect(trackArrival({ key, t: 4 }, seen(at(10)), at(30), route)).toBeNull()
   })
 })
