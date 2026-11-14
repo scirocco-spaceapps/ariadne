@@ -11,6 +11,8 @@ on:
       - "planner/**"
       - "mission-control/**"
       - "infra/**"
+      # Docs-only changes must not restart the services (open sessions live in memory).
+      - "!**/*.md"
   workflow_dispatch:
 
 concurrency:
