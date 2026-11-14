@@ -225,15 +225,21 @@ export function trackArrival(
   const key = `${state.session}|${state.at_stop}`
   const t = state.t_min
   if (current && current.key === key && t >= current.t) return current
+  const step = Math.max(1, state.speed)
+  const dwell = route.timeline.find((it) => it.kind === 'dwell' && it.stop === state.at_stop)
+  const inWindow = dwell !== undefined && dwell.t0_min <= t && t <= dwell.t1_min
   const seen =
     prev !== null &&
     prev.session === state.session &&
     prev.at_stop !== state.at_stop &&
     t >= prev.t_min &&
-    t - prev.t_min <= Math.max(1, state.speed)
-  if (seen) return { key, t }
-  const dwell = route.timeline.find((it) => it.kind === 'dwell' && it.stop === state.at_stop)
-  if (dwell && dwell.t0_min <= t && t <= dwell.t1_min) return { key, t: dwell.t0_min }
+    t - prev.t_min <= step
+  if (seen) {
+    // The first frame at the stop can come up to one step after the real arrival (2 states per
+    // second at `speed` min/s); on plan, that step is the planned dwell start.
+    return { key, t: inWindow && t - dwell.t0_min <= step ? dwell.t0_min : t }
+  }
+  if (inWindow) return { key, t: dwell.t0_min }
   return { key, t }
 }
 

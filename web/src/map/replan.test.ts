@@ -131,6 +131,13 @@ describe('trackArrival (MPC-3: arrival after a seek or a reload)', () => {
     expect(trackArrival(null, seen(at(3)), at(4), route)).toEqual({ key, t: 4 })
   })
 
+  it('a seen arrival up to one step after the planned start snaps back to it (speed 6: 3 min per frame)', () => {
+    const prev = { ...seen(at(3)), t_min: 1.5 }
+    expect(trackArrival(null, prev, { ...at(4), t_min: 4.5, speed: 6 }, route)).toEqual({ key, t: 4 })
+    // More than one step after the planned start (on a delayed plan): the seen time stays.
+    expect(trackArrival(null, { ...prev, t_min: 10.5 }, { ...at(10), t_min: 11, speed: 1 }, route)).toEqual({ key, t: 11 })
+  })
+
   it('keeps the arrival through the dwell and returns the same object', () => {
     const a = { key, t: 4 }
     expect(trackArrival(a, seen(at(4)), at(5), route)).toBe(a)
