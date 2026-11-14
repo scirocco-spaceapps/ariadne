@@ -76,10 +76,12 @@ changes. A "seen, not touched" layer marks ground that Perseverance's cameras sa
 never drove to. Four targets on it have their own cards.
 
 When the operator raises a storm alert, the console draws the way home ("the thread"), and the
-cuff switches to "Follow the thread home". After the all-clear, the plan goes on.
+cuff switches to "Follow the thread home". In the demo the astronaut reaches the safe haven before
+the all-clear, and the walk ends there. (In a live session, if the astronaut is not home yet when
+the all-clear comes, the plan resumes toward the next stop.)
 
-Live site: https://ariadne-gilt-tau.vercel.app. Its services run on a team laptop, so the site can
-be offline at times.
+Live site: https://ariadne-gilt-tau.vercel.app. Its services run on a cloud server that stays up
+through judging.
 
 ### How it works
 
@@ -140,7 +142,7 @@ we still get home from here?
 - Web: React, deck.gl, Vite, zustand, uqr (QR code).
 - Tests: pytest, Go test, Vitest, Playwright (end-to-end test of both screens through the storm
   alert).
-- Hosting: Vercel (web), Docker, Caddy and Tailscale Funnel on a team laptop (services).
+- Hosting: Vercel (web); Docker and Caddy on a Hetzner Cloud server (services).
 - Hardware: a laptop for the console, a phone for the cuff.
 - AI: Claude Code (see "How we used AI").
 
@@ -264,7 +266,8 @@ and found none, so that panel stays empty and says why.
 | IBM Plex Sans, IBM Plex Mono, Barlow Condensed (Google Fonts) | https://fonts.google.com/ |
 | Claude Code (Anthropic), AI coding assistant | https://www.anthropic.com/claude-code |
 | Vercel (web hosting) | https://vercel.com/ |
-| Tailscale Funnel (service hosting from a team laptop) | https://tailscale.com/kb/1223/funnel |
+| Hetzner Cloud (service hosting) | https://www.hetzner.com/cloud |
+| Tailscale Funnel (fallback service hosting) | https://tailscale.com/kb/1223/funnel |
 | Caddy (asset server) | https://github.com/caddyserver/caddy |
 | Docker | https://www.docker.com/ |
 
@@ -278,15 +281,13 @@ Everything I was unsure about while writing this page (F6, 2026-11-14):
 3. **DONKI has no row in `DATA_SOURCES.md`.** The app links https://kauai.ccmc.gsfc.nasa.gov/DONKI/
    (mission-control). Note left for Yusuf, who took over Mazlum's card.
 4. **Tobler 1993 has no URL.** `docs/model.md` says the citation was written from memory.
-5. **Live site.** It depends on Nuri's laptop. On 2026-11-14 at about 19:00 the services and the
-   real assets answered; the HiRISE layer in the browser was not checked by me.
-6. **NTRS and Apollo rows under NASA Data.** They are NASA documents and Apollo data, not Mars
+5. **NTRS and Apollo rows under NASA Data.** They are NASA documents and Apollo data, not Mars
    datasets. If the judges expect datasets only, move them to the other list.
-7. **Stop science text.** The stop cards cite NASA news pages and papers, and Bunyamin reviewed
+6. **Stop science text.** The stop cards cite NASA news pages and papers, and Bunyamin reviewed
    them (F3), but the science write-up itself is not done (see 2).
-8. **Summary numbers.** The Summary has no numbers on purpose; if you want one, the 2.89 km /
+7. **Summary numbers.** The Summary has no numbers on purpose; if you want one, the 2.89 km /
    80.3 min margin is the safest (Modeled, `DATA_SOURCES.md` row of the planned walk).
-9. **MPC replanning.** Not described here: it is not merged yet (TASKS.md, MPC-2). Add one line
+8. **MPC replanning.** Not described here: it is not merged yet (TASKS.md, MPC-2). Add one line
    only if it lands before Sunday 09:30 and shows in the demo.
 
 Closed after review (2026-11-14): the HiRISE credit is "Image: NASA/JPL/University of Arizona"
@@ -294,3 +295,7 @@ Closed after review (2026-11-14): the HiRISE credit is "Image: NASA/JPL/Universi
 (the 9 Astropedia authors belong to a separate LPSC 2020 abstract, Ali Koray); the MSL RAD link is
 https://doi.org/10.1126/science.1244797 (Bunyamin). Bunyamin checked every number in Project
 Details against the sources.
+
+Closed (2026-11-14, live site): planner, mission control and the assets now run on a Hetzner Cloud
+server that stays up through judging; Nuri's laptop with Tailscale Funnel is only the fallback. The
+production site loads its assets from that server, and the HiRISE layer renders in the browser.

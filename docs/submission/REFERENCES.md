@@ -83,7 +83,8 @@ in the dependency files.
 | GDAL (`gdalwarp`, `gdal_viewshed`; Docker image `ghcr.io/osgeo/gdal`) | https://github.com/OSGeo/gdal | GDAL/OGR licence, MIT-style (`LICENSE.TXT` in the repo) | Cropping and reprojecting the HiRISE mosaics (`pipeline/`), viewsheds (`notebooks/`) |
 | Docker | https://www.docker.com/ | Docker Engine Apache-2.0 | Running GDAL, planner and the services |
 | Caddy | https://github.com/caddyserver/caddy | Apache-2.0 | Asset server with CORS (`infra/`) |
-| Tailscale Funnel | https://tailscale.com/kb/1223/funnel | Tailscale service | Public HTTPS to the services on a team laptop (`infra/funnel.sh`) |
+| Hetzner Cloud | https://www.hetzner.com/cloud | Hetzner service | Server for planner, mission control and the assets (`infra/docker-compose.yml`) |
+| Tailscale Funnel | https://tailscale.com/kb/1223/funnel | Tailscale service | Fallback: public HTTPS to the services from a team laptop (`infra/funnel.sh`) |
 | Vercel | https://vercel.com/ | Vercel service | Hosting the web app |
 | Claude Code (Anthropic) | https://www.anthropic.com/claude-code | Anthropic service | AI coding assistant; see `docs/ai-use/` |
 
