@@ -1,7 +1,8 @@
 # References
 
 Owner: Furkan. Every outside resource the project uses: code libraries, data, images and papers.
-This feeds the "Other References" field of the project page (`page.md`). Add a row when you add a
+This feeds the "NASA Data" and "Space Agency Partner & Other Data" fields of the project page
+(`page.md`). Add a row when you add a
 dependency or a source.
 
 Licences were checked on 2026-11-14 against the npm registry, PyPI and deps.dev for the versions
@@ -17,6 +18,7 @@ in the dependency files.
 | react | https://github.com/react/react | MIT | UI framework |
 | react-dom | https://github.com/react/react | MIT | Rendering React in the browser |
 | react-router-dom | https://github.com/remix-run/react-router | MIT | Console and cuff routes |
+| uqr | https://github.com/unjs/uqr | MIT | QR code for pairing the cuff |
 | zustand | https://github.com/pmndrs/zustand | MIT | Client state store |
 | @testing-library/dom | https://github.com/testing-library/dom-testing-library | MIT | Web tests (dev) |
 | @testing-library/react | https://github.com/testing-library/react-testing-library | MIT | Component tests (dev) |
@@ -30,6 +32,13 @@ in the dependency files.
 | typescript | https://github.com/microsoft/TypeScript | Apache-2.0 | Type checking and build (dev) |
 | vite | https://github.com/vitejs/vite | MIT | Dev server and bundler (dev) |
 | vitest | https://github.com/vitest-dev/vitest | MIT | Unit tests (dev) |
+| Barlow Condensed, IBM Plex Sans, IBM Plex Mono (Google Fonts) | https://fonts.google.com/ | SIL Open Font License 1.1 | UI fonts, loaded in `web/index.html` |
+
+## Libraries — end-to-end tests (`e2e/package.json`)
+
+| Resource | URL | Licence or credit | Used for |
+|---|---|---|---|
+| @playwright/test | https://github.com/microsoft/playwright | Apache-2.0 | demo90 test of console and cuff (dev) |
 
 ## Libraries — mission control (`mission-control/go.mod`)
 
@@ -48,7 +57,7 @@ in the dependency files.
 | github.com/valyala/tcplisten | https://github.com/valyala/tcplisten | MIT | Indirect, via Fiber |
 | golang.org/x/sys | https://pkg.go.dev/golang.org/x/sys | BSD-3-Clause | Indirect, via Fiber |
 
-## Libraries — Python (`contracts/`, `pipeline/`, `planner/` requirements)
+## Libraries — Python (`contracts/`, `pipeline/`, `planner/` requirements; `notebooks/` imports)
 
 | Resource | URL | Licence or credit | Used for |
 |---|---|---|---|
@@ -63,24 +72,42 @@ in the dependency files.
 | uvicorn | https://github.com/Kludex/uvicorn | BSD-3-Clause | Planner server (`planner/`) |
 | pytest | https://github.com/pytest-dev/pytest | MIT | Planner tests (`planner/`, dev) |
 | httpx | https://github.com/encode/httpx | BSD-3-Clause | Planner API tests (`planner/`, dev) |
+| scikit-image | https://github.com/scikit-image/scikit-image | BSD License (PyPI classifier) | Minimum-cost paths: cost to home, routes and abort paths (`pipeline/`, `planner/`) |
+| scipy | https://github.com/scipy/scipy | BSD License (PyPI classifier) | Viewshed notebook (`notebooks/`) |
+| matplotlib | https://github.com/matplotlib/matplotlib | Matplotlib licence (PSF-based; PyPI classifier) | Validation figures (`notebooks/`) |
 
-## NASA and USGS data (planned)
-
-`docs/DATA_SOURCES.md` has no NASA or USGS rows yet. These rows come from the data table in the
-game plan and are not confirmed. Fill in URL and credit when the source is added to
-`docs/DATA_SOURCES.md` (cards A1, B1, B4, F3), and remove any row the project does not use.
+## Tools and hosting
 
 | Resource | URL | Licence or credit | Used for |
 |---|---|---|---|
-| MRO HiRISE orthomosaic of Jezero, 25 cm (USGS) | TBD | TBD | Base image of the site map |
-| MRO HiRISE DTM mosaic of Jezero, 1 m (USGS) | TBD | TBD | Terrain, slope and walking cost |
-| MRO CTX DTM, 20 m (USGS) | TBD | TBD | Backup terrain model if the HiRISE DTM has gaps |
-| Mars 2020 traverse and waypoints (`M20_traverse.json`, `M20_waypoints.json`) | TBD | TBD | Rover track, site location and sols |
+| GDAL (`gdalwarp`, `gdal_viewshed`; Docker image `ghcr.io/osgeo/gdal`) | https://github.com/OSGeo/gdal | GDAL/OGR licence, MIT-style (`LICENSE.TXT` in the repo) | Cropping and reprojecting the HiRISE mosaics (`pipeline/`), viewsheds (`notebooks/`) |
+| Docker | https://www.docker.com/ | Docker Engine Apache-2.0 | Running GDAL, planner and the services |
+| Caddy | https://github.com/caddyserver/caddy | Apache-2.0 | Asset server with CORS (`infra/`) |
+| Tailscale Funnel | https://tailscale.com/kb/1223/funnel | Tailscale service | Public HTTPS to the services on a team laptop (`infra/funnel.sh`) |
+| Vercel | https://vercel.com/ | Vercel service | Hosting the web app |
+| Claude Code (Anthropic) | https://www.anthropic.com/claude-code | Anthropic service | AI coding assistant; see `docs/ai-use/` |
+
+## NASA and USGS data
+
+Filled in task F6 from `docs/DATA_SOURCES.md` and, for HiRISE, from the USGS pages (citation
+fields copied from the USGS data-release pages on 2026-11-14; Astropedia's "Use Constraints" is
+"Please cite authors"). A URL that `DATA_SOURCES.md` does not give stays TBD and is listed under
+"Open questions" in `page.md`.
+
+| Resource | URL | Licence or credit | Used for |
+|---|---|---|---|
+| MRO HiRISE orthomosaic of Jezero, 25 cm (USGS Mars 2020 TRN), file `JEZ_hirise_soc_006_orthoMosaic_25cm_Eqc_latTs0_lon0_first.tif` | Product: https://www.usgs.gov/data/mars-2020-terrain-relative-navigation-hirise-orthorectified-image-mosaic · Astropedia: https://astrogeology.usgs.gov/search/map/mars_2020_terrain_relative_navigation_hirise_orthorectified_image_mosaic · File: https://planetarymaps.usgs.gov/mosaic/mars2020_trn/HiRISE/JEZ_hirise_soc_006_orthoMosaic_25cm_Eqc_latTs0_lon0_first.tif | CC0 1.0. Fergason, R. L., Galuszka, D. M., Hare, T. M., Mayer, D. P., Redding, B. L. (2020), Mars 2020 Terrain Relative Navigation HiRISE Orthorectified Image Mosaic, USGS Astrogeology Science Center data release, doi:10.5066/P9QJDP48. Source images: HiRISE, NASA/JPL-Caltech/University of Arizona | Base image of the site map (`ortho_50cm.jpg`, `ortho_1m.jpg`) |
+| MRO HiRISE DTM mosaic of Jezero, 1 m (USGS Mars 2020 TRN), file `JEZ_hirise_soc_006_DTM_MOLAtopography_DeltaGeoid_1m_Eqc_latTs0_lon0_blend40.tif` | Product: https://www.usgs.gov/data/mars-2020-terrain-relative-navigation-hirise-dtm-mosaic · Astropedia: https://astrogeology.usgs.gov/search/map/Mars/Mars2020/JEZ_hirise_soc_006_DTM_MOLAtopography_DeltaGeoid_1m_Eqc_latTs0_lon0_blend40 · File: https://planetarymaps.usgs.gov/mosaic/mars2020_trn/HiRISE/JEZ_hirise_soc_006_DTM_MOLAtopography_DeltaGeoid_1m_Eqc_latTs0_lon0_blend40.tif | CC0 1.0. Fergason, R. L., Galuszka, D. M., Hare, T. M., Mayer, D. P., Redding, B. L. (2020), Mars 2020 Terrain Relative Navigation HiRISE DTM Mosaic, USGS Astrogeology Science Center data release, doi:10.5066/P9REJ9JN. Source images: HiRISE, NASA/JPL-Caltech/University of Arizona | Terrain, slope, walking cost, cost to home, hillshade, elevation line |
+| McEwen et al. 2007, Mars Reconnaissance Orbiter's High Resolution Imaging Science Experiment (HiRISE), J. Geophys. Res. 112, E05S04 | https://doi.org/10.1029/2005JE002605 | Citation (listed in the references of both Astropedia pages) | Instrument reference for the HiRISE mosaics |
+| Fergason et al. 2020, Mars 2020 Terrain Relative Navigation Flight Product Generation: Digital Terrain Model and Orthorectified Image Mosaics, 51st LPSC | https://www.hou.usra.edu/meetings/lpsc2020/pdf/2020.pdf | Citation (listed in the references of both Astropedia pages) | How the HiRISE mosaics were made |
+| MRO CTX DTM, 20 m (USGS) | — | — | **Not used (backup).** The HiRISE DTM had 0 % gaps in our area |
+| Mars 2020 traverse (`M20_traverse.json`) | https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_traverse.json | NASA/JPL-Caltech (MMGIS) | Rover track layer; slope and route checks |
+| Mars 2020 waypoints (`M20_waypoints.json`) | https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json | NASA/JPL-Caltech (MMGIS) | Stop and safe-haven positions, sols, viewshed observer points |
 | Mars 2020 raw images, Navcam and Mastcam-Z | https://mars.nasa.gov/mars2020/multimedia/raw-images/ | NASA/JPL-Caltech/ASU (Mastcam-Z) | Stop photos; each image is listed under "Stop photos" below |
-| Mars 2020 MEDA weather data (NASA PDS) | TBD | TBD | Conditions panel: temperature, pressure, dust |
-| MSL RAD surface dose rate (Hassler et al. 2014) | TBD | TBD | Modeled radiation dose rate |
-| DONKI WSA-ENLIL CME arrival forecasts (api.nasa.gov) | TBD | TBD | Storm arrival forecast |
-| USGS SIM 3464, Jezero crater geologic map | TBD | TBD | Geology layer |
+| Mars 2020 MEDA, `CAL_ATS` and `DER_PS` for sol 1215 (NASA PDS Atmospheres Node) | https://doi.org/10.17189/1522849 | NASA PDS dataset doi:10.17189/1522849 | Conditions panel: air temperature, pressure (dust opacity not available) |
+| MSL RAD surface dose rate (Hassler et al. 2014, Science 343, 1244797) | TBD | Citation | Modeled radiation dose rate |
+| DONKI WSA-ENLIL CME arrival forecasts for Mars (CCMC, via api.nasa.gov) | TBD (the app links https://kauai.ccmc.gsfc.nasa.gov/DONKI/; no row in `DATA_SOURCES.md` yet) | NASA CCMC | Space-weather list in the conditions panel, live mode only |
+| USGS SIM 3464, Jezero crater geologic map | — | — | **Not used.** No geology layer is published (`geology.geojson` is optional and absent) |
 
 ## Stop photos (`content/photos/`)
 
@@ -132,3 +159,17 @@ Perseverance raw images, NASA's 1200 px JPG browse version. The credit is copied
 | Mars 2020 raw image API (camera model, rover attitude) | https://mars.nasa.gov/rss/api/?feed=raw_images&category=mars2020&feedtype=json | NASA/JPL-Caltech | Checking that each target photo points at its target |
 | Mars 2020 waypoints (`M20_waypoints.json`) | https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json | NASA/JPL-Caltech | Rover positions and headings for the target photos |
 | Ariadne walk model parameters (`model/params.json`: caution_slope_deg 15, max_slope_deg 20) | https://github.com/scirocco-spaceapps/ariadne/blob/main/model/params.json | Project work (Bunyamin) | Slope class in the `target-closest-pass` task |
+
+## Walk model sources (`model/params.json`)
+
+Copied from the `source` fields of `model/params.json` (Bunyamin, B1). `docs/model.md` lists which
+of them are not yet checked against the original.
+
+| Resource | URL | Licence or credit | Used for |
+|---|---|---|---|
+| Scoville, Artemis III EVA Mission Capability for de Gerlache-Shackleton Ridge (quotes the xEVA System Requirements Document and Del Greco et al. 2021) | https://ntrs.nasa.gov/citations/20210026296 | NASA NTRS | `max_slope_deg` 20, `walk_speed_flat_m_per_min` 33.3, `budget_min`, `reserve_min` |
+| Oliver et al., ICES 2026, Mars PLSS design study | https://ntrs.nasa.gov/citations/20260005204 | NASA NTRS | `budget_min` 360, `reserve_min` 60 |
+| Apollo 15 Activities Timeline (Lunar Orbital Data Explorer, WUSTL) | https://an.rsl.wustl.edu/apollo/data/A15/pages/time/time.html | Washington University in St. Louis | `dwell_min` 20 |
+| Tobler 1993, Three presentations on geographical analysis and modeling, NCGIA Technical Report 93-1 | TBD | Citation, not yet checked | `speed_vs_slope` |
+| Hassler et al. 2014, Mars' surface radiation environment measured with the Mars Science Laboratory's Curiosity rover, Science 343, 1244797 | TBD | Citation | `radiation_dose_rate` 210 uGy/day |
+| Bell et al. 2021, The Mars 2020 Perseverance Rover Mast Camera Zoom (Mastcam-Z), Space Sci. Rev. 217:24 | https://doi.org/10.1007/s11214-020-00755-x | Citation | `observer_height_m` 2.0 |
