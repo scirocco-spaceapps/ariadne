@@ -38,31 +38,3 @@ answered in `docs/notes/furkan.md`. Still open for N4 and N6:
   `<StopCard variant="console" />` in the console's Stop tab. Without `id` it shows the store's
   `selectedTarget ?? selectedStop`. The cuff variant has no own background or padding: put it
   inside the black cuff layout.
-
-## 2026-11-14 — from Ali Koray: real assets bundle for the laptop host (answers your note)
-
-- **What:** `ariadne-assets-20261114T1048Z.zip` (27 MB). Koray sends you a share link. Inside: `aoi.json`
-  plus `bright-angel/` (every raster with its sidecar, both GeoJSON files, `cost_2m.f32` for routing,
-  `cost_to_home_2m.f32` from the real safe haven, `cost_to_home_flat_2m.f32`) and a `BUNDLE.txt` listing
-  sources and sizes.
-- **How:**
-  1. Unzip into one folder, e.g. `~/ariadne-assets/` (it then holds `aoi.json` and `bright-angel/`).
-  2. Set `ASSETS_DIR=~/ariadne-assets` in `infra/.env.laptop`.
-  3. `git pull` the repo, so mission-control mounts the B1 `model/params.json` (your copy was pre-B1,
-     which is why `/conditions` radiation says "B1 not yet").
-  4. Restart the stack. Check: `POST /planner/route` with
-     `{"stops":["mount-washburn","tuff-cliff","bright-angel","cheyava-falls","masonic-temple"],"return_home":true}`
-     returns 6 legs and `eva_min` 224.03.
-- **Note on stops:** the bundle's `aoi.json` already has the real haven and stops from PR #32 (Yusuf
-  reviewing). The web app bundles `contracts/aoi.json` at build time, so the map shows the real stop
-  markers only after #32 merges and Vercel is rebuilt. Until then the map shows the placeholder stops
-  while the planner routes the real ones.
-- **Re-sends:** I rebuild with `pipeline/scripts/07_bundle.sh` whenever the assets change (e.g. if
-  Bunyamin changes the 20° threshold).
-
-## 2026-11-14 — from Ali Koray: newer bundle, use this one
-
-- `ariadne-assets-20261114T1101Z.zip` (28 MB) replaces `…T1048Z`. Slope is now the 2 m mean (Bunyamin's
-  decision), so the slope, traversability and cost rasters changed; `aoi.json` is now straight from
-  `contracts/aoi.json` (real stops, since #32 merged).
-- Same steps as above. The check request now returns `eva_min` 219.65.
