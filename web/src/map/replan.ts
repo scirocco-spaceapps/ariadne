@@ -198,6 +198,51 @@ export function sessionReplan(route: RouteResponse, state: WsState, arrivedAt: n
   return null
 }
 
+/** When the astronaut reached the stop being dwelt at, per session and stop (`session|stop`). */
+export type Arrival = { key: string; t: number }
+
+/** The fields of the previous state the console saw, for telling a seen arrival from a jump. */
+export type SeenState = Pick<WsState, 'session' | 't_min' | 'at_stop'>
+
+/**
+ * The arrival time behind `dwell_done_min` (MPC-3, Bunyamin's note). The state does not carry it,
+ * so the console tracks it:
+ * - Seen: the previous state of this session was not at this stop and the clock moved on by at most
+ *   one second of sim time (`speed` minutes). The arrival is now.
+ * - Not seen (page opened or reloaded during the dwell, or a seek into it): the route's planned
+ *   dwell start, if the clock is inside that stop's planned dwell. After a storm detour the session
+ *   clock runs ahead of the plan, so outside the window this falls back to now, i.e. no dwell done
+ *   yet (the safe side: it only ever suggests shorter dwells).
+ * Returns `current` itself when nothing changed, so a caller can keep it in state without a loop.
+ */
+export function trackArrival(
+  current: Arrival | null,
+  prev: SeenState | null,
+  state: WsState,
+  route: RouteResponse,
+): Arrival | null {
+  if (!state.at_stop) return null
+  const key = `${state.session}|${state.at_stop}`
+  const t = state.t_min
+  if (current && current.key === key && t >= current.t) return current
+  const step = Math.max(1, state.speed)
+  const dwell = route.timeline.find((it) => it.kind === 'dwell' && it.stop === state.at_stop)
+  const inWindow = dwell !== undefined && dwell.t0_min <= t && t <= dwell.t1_min
+  const seen =
+    prev !== null &&
+    prev.session === state.session &&
+    prev.at_stop !== state.at_stop &&
+    t >= prev.t_min &&
+    t - prev.t_min <= step
+  if (seen) {
+    // The first frame at the stop can come up to one step after the real arrival (2 states per
+    // second at `speed` min/s); on plan, that step is the planned dwell start.
+    return { key, t: inWindow && t - dwell.t0_min <= step ? dwell.t0_min : t }
+  }
+  if (inWindow) return { key, t: dwell.t0_min }
+  return { key, t }
+}
+
 /** Re-check key (rule line 1): every replan_interval_min, on arrival at a stop, when a trigger changes. */
 export function replanKey(s: SessionReplan | null, speed_factor: number, leak_min: number): string {
   if (!s) return 'none'
