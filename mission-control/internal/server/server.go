@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/gofiber/contrib/websocket"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/ozyusuf/ariadne/mission-control/internal/contract"
 	"github.com/ozyusuf/ariadne/mission-control/internal/session"
+	"github.com/ozyusuf/ariadne/mission-control/internal/sim"
 )
 
 // Health is the /health response (schema Health in contracts/openapi.yaml).
@@ -26,15 +26,12 @@ type Health struct {
 type Config struct {
 	// WebOrigins is the CORS allow list, comma-separated (WEB_ORIGIN).
 	WebOrigins string
-	// ReplayPath is the ws-state.jsonl file new sessions replay until the simulator lands (REPLAY_PATH).
-	ReplayPath string
 }
 
 // DefaultConfig works from the mission-control folder of a repo checkout.
 func DefaultConfig() Config {
 	return Config{
 		WebOrigins: "http://localhost:5173",
-		ReplayPath: "../contracts/fixtures/ws-state.jsonl",
 	}
 }
 
@@ -64,6 +61,7 @@ func New(cfg Config) *Server {
 		return c.JSON(Health{Status: "ok", Service: "mission-control"})
 	})
 	s.App.Post("/sessions", s.createSession)
+	s.App.Post("/sessions/:id/control", s.controlSession)
 	s.App.Use("/ws", func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
 			return c.Next()
@@ -84,16 +82,7 @@ func (s *Server) createSession(c *fiber.Ctx) error {
 	if err := validateSession(body); err != nil {
 		return badRequest(c, err.Error())
 	}
-	f, err := os.Open(s.cfg.ReplayPath)
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "replay file: "+err.Error())
-	}
-	defer f.Close()
-	engine, err := session.LoadReplay(f)
-	if err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "replay file: "+err.Error())
-	}
-	sess := s.Sessions.Create(engine, true)
+	sess := s.Sessions.Create(sim.New(body.Route), false)
 	return c.Status(fiber.StatusCreated).JSON(contract.SessionCreated{ID: sess.ID})
 }
 
@@ -136,6 +125,76 @@ func validateSession(b contract.SessionCreate) error {
 		}
 	}
 	return nil
+}
+
+// sessionControl is the POST /sessions/{id}/control body (schema SessionControl).
+type sessionControl struct {
+	Action string   `json:"action"`
+	TMin   *float64 `json:"t_min"`
+	Speed  *float64 `json:"speed"`
+}
+
+// controllable is what /control needs from an engine beyond session.Engine.
+type controllable interface {
+	Seek(t float64)
+	Reset()
+}
+
+func (s *Server) controlSession(c *fiber.Ctx) error {
+	sess := s.Sessions.Get(c.Params("id"))
+	if sess == nil {
+		return c.Status(fiber.StatusNotFound).JSON(contract.Error{Detail: "unknown session"})
+	}
+	var body sessionControl
+	dec := json.NewDecoder(bytes.NewReader(c.Body()))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&body); err != nil {
+		return badRequest(c, "invalid body: "+err.Error())
+	}
+	switch body.Action {
+	case "start", "pause", "reset":
+	case "seek":
+		if body.TMin == nil {
+			return badRequest(c, "seek needs t_min")
+		}
+	default:
+		return badRequest(c, "action must be start, pause, reset or seek")
+	}
+	if body.TMin != nil && *body.TMin < 0 {
+		return badRequest(c, "t_min must be >= 0")
+	}
+	if body.Speed != nil && *body.Speed <= 0 {
+		return badRequest(c, "speed must be > 0")
+	}
+	sess.Update(func(ctl *session.Control) []contract.Event {
+		eng, _ := ctl.Engine().(controllable)
+		switch body.Action {
+		case "start":
+			if body.Speed != nil {
+				ctl.SetSpeed(*body.Speed)
+			}
+			ctl.SetRunning(!ctl.Engine().Done())
+		case "pause":
+			ctl.SetRunning(false)
+		case "reset":
+			if eng != nil {
+				eng.Reset()
+			}
+			ctl.SetRunning(false)
+		case "seek":
+			if eng != nil {
+				eng.Seek(*body.TMin)
+			}
+			if body.Speed != nil {
+				ctl.SetSpeed(*body.Speed)
+			}
+			if ctl.Engine().Done() {
+				ctl.SetRunning(false)
+			}
+		}
+		return nil
+	})
+	return c.JSON(contract.Ack{OK: true})
 }
 
 func badRequest(c *fiber.Ctx, msg string) error {

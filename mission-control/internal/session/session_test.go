@@ -2,7 +2,6 @@ package session
 
 import (
 	"encoding/json"
-	"os"
 	"testing"
 	"time"
 
@@ -143,26 +142,5 @@ func TestSlowClientIsDropped(t *testing.T) {
 	<-c.Send
 	if _, ok := <-c.Send; ok {
 		t.Fatal("dropped client's channel should be closed")
-	}
-}
-
-func TestReplayFixture(t *testing.T) {
-	f, err := os.Open("../../../contracts/fixtures/ws-state.jsonl")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer f.Close()
-	r, err := LoadReplay(f)
-	if err != nil {
-		t.Fatal(err)
-	}
-	r.Advance(2.5)
-	snap := r.Snapshot()
-	if snap.TMin != 2.5 || snap.Pos != (contract.XY{140, 120}) {
-		t.Fatalf("snapshot at 2.5 = %+v, want t 2.5 at the t=2 position", snap)
-	}
-	r.Advance(1000)
-	if !r.Done() {
-		t.Fatal("replay should be done after its last state")
 	}
 }

@@ -14,9 +14,6 @@ func main() {
 	if v := os.Getenv("WEB_ORIGIN"); v != "" {
 		cfg.WebOrigins = v
 	}
-	if v := os.Getenv("REPLAY_PATH"); v != "" {
-		cfg.ReplayPath = v
-	}
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
