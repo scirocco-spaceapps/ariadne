@@ -19,6 +19,8 @@ parameter has a `provenance` and a `source` there.
 | `reserve_min` | 60 min | Assumed | Mars PLSS study (1 h secondary life support for 4-8 h EVAs); xEVA 1 h contingency | Contingency duration used as walk-home reserve, held inside the budget. |
 | `radiation_dose_rate` | 210 uGy/day | Modeled | Hassler et al. 2014, Science 343, 1244797 (MSL RAD, Gale) | Measured at Gale; used as a model value for Jezero. |
 | `observer_height_m` | 2.0 m | Observed | Bell et al. 2021, Space Sci. Rev. 217:24 (Mastcam-Z) | Rover camera height; no carry-over needed. |
+| `replan_interval_min` | 5 min | Assumed | Team choice, no source | How often replanning re-checks the plan (see Replanning). |
+| `min_dwell_min` | 10 min | Assumed | Team choice: half of `dwell_min`, no source | Shortest dwell replanning may suggest before it drops a stop. |
 
 "Assumed" with a source means a published requirement or design case that we adopted; it is not a
 measurement.
@@ -85,6 +87,76 @@ t ≈ 279 min: about 179 min walking plus 100 min dwell. With 240 min budget and
 astronaut could not get home; with 360 min the reserve stays intact. Repeat this check with the
 real stops (B2) and the real cost raster (A4): the planned route must end before
 `budget_min - reserve_min`.
+
+## Replanning
+
+Receding-horizon replanning re-checks the rest of the walk while it runs and suggests the smallest
+change that still gets the astronaut home with the reserve intact. It is a **suggestion on the
+console**: the crew decides, and the simulated astronaut does not follow it on its own.
+
+**Triggers.** Two what-if controls on the console. Both are Simulation inputs, not measurements.
+
+- **Suit leak:** `leak_min` comes off the consumables budget, so the deadline is
+  `budget_min − leak_min − reserve_min`.
+- **Dust / low visibility:** all walking time, the walk home included, is divided by `speed_factor`
+  (0.5 = half speed); dwells do not change. Wind is modelled this way, not as a force on the
+  astronaut: at Jezero's air density (about 0.018 kg/m³ from the sol 1215 MEDA pressure and
+  temperature, our calculation) a 20 m/s wind pushes like a 2–3 m/s breeze on Earth.
+
+**Definitions.** `D` is the time still needed: walking (what is left of the leg to the current stop,
+the legs between the kept stops and the leg home) divided by `speed_factor`, plus the remaining
+dwells; at the current stop only `max(0, new dwell − dwell already spent)` is left.
+`margin = deadline − (t + D)`, and `reserve_left = reserve_min + margin` is the reserve on arrival
+at the haven. Mid-leg, `lead_min` = leg time × remaining path length / leg path length.
+
+**The rule, and why each line:**
+
+1. Re-check every `replan_interval_min` (5 min), on arrival at each stop and when a trigger changes:
+   often enough to react within one short leg, and at the moments the crew can act.
+2. If `t + D ≤ deadline`, no suggestion: the 60 min reserve is already held back inside the deadline.
+3. Otherwise shorten all remaining dwells equally, in 1 min steps from `dwell_min` (20) down to
+   `min_dwell_min` (10), and take the longest that fits: every stop is kept and the plan changes least.
+4. If that is not enough, drop one remaining stop, then two, and so on, trying every combination in
+   plan order; dwells may be shortened too. Fewer stops is a bigger change than shorter stops.
+5. Among plans that fit: most stops kept, then the longest dwell, then the larger margin, then the
+   plan that keeps the earlier stops. Science first, then time at each stop, then safety; the last
+   step makes the choice unique.
+6. The stop being walked to is never dropped mid-leg: the planner routes from stop to stop, not from
+   an arbitrary point.
+7. If nothing fits, go home now along `cost_to_home` from the astronaut's position, divided by
+   `speed_factor`. This is always possible; a negative margin means the reserve is in use.
+8. Stops are never reordered: the order is the crew's plan; the rule only shortens or removes.
+9. While a storm alert is active there is no suggestion: mission-control's abort already sends the
+   astronaut home.
+
+**Data.** Leg times come from the planner (`POST /route`, the existing contract): every pair of
+stops in plan order, every haven → stop and stop → haven leg, fetched once into
+`notebooks/out/route.json` with the planner commit. The running planner does not report its commit;
+the planner code of that commit, run locally on the asset host's rasters, gave the same 21 answers.
+`cost_to_home_2m.f32` equals the planner's walk home at all five stops.
+
+**What it does on the real route** (`notebooks/replanning.ipynb`; all 11 cases in
+`notebooks/out/replanning_cases.json`):
+
+| Trigger | Where | Suggestion | Margin | Reserve left |
+|---|---|---|---|---|
+| none | Tuff Cliff | none | 80.3 min | 140.3 min |
+| dust, speed × 0.5 | arrival at Mount Washburn | shorten dwells to 16 min | 3.3 min | 63.3 min |
+| dust, speed × 0.4 | arrival at Mount Washburn | skip Masonic Temple | 6.5 min | 66.5 min |
+| suit leak −90 min | arrival at Tuff Cliff | shorten dwells to 17 min | 2.4 min | 62.4 min |
+| suit leak −120 min | arrival at Bright Angel | skip Masonic Temple | 1.0 min | 61.0 min |
+| suit leak −150 min | arrival at Cheyava Falls | go home now | −9.0 min | 51.0 min |
+| leak −150 min and speed × 0.5 | arrival at Cheyava Falls | go home now | −52.8 min | 7.3 min |
+
+![Replanning](../notebooks/out/replanning.png)
+
+A speed factor of 0.6 alone or a 60 min leak alone does not trigger a suggestion at any stop
+arrival: the plan has 80 min to spare. The rule takes the longest dwell that fits, so the margin
+after a suggestion is small by design; the 60 min reserve is the safety, not that margin.
+
+**Limits.** All stops weigh the same: the rule does not know that Cheyava Falls matters more than
+the others. It changes which stops are visited and for how long, not the path: a suit fault that
+lowers the slope limit would need a new cost raster and is not covered.
 
 ## Not yet verified
 

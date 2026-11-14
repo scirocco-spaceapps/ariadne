@@ -54,5 +54,17 @@
     "unit": "m",
     "provenance": "Observed",
     "source": "Mastcam-Z cameras 'on a camera plate ~2 m above the surface' (Bell et al. 2021, The Mars 2020 Perseverance Rover Mast Camera Zoom (Mastcam-Z), Space Science Reviews 217:24, doi:10.1007/s11214-020-00755-x)."
+  },
+  "replan_interval_min": {
+    "value": 5,
+    "unit": "min",
+    "provenance": "Assumed",
+    "source": "Team choice (Bunyamin, 2026-11-14), no published source. Receding-horizon replanning re-checks the rest of the plan every 5 simulated minutes, on arrival at each stop and when a what-if trigger changes. See docs/model.md, Replanning."
+  },
+  "min_dwell_min": {
+    "value": 10,
+    "unit": "min",
+    "provenance": "Assumed",
+    "source": "Team choice (Bunyamin, 2026-11-14), half of dwell_min; no published source. Replanning may shorten dwells in 1 min steps down to this value before it drops a stop. For scale only: the shortest of the nine Apollo 15 geology stations behind dwell_min took 12 min. See docs/model.md, Replanning."
   }
 }
