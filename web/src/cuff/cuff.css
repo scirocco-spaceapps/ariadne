@@ -1,0 +1,144 @@
+/* Cuff: dark, high contrast, readable at arm's length, no overflow at 360 px. */
+.cuff {
+  --cuff-bg: #000;
+  --cuff-fg: #fff;
+  --cuff-dim: #b8b8b8;
+  --cuff-ok: #3ddc84;
+  --cuff-warn: #ffc400;
+  --cuff-bad: #ff5252;
+  box-sizing: border-box;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 16px;
+  background: var(--cuff-bg);
+  color: var(--cuff-fg);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-x: hidden;
+}
+
+.cuff *,
+.cuff *::before,
+.cuff *::after {
+  box-sizing: border-box;
+}
+
+.cuff button {
+  min-height: 48px;
+  min-width: 48px;
+  font-size: 1.125rem;
+}
+
+.cuff-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cuff-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.cuff-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 6px 14px;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 700;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.cuff-pill--ok { color: var(--cuff-ok); }
+.cuff-pill--warn { color: var(--cuff-warn); }
+.cuff-pill--bad { color: var(--cuff-bad); }
+
+.cuff-body,
+.cuff-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cuff-empty h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+.cuff-empty p {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--cuff-dim);
+}
+
+.cuff-clock {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  /* 360 px wide: ~3.1rem fits "T+ 00:00:00"; grows on larger phones. */
+  font-size: clamp(2.5rem, 13vw, 4.5rem);
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.cuff-run {
+  font-size: 1.25rem;
+  color: var(--cuff-dim);
+}
+
+.cuff-pos {
+  margin: 0;
+}
+.cuff-pos dt {
+  font-size: 1rem;
+  color: var(--cuff-dim);
+}
+.cuff-pos dd {
+  margin: 4px 0 0;
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.cuff-prov {
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border: 1px solid var(--cuff-dim);
+  border-radius: 4px;
+  color: var(--cuff-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cuff-session {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--cuff-dim);
+  overflow-wrap: anywhere;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* The cuff owns the whole page: no default body margin or white edge around it. */
+body:has(.cuff) {
+  margin: 0;
+  background: #000;
+}

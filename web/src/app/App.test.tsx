@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fixtures } from '../lib/fixtures'
 import { App } from './App'
-import { DEMO_TICK_MS } from './demo'
+import { DEMO_TICK_MS, demoIndex } from './demo'
 import { useMission } from './store'
 
 beforeEach(() => {
@@ -34,15 +34,17 @@ describe('routes', () => {
     expect(useMission.getState().aoi?.id).toBeTruthy()
   })
 
-  it('renders the cuff placeholder at /cuff', () => {
+  it('renders the cuff at /cuff and asks for a session without ?s=', () => {
     renderAt('/cuff')
-    expect(screen.getByRole('heading', { name: /cuff/i })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: /no session/i })).toBeTruthy()
+    expect(screen.getByTestId('cuff-status').textContent).toBe('No session')
   })
 })
 
 describe('DEMO mode', () => {
   it('shows the badge and advances the state from the fixture', () => {
     vi.useFakeTimers()
+    vi.setSystemTime(0) // the replay is locked to the wall clock
     renderAt('/cuff?demo=1')
     expect(screen.getByText('DEMO DATA')).toBeTruthy()
     const s = useMission.getState()
@@ -55,7 +57,25 @@ describe('DEMO mode', () => {
     expect(st.state?.t_min).toBe(31)
     expect(st.state?.alert?.type).toBe('storm_alert')
     expect(st.lastEvent?.name).toBe('storm_alert')
-    expect(screen.getByTestId('session-line').textContent).toContain('T+31.0')
+    expect(screen.getByTestId('cuff-clock').textContent).toBe('T+ 00:31:00')
+  })
+})
+
+describe('DEMO clock lock', () => {
+  it('puts two screens opened at different times on the same frame', () => {
+    const n = 60
+    // The index depends only on the wall clock: one tick later is the next frame, and it loops
+    // after the fixture plus the pause.
+    expect(demoIndex(0, n)).toBe(0)
+    expect(demoIndex(DEMO_TICK_MS * 31 + 499, n)).toBe(31)
+    expect(demoIndex(DEMO_TICK_MS * (n + 6), n)).toBe(0)
+  })
+
+  it('a second replay started later joins at the current frame', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(DEMO_TICK_MS * 12)
+    renderAt('/?demo=1')
+    expect(useMission.getState().session.state?.t_min).toBe(12)
   })
 })
 
