@@ -140,7 +140,7 @@ the planner code of that commit, run locally on the asset host's rasters, gave t
 
 | Trigger | Where | Suggestion | Margin | Reserve left |
 |---|---|---|---|---|
-| none | Tuff Cliff | none | 80.4 min | 140.4 min |
+| none | Tuff Cliff | none | 80.3 min | 140.3 min |
 | dust, speed × 0.5 | arrival at Mount Washburn | shorten dwells to 16 min | 3.3 min | 63.3 min |
 | dust, speed × 0.4 | arrival at Mount Washburn | skip Masonic Temple | 6.5 min | 66.5 min |
 | suit leak −90 min | arrival at Tuff Cliff | shorten dwells to 17 min | 2.4 min | 62.4 min |
