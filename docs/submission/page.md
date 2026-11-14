@@ -15,7 +15,7 @@ Ariadne
 ## Summary
 
 <!-- Form: 50-200 words, at most 1500 characters. Already saved on the site; this text replaces it.
-Count of the text below (checked with a script): 158 words, 846 characters (paragraphs
+Count of the text below (checked with a script): 166 words, 890 characters (paragraphs
 joined with one blank line). -->
 
 Ariadne is a walking-scale Mars EVA map for Bright Angel in Jezero crater. It layers NASA data,
@@ -27,8 +27,9 @@ back.
 We turned NASA HiRISE images and terrain of Jezero into slope, walking cost and minutes to home.
 The stops are places Perseverance studied, with its photos. As time passes, the map shrinks to the
 ground the astronaut can still reach and get back from. In our demo, a simulated storm alert sends
-both screens the way home. Every value carries its provenance. The walk model uses lunar EVA
-planning values, so it is a planning aid, not a safety tool.
+both screens the way home. Every value carries its provenance. The walk values come from NASA
+lunar EVA requirements and a Mars suit (PLSS) design study, so it is a planning aid, not a safety
+tool.
 
 ## Project Demonstration
 
@@ -103,8 +104,8 @@ On the real data (Modeled unless noted):
 - The planned walk from the safe haven through the five stops and back is 2.89 km: 119.7 min of
   walking plus 100 min at the stops, 219.7 min in all. That leaves 80.3 min before the 60 min
   reserve in a 360 min EVA.
-- 52.0 % of the area is within 75 min of the safe haven over the real terrain. On flat ground it
-  would be 94.4 %.
+- 225 min into the EVA, with 75 min left before the reserve, home is still reachable from 52.0 %
+  of the area over the real terrain. On flat ground it would be 94.4 %.
 - Along 4.51 km of Perseverance's own track, 1.6 % is steeper than our 20° limit (Derived). A rover
   is not a human, so this is a sanity check, not proof of safety.
 - Between Tuff Cliff and Bright Angel our planned leg is 581 m; the rover drove 582 m.
@@ -156,9 +157,9 @@ we still get home from here?
 
 - **Provenance.** Every value carries Observed, Derived, Modeled, Assumed or Simulation. A value
   without a source is Assumed.
-- **Lunar values on Mars.** The 20° slope limit, the 2 km/h walking speed, the 360 min EVA and
-  the 60 min reserve come from NASA lunar EVA and suit planning documents. No suited walking on
-  Mars exists to check them against. They are labelled Assumed.
+- **Moon and suit-study values on Mars.** The 20° slope limit, the 2 km/h walking speed, the
+  360 min EVA and the 60 min reserve come from NASA lunar EVA requirements and a Mars suit (PLSS)
+  design study. No suited walking on Mars exists to check them against. They are labelled Assumed.
 - **The model is simple.** Cost depends on slope only, the same uphill and downhill. Sand and rock
   fields are not in it. The speed curve comes from Earth hikers (Tobler 1993).
 - **A rover is not a human.** We checked our slopes and routes against Perseverance's drives, as a
@@ -215,7 +216,7 @@ for us and for Project Details. -->
 | Mars 2020, Mastcam-Z and Navcam raw images | https://mars.nasa.gov/mars2020/multimedia/raw-images/ | Photos on the stop and target cards |
 | Mars 2020, raw image API (camera model, rover attitude) | https://mars.nasa.gov/rss/api/?feed=raw_images&category=mars2020&feedtype=json | Checking that each target photo points at its target |
 | Mars 2020, MEDA calibrated air temperature and derived pressure (NASA PDS Atmospheres Node) | https://doi.org/10.17189/1522849 | Weather in the conditions panel: sol 1215, archive, Derived |
-| MSL, RAD surface dose rate at Gale crater (Hassler et al. 2014) | TBD (open question) | Radiation value in the conditions panel (Modeled for Jezero) |
+| MSL, RAD surface dose rate at Gale crater (Hassler et al. 2014) | https://doi.org/10.1126/science.1244797 | Radiation value in the conditions panel (Modeled for Jezero) |
 | NASA DONKI, WSA-ENLIL CME arrival forecasts for Mars (CCMC) | TBD (open question; the app links https://kauai.ccmc.gsfc.nasa.gov/DONKI/) | Space-weather list in the conditions panel, live mode only; it does not raise the demo alert |
 | NASA NTRS 20210026296, Artemis III EVA mission capability (Scoville), quoting the xEVA requirements | https://ntrs.nasa.gov/citations/20210026296 | 20° slope limit, 2 km/h walking speed, 1 h contingency |
 | NASA NTRS 20260005204, Mars PLSS design study (Oliver et al., ICES 2026) | https://ntrs.nasa.gov/citations/20260005204 | 360 min EVA budget, 60 min reserve |
@@ -274,24 +275,22 @@ Everything I was unsure about while writing this page (F6, 2026-11-14):
 1. **Repo is private.** The Project link works only after Yusuf makes the repo public (Y8). It has
    no licence file yet either. The REFERENCES.md link in the table above also needs the public repo.
 2. **Science section is a placeholder.** `science.md` is empty (Bunyamin, B5, Sunday ~09:30).
-3. **MSL RAD URL.** Neither `DATA_SOURCES.md` nor `model/params.json` has a URL for Hassler et al.
-   2014 (Science 343, 1244797). The DOI would be the natural link; someone should confirm it and add
-   it to `DATA_SOURCES.md`. `docs/model.md` also says the value was read from a copy of the paper.
-4. **DONKI has no row in `DATA_SOURCES.md`.** The app links https://kauai.ccmc.gsfc.nasa.gov/DONKI/
+3. **DONKI has no row in `DATA_SOURCES.md`.** The app links https://kauai.ccmc.gsfc.nasa.gov/DONKI/
    (mission-control). Note left for Yusuf, who took over Mazlum's card.
-5. **Tobler 1993 has no URL.** `docs/model.md` says the citation was written from memory.
-6. **HiRISE credit line.** The USGS pages give citations and "Please cite authors", but no credit
-   line. "NASA/JPL-Caltech/University of Arizona" comes from Ali Koray's note, not from those
-   pages. The USGS product page and Astropedia also differ on author order and date (Astropedia
-   lists nine authors of an LPSC 2020 abstract and a 2020-07-24 date; the data release lists five
-   authors and 6 August 2020). I used the data-release citation.
-7. **Live site.** It depends on Nuri's laptop. On 2026-11-14 at about 19:00 the services and the
+4. **Tobler 1993 has no URL.** `docs/model.md` says the citation was written from memory.
+5. **Live site.** It depends on Nuri's laptop. On 2026-11-14 at about 19:00 the services and the
    real assets answered; the HiRISE layer in the browser was not checked by me.
-8. **NTRS and Apollo rows under NASA Data.** They are NASA documents and Apollo data, not Mars
+6. **NTRS and Apollo rows under NASA Data.** They are NASA documents and Apollo data, not Mars
    datasets. If the judges expect datasets only, move them to the other list.
-9. **Stop science text.** The stop cards cite NASA news pages and papers, and Bunyamin reviewed
+7. **Stop science text.** The stop cards cite NASA news pages and papers, and Bunyamin reviewed
    them (F3), but the science write-up itself is not done (see 2).
-10. **Summary numbers.** The Summary has no numbers on purpose; if you want one, the 2.89 km /
-    80.3 min margin is the safest (Modeled, `DATA_SOURCES.md` row of the planned walk).
-11. **MPC replanning.** Not described here: it is not merged yet (TASKS.md, MPC-2). Add one line
-    only if it lands before Sunday 09:30 and shows in the demo.
+8. **Summary numbers.** The Summary has no numbers on purpose; if you want one, the 2.89 km /
+   80.3 min margin is the safest (Modeled, `DATA_SOURCES.md` row of the planned walk).
+9. **MPC replanning.** Not described here: it is not merged yet (TASKS.md, MPC-2). Add one line
+   only if it lands before Sunday 09:30 and shows in the demo.
+
+Closed after review (2026-11-14): the HiRISE credit is "Image: NASA/JPL/University of Arizona"
+(HiRISE image-use policy, Ali Koray); the 5-author USGS data-release citation is the right one
+(the 9 Astropedia authors belong to a separate LPSC 2020 abstract, Ali Koray); the MSL RAD link is
+https://doi.org/10.1126/science.1244797 (Bunyamin). Bunyamin checked every number in Project
+Details against the sources.
