@@ -3,7 +3,8 @@
 Everything written here is fake data for development only. Inputs are the hand-made
 fixtures/aoi.json and fixtures/route.json; outputs:
 
-  fixtures/rasters/*.jpg|*.png|*.f32 (+ .json sidecars for .f32)
+  fixtures/assets/*.jpg|*.png|*.f32 (+ .json sidecars for .f32)
+  fixtures/assets/track.geojson, waypoints.geojson, targets.geojson
   fixtures/ws-state.jsonl
 
 Run: python contracts/tools/make_fixtures.py
@@ -21,7 +22,7 @@ from PIL.PngImagePlugin import PngInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 FIX = ROOT / "fixtures"
-RASTERS = FIX / "rasters"
+RASTERS = FIX / "assets"
 LABEL = "SYNTHETIC"
 WALK_M_PER_MIN = 50.0  # Assumed, fixtures only (see docs/DATA_SOURCES.md)
 CAUTION_DEG, NOGO_DEG = 15.0, 25.0  # Assumed, fixtures only; real thresholds come from model/params.json
@@ -139,6 +140,7 @@ def rasters():
         rgb[(s > lower) & (s <= b["max_deg"])] = c
         lower = b["max_deg"]
     stamp(Image.fromarray(rgb, "RGB")).save(RASTERS / r["slope"]["file"], pnginfo=png_info())
+    write_f32(r["slope_values"]["file"], s, px, "deg", "slope of the DEM formula, degrees")
 
     # Traversability: RGB coloured by the go / caution / no-go classes of its legend
     px = r["traversability"]["px_m"]
@@ -158,6 +160,32 @@ def rasters():
     cost = np.hypot(x - HAVEN[0], y - HAVEN[1]) / WALK_M_PER_MIN
     write_f32(r["cost_to_home"]["file"], cost, px, "min",
               "hypot(x - haven_x, y - haven_y) / 50")
+
+
+def collection(features):
+    return {"type": "FeatureCollection", "provenance": "Simulation",
+            "source": "SYNTHETIC fixture, not real data", "features": features}
+
+
+def vectors():
+    """SYNTHETIC rover traverse, waypoints and one target, in AOI metres."""
+    track = [[30, 40], [90, 70], [150, 140], [200, 150], [260, 210], [330, 250], [400, 320], [470, 370]]
+    sols = [1200, 1201, 1202, 1203, 1204, 1205, 1206]
+    track_fc = collection([
+        {"type": "Feature", "geometry": {"type": "LineString", "coordinates": [a, b]}, "properties": {"sol": sol}}
+        for a, b, sol in zip(track, track[1:], sols)
+    ])
+    wp_fc = collection([
+        {"type": "Feature", "geometry": {"type": "Point", "coordinates": xy},
+         "properties": {"sol": sol, "site": 70 + i, "drive": 100 * i}}
+        for i, (xy, sol) in enumerate(zip(track[1:], sols))
+    ])
+    targets_fc = collection([
+        {"type": "Feature", "geometry": {"type": "Point", "coordinates": [330, 350]},
+         "properties": {"id": "t1", "area_m2": 150.0, "distance_m": 100.0, "sol": 1205}}
+    ])
+    for name, fc in (("track.geojson", track_fc), ("waypoints.geojson", wp_fc), ("targets.geojson", targets_fc)):
+        (RASTERS / name).write_text(json.dumps(fc, indent=1) + "\n", encoding="utf-8", newline="\n")
 
 
 def along(path, frac):
@@ -205,7 +233,8 @@ def ws_stream():
                     break
             visited = [it["stop"] for it in tl if it["kind"] == "dwell" and it["t1_min"] <= t]
         else:
-            visited = [it["stop"] for it in tl if it["kind"] == "dwell"]
+            # A dwell cut short by the alert does not count as visited (ws-messages.md).
+            visited = [it["stop"] for it in tl if it["kind"] == "dwell" and it["t1_min"] <= alert_t]
             frac = min(1.0, (t - alert_t) / (home_t - alert_t))
             pos = along(abort_path, frac).tolist()
             running = t < home_t
@@ -225,5 +254,6 @@ def ws_stream():
 
 if __name__ == "__main__":
     rasters()
+    vectors()
     ws_stream()
-    print("wrote SYNTHETIC rasters and ws-state.jsonl")
+    print("wrote SYNTHETIC assets and ws-state.jsonl")

@@ -3,7 +3,7 @@
   "max_slope_deg": { "value": null, "unit": "deg", "provenance": null, "source": null },
   "caution_slope_deg": { "value": null, "unit": "deg", "provenance": null, "source": null },
   "walk_speed_flat_m_per_min": { "value": null, "unit": "m/min", "provenance": null, "source": null },
-  "speed_vs_slope": { "value": null, "unit": "table or function of slope (deg) -> speed factor", "provenance": null, "source": null },
+  "speed_vs_slope": { "value": null, "unit": "list of [slope_deg, speed_factor] pairs, ascending slope, factor 1.0 at 0 deg, linear interpolation between pairs", "provenance": null, "source": null },
   "dwell_min": { "value": null, "unit": "min", "provenance": null, "source": null },
   "budget_min": { "value": null, "unit": "min", "provenance": null, "source": null },
   "reserve_min": { "value": null, "unit": "min", "provenance": null, "source": null },

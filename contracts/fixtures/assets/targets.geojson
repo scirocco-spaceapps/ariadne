@@ -1,0 +1,23 @@
+{
+ "type": "FeatureCollection",
+ "provenance": "Simulation",
+ "source": "SYNTHETIC fixture, not real data",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     330,
+     350
+    ]
+   },
+   "properties": {
+    "id": "t1",
+    "area_m2": 150.0,
+    "distance_m": 100.0,
+    "sol": 1205
+   }
+  }
+ ]
+}

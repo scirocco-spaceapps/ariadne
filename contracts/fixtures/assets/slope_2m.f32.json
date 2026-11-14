@@ -1,0 +1,15 @@
+{
+  "synthetic": true,
+  "label": "SYNTHETIC",
+  "width": 250,
+  "height": 200,
+  "px_m": 2,
+  "min": 0.1069,
+  "max": 33.4329,
+  "dtype": "float32",
+  "byte_order": "little",
+  "layout": "row-major, row 0 = north edge, no header",
+  "unit": "deg",
+  "formula": "slope of the DEM formula, degrees",
+  "provenance": "Simulation"
+}

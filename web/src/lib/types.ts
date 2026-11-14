@@ -185,6 +185,7 @@ export interface components {
             from: string;
             /** @description Stop id or the safe haven id. */
             to: string;
+            /** @description Simplified to at most 300 vertices; first point = from, last point = to. */
             path: components["schemas"]["Path"];
             distance_m: number;
             time_min: number;
@@ -219,6 +220,7 @@ export interface components {
             from: components["schemas"]["XY"];
         };
         AbortResponse: {
+            /** @description From the requested position to the safe haven, simplified to at most 300 vertices. */
             path: components["schemas"]["Path"];
             time_min: number;
             distance_m: number;
@@ -307,7 +309,7 @@ export interface components {
             action: "start" | "pause" | "reset" | "seek";
             /** @description Required for seek. */
             t_min?: number;
-            /** @description Simulated minutes per real second; optional on start. */
+            /** @description Simulated minutes per real second; default 6; optional on start. */
             speed?: number;
         };
         SessionEvent: {
@@ -362,12 +364,18 @@ export interface components {
             /** @enum {string} */
             role: "console" | "cuff";
         };
+        /**
+         * @description One raster, north-up, covering exactly size_m from the AOI south-west corner.
+         *     .jpg/.png are display images. Classified PNGs (slope, traversability) are RGB(A) with
+         *     exactly the legend colours, no anti-aliasing, alpha 0 where there is no data.
+         *     .f32 is raw float32 (see dtype). .tif is a GeoTIFF in crs.proj4, for notebooks only.
+         */
         RasterRef: {
             /** @description Relative to assets_base. */
             file: string;
             px_m: number;
             /**
-             * @description Binary rasters: little-endian, row-major, no header.
+             * @description Binary rasters: little-endian, row-major, row 0 = north, no header. Each has a sidecar <file>.json {width, height, px_m, min, max}.
              * @enum {string}
              */
             dtype?: "float32";
@@ -413,6 +421,10 @@ export interface components {
                 number,
                 number
             ];
+            /**
+             * @description Folder of this AOI's files relative to the asset root. Web: VITE_ASSETS_URL + assets_base + file.
+             *     planner and pipeline: DATA_DIR + assets_base + file. Fixtures: relative to contracts/fixtures/.
+             */
             assets_base: string;
             rasters: {
                 ortho: components["schemas"]["RasterRef"];
@@ -424,6 +436,8 @@ export interface components {
                 cost_to_home: components["schemas"]["RasterRef"];
                 cost_to_home_flat?: components["schemas"]["RasterRef"];
                 seen_not_touched?: components["schemas"]["RasterRef"];
+                slope_values?: components["schemas"]["RasterRef"];
+                dem_geotiff?: components["schemas"]["RasterRef"];
             };
             vectors: {
                 track: components["schemas"]["VectorRef"];
@@ -440,7 +454,13 @@ export interface components {
             };
         };
         Photo: {
+            /** @description Relative to content/, e.g. photos/<name>.jpg. */
             file: string;
+            /**
+             * Format: uri
+             * @description NASA page of the raw image.
+             */
+            page_url: string;
             sol: number;
             camera: string;
             credit: string;
@@ -449,7 +469,7 @@ export interface components {
             distance_m?: number;
         };
         StopContent: {
-            /** @description Matches a stop id in aoi.json (kind stop) or a target id (kind target). */
+            /** @description Matches a stop id in aoi.json (kind stop) or properties.id in targets.geojson (kind target). */
             id: string;
             name: string;
             /** @enum {string} */
@@ -460,6 +480,103 @@ export interface components {
             /** @description Geologic unit the stop sits on. */
             unit: string;
             provenance: components["schemas"]["Provenance"];
+            /** @description Pages that back the science question and tasks. */
+            sources: {
+                title: string;
+                /** Format: uri */
+                url: string;
+            }[];
+            /** @description True until Bunyamin has reviewed the science text. */
+            draft?: boolean;
+        };
+        PointGeometry: {
+            /** @constant */
+            type: "Point";
+            coordinates: components["schemas"]["XY"];
+        };
+        LineGeometry: {
+            /** @enum {string} */
+            type: "LineString" | "MultiLineString";
+            /** @description LineString = [XY, ...]; MultiLineString = [[XY, ...], ...]. */
+            coordinates: (components["schemas"]["XY"] | components["schemas"]["XY"][])[];
+        };
+        PolygonGeometry: {
+            /** @enum {string} */
+            type: "Polygon" | "MultiPolygon";
+            /** @description Rings of XY with RFC 7946 nesting, in AOI metres. */
+            coordinates: unknown[];
+        };
+        /** @description track.geojson, the rover traverse. */
+        TrackCollection: {
+            /** @constant */
+            type: "FeatureCollection";
+            provenance: components["schemas"]["Provenance"];
+            source: string;
+            features: {
+                /** @constant */
+                type: "Feature";
+                geometry: components["schemas"]["LineGeometry"];
+                properties: {
+                    /** @description Sol of this drive segment */
+                    sol?: number;
+                };
+            }[];
+        };
+        /** @description waypoints.geojson, rover stops with their sol. */
+        WaypointCollection: {
+            /** @constant */
+            type: "FeatureCollection";
+            provenance: components["schemas"]["Provenance"];
+            source: string;
+            features: {
+                /** @constant */
+                type: "Feature";
+                geometry: components["schemas"]["PointGeometry"];
+                properties: {
+                    sol: number;
+                    site?: number;
+                    drive?: number;
+                    name?: string;
+                };
+            }[];
+        };
+        /** @description targets.geojson, seen-not-touched targets (task B3). */
+        TargetCollection: {
+            /** @constant */
+            type: "FeatureCollection";
+            provenance: components["schemas"]["Provenance"];
+            source: string;
+            features: {
+                /** @constant */
+                type: "Feature";
+                geometry: components["schemas"]["PointGeometry"];
+                properties: {
+                    /** @description Matches a StopContent id of kind target. */
+                    id: string;
+                    area_m2: number;
+                    /** @description Distance to the nearest rover waypoint. */
+                    distance_m: number;
+                    /** @description Sol of that waypoint. */
+                    sol: number;
+                };
+            }[];
+        };
+        /** @description geology.geojson, mapped geologic units. */
+        GeologyCollection: {
+            /** @constant */
+            type: "FeatureCollection";
+            provenance: components["schemas"]["Provenance"];
+            source: string;
+            features: {
+                /** @constant */
+                type: "Feature";
+                geometry: components["schemas"]["PolygonGeometry"];
+                properties: {
+                    /** @description Unit code from the source map. */
+                    unit: string;
+                    name: string;
+                };
+            }[];
         };
     };
     responses: never;
@@ -506,6 +623,13 @@ export type Place = components['schemas']['Place'];
 export type Aoi = components['schemas']['Aoi'];
 export type Photo = components['schemas']['Photo'];
 export type StopContent = components['schemas']['StopContent'];
+export type PointGeometry = components['schemas']['PointGeometry'];
+export type LineGeometry = components['schemas']['LineGeometry'];
+export type PolygonGeometry = components['schemas']['PolygonGeometry'];
+export type TrackCollection = components['schemas']['TrackCollection'];
+export type WaypointCollection = components['schemas']['WaypointCollection'];
+export type TargetCollection = components['schemas']['TargetCollection'];
+export type GeologyCollection = components['schemas']['GeologyCollection'];
 export type ParameterSessionId = components['parameters']['SessionId'];
 export type $defs = Record<string, never>;
 export interface operations {

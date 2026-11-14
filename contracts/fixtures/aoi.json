@@ -7,7 +7,7 @@
   },
   "origin_lonlat": [77.27666, 18.47203],
   "size_m": [500, 400],
-  "assets_base": "rasters/",
+  "assets_base": "assets/",
   "rasters": {
     "ortho": { "file": "ortho_50cm.jpg", "px_m": 0.5 },
     "ortho_small": { "file": "ortho_1m.jpg", "px_m": 1 },
@@ -34,7 +34,9 @@
     },
     "cost_to_home": { "file": "cost_to_home_2m.f32", "px_m": 2, "dtype": "float32", "unit": "min", "nodata": "NaN" },
     "cost_to_home_flat": { "file": "cost_to_home_flat_2m.f32", "px_m": 2, "dtype": "float32", "unit": "min", "nodata": "NaN", "optional": true },
-    "seen_not_touched": { "file": "seen_not_touched_2m.png", "px_m": 2, "optional": true }
+    "seen_not_touched": { "file": "seen_not_touched_2m.png", "px_m": 2, "optional": true },
+    "slope_values": { "file": "slope_2m.f32", "px_m": 2, "dtype": "float32", "unit": "deg", "nodata": "NaN", "optional": true },
+    "dem_geotiff": { "file": "dem_1m.tif", "px_m": 1, "unit": "m", "optional": true }
   },
   "vectors": {
     "track": "track.geojson",

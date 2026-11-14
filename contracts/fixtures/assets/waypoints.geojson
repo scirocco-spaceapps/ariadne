@@ -1,0 +1,112 @@
+{
+ "type": "FeatureCollection",
+ "provenance": "Simulation",
+ "source": "SYNTHETIC fixture, not real data",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     90,
+     70
+    ]
+   },
+   "properties": {
+    "sol": 1200,
+    "site": 70,
+    "drive": 0
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     150,
+     140
+    ]
+   },
+   "properties": {
+    "sol": 1201,
+    "site": 71,
+    "drive": 100
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     200,
+     150
+    ]
+   },
+   "properties": {
+    "sol": 1202,
+    "site": 72,
+    "drive": 200
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     260,
+     210
+    ]
+   },
+   "properties": {
+    "sol": 1203,
+    "site": 73,
+    "drive": 300
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     330,
+     250
+    ]
+   },
+   "properties": {
+    "sol": 1204,
+    "site": 74,
+    "drive": 400
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     400,
+     320
+    ]
+   },
+   "properties": {
+    "sol": 1205,
+    "site": 75,
+    "drive": 500
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     470,
+     370
+    ]
+   },
+   "properties": {
+    "sol": 1206,
+    "site": 76,
+    "drive": 600
+   }
+  }
+ ]
+}

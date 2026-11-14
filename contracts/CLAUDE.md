@@ -7,7 +7,7 @@
 - `openapi.yaml` — HTTP API of `planner` and `mission-control`, plus shared schemas (`Aoi`,
   `StopContent`, `WsState`, `WsEvent`, `WsHello`) so one generator types everything.
 - `ws-messages.md` — WebSocket protocol of mission-control.
-- `fixtures/` — small example payloads and SYNTHETIC rasters everyone codes against.
+- `fixtures/` — small example payloads and SYNTHETIC assets (rasters, GeoJSON) everyone codes against.
 
 **Run / regenerate fixtures:** `python contracts/tools/make_fixtures.py` (rewrites rasters and
 `ws-state.jsonl`; JSON fixtures other than those are hand-made).

@@ -106,7 +106,57 @@ def check_rasters(aoi: dict) -> None:
                 if im.size != (cols, rows):
                     fail(f"fixture raster {key}: {im.size}, expected {(cols, rows)}")
     if "SYNTHETIC" not in (base / "README.md").read_text(encoding="utf-8"):
-        fail("fixtures/rasters/README.md must say SYNTHETIC")
+        fail(f"fixtures/{aoi['assets_base']}README.md must say SYNTHETIC")
+
+
+VECTOR_SCHEMAS = {"track": "TrackCollection", "waypoints": "WaypointCollection",
+                  "targets": "TargetCollection", "geology": "GeologyCollection"}
+
+
+def iter_xy(coords):
+    """Yield every [x, y] pair inside nested GeoJSON coordinates."""
+    if len(coords) == 2 and all(isinstance(v, (int, float)) for v in coords):
+        yield coords
+    else:
+        for c in coords:
+            yield from iter_xy(c)
+
+
+def check_vectors(aoi: dict) -> set[str]:
+    """Validate fixture GeoJSON files; returns the target ids found."""
+    base = FIX / aoi["assets_base"]
+    w, h = aoi["size_m"]
+    target_ids: set[str] = set()
+    for key, ref in aoi["vectors"].items():
+        name, optional = (ref, False) if isinstance(ref, str) else (ref["file"], ref.get("optional", False))
+        f = base / name
+        if not f.exists():
+            if not optional:
+                fail(f"fixture vector {key}: missing {f.relative_to(ROOT)}")
+            continue
+        fc = load(f)
+        if not validate(fc, VECTOR_SCHEMAS[key], f"fixture vector {key}"):
+            continue
+        for feat in fc["features"]:
+            for x, y in iter_xy(feat["geometry"]["coordinates"]):
+                if not (0 <= x <= w and 0 <= y <= h):
+                    fail(f"fixture vector {key}: point {[x, y]} outside size_m (AOI metres, not lon/lat)")
+                    break
+        if key == "targets":
+            target_ids = {feat["properties"]["id"] for feat in fc["features"]}
+    return target_ids
+
+
+def check_model_params(aoi: dict) -> None:
+    """aoi.json model values are copies of model/params.json once those are filled."""
+    params_file = ROOT.parent / "model" / "params.json"
+    if not params_file.exists():
+        return
+    params = load(params_file)
+    for key in ("budget_min", "reserve_min", "dwell_min"):
+        value = (params.get(key) or {}).get("value")
+        if value is not None and value != aoi["model"][key]:
+            fail(f"aoi.json model.{key} = {aoi['model'][key]} but model/params.json says {value}")
 
 
 def path_len(path) -> float:
@@ -189,17 +239,30 @@ def check_ws(aoi: dict) -> None:
             for s in msg["visited"] + ([msg["at_stop"]] if msg["at_stop"] else []):
                 if s not in ids:
                     fail(f"ws-state.jsonl:{n}: unknown stop id {s}")
+            if msg["at_stop"] and msg["at_stop"] in msg["visited"]:
+                fail(f"ws-state.jsonl:{n}: {msg['at_stop']} is visited while its dwell is still running")
+            if msg["abort_path"] is not None and msg["leg"] is not None:
+                fail(f"ws-state.jsonl:{n}: leg must be null while walking abort_path")
     if states < 50:
         fail(f"ws-state.jsonl: only {states} state ticks, expected about 60")
     if not saw_alert:
         fail("ws-state.jsonl: no tick with an active alert")
 
 
-def check_stops(stops: list, aoi: dict) -> None:
+def check_stops(stops: list, aoi: dict, target_ids: set[str]) -> None:
     ids = {s["id"] for s in aoi["stops"]}
+    content_targets = set()
     for i, s in enumerate(stops):
-        if validate(s, "StopContent", f"fixtures/stops.json[{i}]") and s["kind"] == "stop" and s["id"] not in ids:
-            fail(f"stops.json[{i}]: stop id {s.get('id')} not in fixture aoi stops")
+        if not validate(s, "StopContent", f"fixtures/stops.json[{i}]"):
+            continue
+        if s["kind"] == "stop" and s["id"] not in ids:
+            fail(f"stops.json[{i}]: stop id {s['id']} not in fixture aoi stops")
+        if s["kind"] == "target":
+            content_targets.add(s["id"])
+            if s["id"] not in target_ids:
+                fail(f"stops.json[{i}]: target id {s['id']} not in targets.geojson")
+    for t in sorted(target_ids - content_targets):
+        fail(f"targets.geojson: target {t} has no entry in stops.json")
 
 
 def main() -> int:
@@ -209,12 +272,14 @@ def main() -> int:
     check_aoi(fx_aoi, "fixtures/aoi.json")
     if errors:  # everything below relies on a valid fixture aoi
         return report()
+    check_model_params(load(ROOT / "aoi.json"))
     check_rasters(fx_aoi)
+    target_ids = check_vectors(fx_aoi)
     check_route(load(FIX / "route.json"), fx_aoi)
     check_abort(load(FIX / "abort.json"), fx_aoi)
     check_conditions(load(FIX / "conditions.json"))
     check_ws(fx_aoi)
-    check_stops(load(FIX / "stops.json"), fx_aoi)
+    check_stops(load(FIX / "stops.json"), fx_aoi, target_ids)
     # Example request bodies from the spec, so they stay valid too.
     validate({"stops": ["s1", "s2"], "return_home": True}, "RouteRequest", "example RouteRequest")
     validate({"from": [300, 240]}, "AbortRequest", "example AbortRequest")
@@ -222,6 +287,10 @@ def main() -> int:
              "SessionCreate", "example SessionCreate")
     validate({"type": "hello", "role": "cuff"}, "WsHello", "example WsHello")
     validate({"name": "demo90"}, "SessionScript", "example SessionScript")
+    validate({"action": "seek", "t_min": 12}, "SessionControl", "example SessionControl (seek)")
+    if not errors and validate({"action": "seek"}, "SessionControl", "probe") is True:
+        fail("openapi.yaml: SessionControl must require t_min for seek")
+    errors[:] = [e for e in errors if not e.startswith("probe:")]
     validate({"detail": "stop s9 is unreachable"}, "Error", "example Error (message)")
     validate({"detail": [{"loc": ["body", "stops"], "msg": "field required", "type": "missing"}]},
              "Error", "example Error (FastAPI 422)")
