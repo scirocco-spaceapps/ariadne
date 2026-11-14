@@ -46,6 +46,27 @@ Uncertainty in consumption is covered by the 60 min reserve, by the suit require
 - **Earth curve.** The speed-vs-slope shape is from Earth hikers without a suit.
 - **Radiation from Gale.** Jezero has no surface dose measurement.
 
+## Why this site
+
+Bright Angel, on the northern edge of Neretva Vallis in Jezero crater, holds the Cheyava Falls
+rock and its Sapphire Canyon core: the strongest candidate for a sign of ancient life that
+Perseverance has found (NASA, July 2024; Hurowitz et al. 2025, Nature). A robot found the clue; a
+human geologist at the outcrop could test it. The rover's own route gives us real stops, real
+photos and a traverse to validate against, all inside one 2.5 x 2 km area.
+
+Stops (`content/stops/index.json`) are Perseverance's end-of-drive positions on the sol it arrived,
+in the rover's order: Mount Washburn (sol 1162), Tuff Cliff (1168), Bright Angel (1175), Cheyava
+Falls (1210; core on about sol 1215) and Masonic Temple (1231). Straight-line spacing along that
+order is 118, 559, 153 and 401 m (1.23 km). Masonic Temple's sol is inferred from the Malgosa
+Crest abrasion (sol 1242, Hurowitz et al. 2025); no NASA news page names it.
+
+The safe haven is a spot where Perseverance parked on sol 1134 (waypoint 52_350), on the Margin
+unit east of the channel, with a measured rover tilt of 4.5°, below the 15° caution slope. All
+stops are 0.4–1.1 km from it. A straight-line tour haven → stops → haven is about 2.7 km; with 30 %
+detour at 33.3 m/min plus five 20-minute dwells that is roughly 205 min, inside the 300 min left
+after the reserve. Two checks are still open: the haven's slope on the 2 m raster (A3) and the real
+route time on the cost raster (A4).
+
 ## Budget check (synthetic)
 
 On a synthetic 2.5 x 2 km site with five stops (sandbox, not real terrain) the plan ended at
