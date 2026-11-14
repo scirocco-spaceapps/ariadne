@@ -36,7 +36,7 @@ export function ReplanPanel({ replan, aoi }: { replan: Replan; aoi: Aoi }) {
         <span>Dust / low visibility</span>
         <input
           type="range"
-          aria-label="Dust, walking speed factor"
+          aria-label="Dust, walking pace factor"
           min={REPLAN_CONTROLS.speed_factor.min}
           max={REPLAN_CONTROLS.speed_factor.max}
           step={REPLAN_CONTROLS.speed_factor.step}
@@ -44,7 +44,7 @@ export function ReplanPanel({ replan, aoi }: { replan: Replan; aoi: Aoi }) {
           disabled={!c.dustOn}
           onChange={(e) => c.set({ speed_factor: Number(e.target.value) })}
         />
-        <span className="am-replan-val">×{c.speed_factor.toFixed(1)} speed</span>
+        <span className="am-replan-val">×{c.speed_factor.toFixed(1)} pace</span>
       </label>
       <div className="am-replan-out" data-testid="replan-suggestion" role="status">
         {replan.storm && <strong className="am-replan-action am-replan-go_home_now">Storm alert: following the way home, no replan.</strong>}
