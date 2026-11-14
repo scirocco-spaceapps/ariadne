@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"sync"
 	"time"
@@ -87,7 +87,7 @@ func (s *Service) spaceWeather(ctx context.Context) (*contract.SpaceWeather, err
 	}
 	events, err := s.cfg.DONKI.MarsArrivals(ctx, now.Add(-Window), now)
 	if err != nil {
-		log.Printf("conditions: %v", err)
+		slog.Warn("DONKI fetch failed", "err", err)
 		s.lastErr = err
 		return s.cachedLocked()
 	}
