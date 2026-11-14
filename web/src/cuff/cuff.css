@@ -142,3 +142,201 @@ body:has(.cuff) {
   margin: 0;
   background: #000;
 }
+
+/* ---------- N4: full cuff view ---------- */
+.cuff {
+  gap: 14px;
+  font-family: var(--body, system-ui, sans-serif);
+  padding-bottom: 24px;
+}
+.cf-label {
+  display: block;
+  font-family: var(--display, 'Arial Narrow', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cuff-dim);
+}
+.cf-clockline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cf-clock {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.4rem, 7vw, 2rem);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* The one number to read at arm's length. */
+.cf-margin {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 0 14px;
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+}
+.cf-margin-value {
+  font-family: var(--display, 'Arial Narrow', sans-serif);
+  font-weight: 700;
+  font-size: clamp(3.5rem, 20vw, 6rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cf-margin-class {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.cf-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cf-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+.cf-dim { color: var(--cuff-dim); }
+.cf-next-name {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.cf-bar {
+  position: relative;
+  height: 18px;
+  border: 2px solid #555;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.cf-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--cuff-ok);
+}
+.cf-bar-fill--low { background: var(--cuff-warn); }
+.cf-bar-reserve {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #fff;
+}
+
+.cf-stop {
+  border-top: 1px solid #333;
+  padding-top: 12px;
+}
+
+.cf-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid #333;
+  padding-top: 12px;
+}
+.cf-foot .cuff-pos dd { font-size: 1.1rem; }
+.cf-wake {
+  min-height: 48px;
+  border-radius: 8px;
+  border: 2px solid #555;
+  background: #111;
+  color: #fff;
+  font-weight: 600;
+}
+.cf-wake:disabled {
+  border-color: var(--cuff-ok);
+  color: var(--cuff-ok);
+}
+
+.cf-prov,
+.cuff .cuff-prov {
+  font-size: 0.75rem;
+}
+
+/* ---------- storm alert: full screen ---------- */
+.cf-alert {
+  position: fixed;
+  inset: 0;
+  /* Under the DEMO DATA badge (z 1000), which must stay visible in DEMO mode. */
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px 20px;
+  background: #ff5d6c;
+  color: #1c0306;
+  overflow-y: auto;
+}
+.cf-alert-title {
+  margin: 0;
+  font-family: var(--display, 'Arial Narrow', sans-serif);
+  font-weight: 700;
+  font-size: clamp(3rem, 16vw, 5rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+.cf-alert-sub {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.cf-alert-grid {
+  margin: 8px 0 0;
+  display: grid;
+  gap: 14px;
+}
+.cf-alert-grid dt {
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+}
+.cf-alert-grid dd {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--display, 'Arial Narrow', sans-serif);
+  font-size: clamp(2rem, 11vw, 3rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.cf-alert .cf-prov {
+  font-family: var(--body, system-ui, sans-serif);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 1px 8px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+/* StopCard inside the black cuff: no own background (see src/stops/stops.css). */
+.cf-stop .stop-card {
+  padding: 0;
+}
+
+/* Room for the fixed DEMO DATA badge (top right) above the status pill. */
+.cuff--demo {
+  padding-top: 44px;
+}
