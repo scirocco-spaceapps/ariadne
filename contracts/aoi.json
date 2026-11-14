@@ -1,7 +1,7 @@
 {
   "id": "bright-angel",
   "name": "Bright Angel, Jezero crater",
-  "placeholder": true,
+  "placeholder": false,
   "crs": {
     "proj4": "+proj=eqc +lat_ts=18.4889 +lat_0=0 +lon_0=77.2989 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs"
   },
@@ -44,11 +44,13 @@
     "targets": { "file": "targets.geojson", "optional": true },
     "geology": { "file": "geology.geojson", "optional": true }
   },
-  "safe_haven": { "id": "haven", "name": "Safe haven (placeholder)", "xy": [400, 300] },
+  "safe_haven": { "id": "haven", "name": "Safe haven (pressurized rover)", "xy": [2419.5, 1156.3] },
   "stops": [
-    { "id": "s1", "name": "Stop 1 (placeholder)", "xy": [900, 700] },
-    { "id": "s2", "name": "Stop 2 (placeholder)", "xy": [1500, 1100] },
-    { "id": "s3", "name": "Stop 3 (placeholder)", "xy": [2000, 1600] }
+    { "id": "mount-washburn", "name": "Mount Washburn", "xy": [2100.8, 1407.6] },
+    { "id": "tuff-cliff", "name": "Tuff Cliff", "xy": [2088.4, 1525.0] },
+    { "id": "bright-angel", "name": "Bright Angel", "xy": [1531.9, 1474.0] },
+    { "id": "cheyava-falls", "name": "Cheyava Falls", "xy": [1603.8, 1608.5] },
+    { "id": "masonic-temple", "name": "Masonic Temple", "xy": [1373.3, 1280.8] }
   ],
   "model": { "budget_min": 360, "reserve_min": 60, "dwell_min": 20 }
 }
