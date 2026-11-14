@@ -1,0 +1,44 @@
+{
+  "id": "target-masonic-temple",
+  "name": "Unvisited ground near Masonic Temple",
+  "kind": "target",
+  "science_question": "The rover saw these strata on the channel's south side, 52 m from Masonic Temple, but never touched them. Are they the same as Bright Angel's?",
+  "tasks": [
+    "Walk to the target area and photograph the strata from about 5 m.",
+    "Compare their colour and layering with the light-toned rock at Bright Angel and photograph a layered face with a scale bar.",
+    "Look for a poorly sorted conglomerate with rounded to subangular clasts, as at Masonic Temple."
+  ],
+  "photos": [
+    {
+      "file": "photos/target-masonic-temple_1.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1234_0776498919_659EBY_N0563438ZCAM09289_1100LMJ",
+      "sol": 1234,
+      "camera": "Mastcam-Z Right",
+      "credit": "NASA/JPL-Caltech/ASU",
+      "caption": "Close view of light-toned outcrop strips and sand; the target area is at the upper right of the frame (projected from rover position and camera pointing).",
+      "distance_m": 52.0
+    },
+    {
+      "file": "photos/target-masonic-temple_2.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_1232_0776303089_566ECM_N0563438NCAM15231_01_195J",
+      "sol": 1232,
+      "camera": "Navcam Left",
+      "credit": "NASA/JPL-Caltech",
+      "caption": "Wide view across the outcrops on the channel floor; the target area is at the right of the frame (projected from rover position and camera pointing).",
+      "distance_m": 52.0
+    }
+  ],
+  "unit": "Unvisited; near the Masonic Temple area of the Bright Angel formation",
+  "provenance": "Derived",
+  "sources": [
+    {
+      "title": "Ariadne B3 viewshed notebook: targets seen but not touched (notebooks/viewshed.ipynb, Chosen targets table)",
+      "url": "https://github.com/scirocco-spaceapps/ariadne/blob/main/notebooks/viewshed.ipynb"
+    },
+    {
+      "title": "Hurowitz et al. 2025, Redox-driven mineral and organic associations in Jezero Crater, Mars, Nature",
+      "url": "https://doi.org/10.1038/s41586-025-09413-0"
+    }
+  ],
+  "draft": true
+}

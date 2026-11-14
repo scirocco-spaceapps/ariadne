@@ -1,0 +1,44 @@
+{
+  "id": "target-mount-washburn",
+  "name": "Unvisited ground near Mount Washburn",
+  "kind": "target",
+  "science_question": "This easy ground (about 3° slope) lies next to the Mount Washburn boulder field, whose boulders include types never seen before on Mars. Do such boulders lie here too?",
+  "tasks": [
+    "Walk to the target area and photograph it from about 5 m.",
+    "Look for light-toned, speckled boulders like Atoko Point among the darker ones and photograph any you find.",
+    "Photograph one boulder up close with a scale bar."
+  ],
+  "photos": [
+    {
+      "file": "photos/target-mount-washburn_1.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_1170_0770822521_176ECM_N0525844NCAM02170_04_195J",
+      "sol": 1170,
+      "camera": "Navcam Left",
+      "credit": "NASA/JPL-Caltech",
+      "caption": "View across the channel floor, with the rover in the foreground; the target area is at the upper centre of the frame (projected from rover position and camera pointing).",
+      "distance_m": 64.9
+    },
+    {
+      "file": "photos/target-mount-washburn_2.jpg",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_1163_0770179205_159ECM_N0524312NCAM14162_04_195J",
+      "sol": 1163,
+      "camera": "Navcam Left",
+      "credit": "NASA/JPL-Caltech",
+      "caption": "View toward the hills from the Mount Washburn stop; the target area is at the centre of the frame (projected from rover position and camera pointing).",
+      "distance_m": 126.6
+    }
+  ],
+  "unit": "Unvisited; next to the Mount Washburn boulder field",
+  "provenance": "Derived",
+  "sources": [
+    {
+      "title": "Ariadne B3 viewshed notebook: targets seen but not touched (notebooks/viewshed.ipynb, Chosen targets table)",
+      "url": "https://github.com/scirocco-spaceapps/ariadne/blob/main/notebooks/viewshed.ipynb"
+    },
+    {
+      "title": "NASA's Perseverance Fords an Ancient River to Reach Science Target (NASA/JPL, 13 June 2024)",
+      "url": "https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-fords-an-ancient-river-to-reach-science-target/"
+    }
+  ],
+  "draft": true
+}

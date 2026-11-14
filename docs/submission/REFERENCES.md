@@ -108,3 +108,26 @@ copied from NASA's raw-image record of each image.
 | NASA's Perseverance Rover Scientists Find Intriguing Mars Rock (NASA/JPL, 25 July 2024) | https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-perseverance-rover-scientists-find-intriguing-mars-rock/ | NASA/JPL-Caltech | Science question and tasks: Cheyava Falls |
 | Hurowitz et al. 2025, Redox-driven mineral and organic associations in Jezero Crater, Mars, Nature | https://doi.org/10.1038/s41586-025-09413-0 | Nature (citation) | Units, tasks and photo captions: Bright Angel, Cheyava Falls, Masonic Temple |
 | Jones et al. 2025, A fluvio-lacustrine environment preserved in the Jezero crater inlet channel, Neretva Vallis (Mars), EPSC-DPS 2025 abstract EPSC-DPS2025-888 | https://meetingorganizer.copernicus.org/EPSC-DPS2025/EPSC-DPS2025-888.html | © Author(s) 2025, CC BY 4.0 | Tuff Cliff member and lake reading (Tuff Cliff); Bright Angel younger than the Margin unit (Bright Angel) |
+
+## Target photos (`content/photos/target-*`)
+
+Perseverance raw images, NASA's 1200 px JPG browse version. The credit is copied from NASA's raw-image record.
+
+| Resource | URL | Licence or credit | Used for |
+|---|---|---|---|
+| `target-cheyava-falls_1.jpg`, sol 1206 (NLF_1206_0774007545_050ECM_N0550340NCAM02206_01_195J) | https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_1206_0774007545_050ECM_N0550340NCAM02206_01_195J | NASA/JPL-Caltech | Target card `target-cheyava-falls` |
+| `target-cheyava-falls_2.jpg`, sol 1195 (NLF_1195_0773024714_972ECM_N0550000NCAM02195_01_195J) | https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_1195_0773024714_972ECM_N0550000NCAM02195_01_195J | NASA/JPL-Caltech | Target card `target-cheyava-falls` |
+| `target-masonic-temple_1.jpg`, sol 1234 (ZR0_1234_0776498919_659EBY_N0563438ZCAM09289_1100LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1234_0776498919_659EBY_N0563438ZCAM09289_1100LMJ | NASA/JPL-Caltech/ASU | Target card `target-masonic-temple` |
+| `target-masonic-temple_2.jpg`, sol 1232 (NLF_1232_0776303089_566ECM_N0563438NCAM15231_01_195J) | https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_1232_0776303089_566ECM_N0563438NCAM15231_01_195J | NASA/JPL-Caltech | Target card `target-masonic-temple` |
+| `target-mount-washburn_1.jpg`, sol 1170 (NLF_1170_0770822521_176ECM_N0525844NCAM02170_04_195J) | https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_1170_0770822521_176ECM_N0525844NCAM02170_04_195J | NASA/JPL-Caltech | Target card `target-mount-washburn` |
+| `target-mount-washburn_2.jpg`, sol 1163 (NLF_1163_0770179205_159ECM_N0524312NCAM14162_04_195J) | https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_1163_0770179205_159ECM_N0524312NCAM14162_04_195J | NASA/JPL-Caltech | Target card `target-mount-washburn` |
+| `target-closest-pass_1.jpg`, sol 1159 (ZR0_1159_0769818090_473EBY_N0523018ZCAM09196_0630LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1159_0769818090_473EBY_N0523018ZCAM09196_0630LMJ | NASA/JPL-Caltech/ASU | Target card `target-closest-pass` |
+| `target-closest-pass_2.jpg`, sol 1155 (ZR0_1155_0769468610_818EBY_N0522644ZCAM09193_0480LMJ) | https://mars.nasa.gov/mars2020/multimedia/raw-images/ZR0_1155_0769468610_818EBY_N0522644ZCAM09193_0480LMJ | NASA/JPL-Caltech/ASU | Target card `target-closest-pass` |
+
+## Target sources (`content/stops/target-*`)
+
+| Resource | URL | Licence or credit | Used for |
+|---|---|---|---|
+| Ariadne B3 viewshed notebook, Chosen targets table (Bunyamin) | https://github.com/scirocco-spaceapps/ariadne/blob/main/notebooks/viewshed.ipynb | Project work | Target choice, distances, sols, slope and science questions |
+| Mars 2020 raw image API (camera model, rover attitude) | https://mars.nasa.gov/rss/api/?feed=raw_images&category=mars2020&feedtype=json | NASA/JPL-Caltech | Checking that each target photo points at its target |
+| Mars 2020 waypoints (`M20_waypoints.json`) | https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json | NASA/JPL-Caltech | Rover positions and headings for the target photos |
