@@ -22,6 +22,9 @@ rasterio has no wheel for newer versions yet), then
    (and `ortho_raw.tif`); the M20 JSON layers go in `$ARIADNE_RAW` too.
 2. `scripts/01_crop.sh`: warp both crops to `crs.proj4` over the AOI (DEM 1 m, ortho 0.25 m).
 3. `scripts/02_track.py`: track and waypoints GeoJSON in AOI metres, campaign check, quicklook, nodata share.
+4. `scripts/03_export.py`: web assets to `DATA_DIR/<assets_base>` plus `DATA_DIR/aoi.json` (the planner's AOI);
+   `--check` re-checks sizes, sidecars and GeoJSON schemas. `scripts/serve_assets.py` serves `DATA_DIR`
+   with CORS on :8001 until the assets host is up (`VITE_ASSETS_URL=http://localhost:8001/`).
 
 **AOI frame:** `scripts/aoi.py` reads `contracts/aoi.json`; `aoi_frame.json` overrides `origin_lonlat`
 until the real origin is in the contract.
