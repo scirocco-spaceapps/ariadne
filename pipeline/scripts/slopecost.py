@@ -1,8 +1,8 @@
 """Slope, traversability and walking cost from the DEM and model/params.json (task A3).
 
 - Slope: Horn's 3 x 3 method on the 1 m DEM, degrees.
-- 2 m aggregation: the MAXIMUM of the four 1 m slopes. Conservative on purpose: a 2 m cell is as
-  steep as its steepest metre, so averaging never hides a steep step from the caution / no-go classes.
+- 2 m aggregation: the MEAN of the four 1 m slopes (Bunyamin's decision, PR #35, docs/model.md): the
+  maximum picked up DTM noise at the 1 m baseline and made 3.1 % of the rover's own track no-go.
 - Classes (same rule as contracts/tools/make_fixtures.py): go if slope < caution_slope_deg,
   caution if caution_slope_deg <= slope < max_slope_deg, no-go if slope >= max_slope_deg.
 - Cost: minutes per metre = 1 / (walk_speed_flat_m_per_min * factor(slope)), factor linearly
@@ -73,12 +73,16 @@ def slope_horn(dem: np.ndarray, px_m: float) -> np.ndarray:
     return np.degrees(np.arctan(np.hypot(dzdx, dzdy)))
 
 
-def aggregate_max(a: np.ndarray, k: int) -> np.ndarray:
+def aggregate(a: np.ndarray, k: int, how: str = "mean") -> np.ndarray:
+    """k x k block reduction ignoring NaN; `mean` is the model's choice, `max` stays for comparisons."""
     rows, cols = a.shape
     b = a[: rows - rows % k, : cols - cols % k].reshape(rows // k, k, cols // k, k)
     with np.errstate(all="ignore"):
-        out = np.nanmax(b, axis=(1, 3))
-    return out
+        if how == "mean":
+            return np.nanmean(b, axis=(1, 3))
+        if how == "max":
+            return np.nanmax(b, axis=(1, 3))
+    raise ValueError(how)
 
 
 def classify(slope: np.ndarray, m: WalkModel) -> np.ndarray:

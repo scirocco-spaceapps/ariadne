@@ -24,3 +24,12 @@ Delete each note in the PR that handles it.
 - **Route** haven → five stops in your order → haven with B1 params: 2.9 km, 124 min walking +
   100 min dwell = 224 min, 76 min margin inside 300 min (budget minus reserve). Steepest leg max 19.9°.
 - The aoi.json change is PR #32 for Yusuf. Nothing for you to move.
+
+## 2026-11-14 — from Ali Koray: re-run with the mean (your PR #35), numbers for B4
+
+- `04_cost.py` now aggregates the 2 m slope as the mean of the four 1 m Horn slopes; re-ran
+  `04_cost.py` → `05_cost_to_home.py` → `06_variants.py` (PR `pipeline/slope-mean`).
+- **Rover track no-go share (≥ 20°): 1.8 %** (was 3.1 % with the maximum). Track: median 10.7°,
+  p95 18.2°, 20.6 % ≥ 15° (caution).
+- AOI: go 58.8 %, caution 20.5 %, no-go 20.7 %; 75.4 % reachable from the haven.
+- Planned walk: 219.7 min with 80.3 min margin (was 224.0 / 76.0).
