@@ -34,7 +34,8 @@ import {
 } from './route'
 import { fitZoom, metresPerPixel } from './scale'
 import { MARS_LIGHT, build3dLayers, useTerrainState } from './terrain3d'
-import { orthoFile } from './buildLayers'
+import { useSmoothed } from './smooth'
+import { LAYER_ORDER, orthoFile } from './buildLayers'
 import { TimeBar } from './TimeBar'
 import { ReplanPanel } from './ReplanPanel'
 import { useReplan } from './useReplan'
@@ -318,30 +319,53 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
 
   // No layers until the real size is known, so a narrow map never downloads the big ortho first.
   const narrow = viewSize ? viewSize.width < NARROW_PX : null
-  const layers = useMemo(() => {
-    if (narrow === null) return []
-    const visible = new Set(registered.filter((l) => l.visible).map((l) => l.id))
-    const mission: MissionLayers = {
-      geom,
-      progress_m,
-      marker,
-      numbers,
-      selectedStop,
-      dash_m,
-      alert: alertLayers,
-      selectedTarget,
-      suggestion: replan.path,
-    }
-    const isVisible = (id: LayerId) => visible.has(id)
-    // 3D chosen but the terrain still loading: draw nothing yet. Drawing the 2D map first compiled its
-    // shaders and uploaded the 20-megapixel 50 cm image, a multi-second freeze on a laptop GPU.
-    if (mode3d && terrainLoading) return []
-    if (show3d && terrain) {
-      // 3D drapes the 1 m ortho: a quarter of the 50 cm image's pixels to upload, same look on a projector.
-      return build3dLayers({ source, data, terrain, orthoFile: orthoFile(source.aoi, true), envelope, mission, isVisible, pulse: 0 })
-    }
-    return buildLayers({ source, data, narrow, mission, envelope, ppm, isVisible })
-  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers, selectedTarget, ppm, replan.path, show3d, terrain, mode3d, terrainLoading])
+  // The astronaut and the walked route glide between the 2 Hz states (smooth.ts). They are built apart
+  // from the rest, so a gliding frame rebuilds two small layers, not the terrain, track and labels.
+  const smoothOn =
+    !!state?.running && !navigator.webdriver && !(typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const smooth = useSmoothed({ marker, s: progress_m }, smoothOn)
+
+  const build = useCallback(
+    (include: (id: LayerId) => boolean, m: { marker: XY | null; progress_m: number }) => {
+      if (narrow === null) return []
+      const visible = new Set(registered.filter((l) => l.visible).map((l) => l.id))
+      const mission: MissionLayers = {
+        geom,
+        progress_m: m.progress_m,
+        marker: m.marker,
+        numbers,
+        selectedStop,
+        dash_m,
+        alert: alertLayers,
+        selectedTarget,
+        suggestion: replan.path,
+      }
+      const isVisible = (id: LayerId) => visible.has(id)
+      // 3D chosen but the terrain still loading: draw nothing yet. Drawing the 2D map first compiled its
+      // shaders and uploaded the 20-megapixel 50 cm image, a multi-second freeze on a laptop GPU.
+      if (mode3d && terrainLoading) return []
+      if (show3d && terrain) {
+        // 3D drapes the 1 m ortho: a quarter of the 50 cm image's pixels to upload, same look on a projector.
+        return build3dLayers({ source, data, terrain, orthoFile: orthoFile(source.aoi, true), envelope, mission, isVisible, pulse: 0, include })
+      }
+      return buildLayers({ source, data, narrow, mission, envelope, ppm, isVisible, include })
+    },
+    [registered, source, data, narrow, geom, numbers, selectedStop, dash_m, envelope, alertLayers, selectedTarget, ppm, replan.path, show3d, terrain, mode3d, terrainLoading],
+  )
+  const ROUTE_AT = LAYER_ORDER.indexOf('route')
+  const below = useMemo(() => build((id) => LAYER_ORDER.indexOf(id) < ROUTE_AT, { marker, progress_m }), [build, ROUTE_AT, marker, progress_m])
+  const above = useMemo(
+    () => build((id) => LAYER_ORDER.indexOf(id) > ROUTE_AT && id !== 'astronaut', { marker, progress_m }),
+    [build, ROUTE_AT, marker, progress_m],
+  )
+  const moving = useMemo(
+    () => ({
+      route: build((id) => id === 'route', { marker: smooth.marker, progress_m: smooth.s }),
+      astronaut: build((id) => id === 'astronaut', { marker: smooth.marker, progress_m: smooth.s }),
+    }),
+    [build, smooth],
+  )
+  const layers = useMemo(() => [...below, ...moving.route, ...above, ...moving.astronaut], [below, above, moving])
 
   // 3D camera: fitted once the terrain and the canvas size are known, then a slow idle orbit.
   const zMid = terrain ? terrain.zMax / 2 : 0

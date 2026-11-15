@@ -174,10 +174,12 @@ type Build3d = {
   isVisible: (id: LayerId) => boolean
   /** Phase 0..1 for the beacon pulse. */
   pulse: number
+  /** Only build these layers (the map builds the moving astronaut apart from the rest); default all. */
+  include?: (id: LayerId) => boolean
 }
 
 /** deck.gl layers for the 3D view, bottom to top. */
-export function build3dLayers({ source, data, terrain, orthoFile, envelope, mission, isVisible, pulse }: Build3d): Layer[] {
+export function build3dLayers({ source, data, terrain, orthoFile, envelope, mission, isVisible, pulse, include = () => true }: Build3d): Layer[] {
   const { aoi } = source
   const EXAG = terrain.exag
   const W = aoi.size_m[0]
@@ -193,7 +195,7 @@ export function build3dLayers({ source, data, terrain, orthoFile, envelope, miss
   const out: Layer[] = []
   const origin = [{ position: [0, 0, 0] }]
 
-  out.push(
+  if (include('ortho')) out.push(
     new SimpleMeshLayer({
       id: 'terrain',
       data: origin,
@@ -207,7 +209,7 @@ export function build3dLayers({ source, data, terrain, orthoFile, envelope, miss
     }),
   )
 
-  if (envelope && isVisible('envelope')) {
+  if (envelope && include('envelope') && isVisible('envelope')) {
     out.push(
       new SimpleMeshLayer({
         id: 'envelope-skin',
@@ -223,7 +225,7 @@ export function build3dLayers({ source, data, terrain, orthoFile, envelope, miss
     )
   }
 
-  if (data.track && isVisible('track')) {
+  if (data.track && include('track') && isVisible('track')) {
     out.push(
       new PathLayer<[number, number, number][]>({
         id: 'track-3d',
@@ -240,7 +242,7 @@ export function build3dLayers({ source, data, terrain, orthoFile, envelope, miss
   }
 
   const alert = mission?.alert ?? null
-  if (mission?.geom && mission.geom.legs.length > 0 && isVisible('route')) {
+  if (mission?.geom && mission.geom.legs.length > 0 && include('route') && isVisible('route')) {
     const { walked, ahead } = splitAt(mission.geom, mission.progress_m)
     const fade = alert ? 0.35 : 1
     const path = (id: string, paths: XY[][], color: Rgba, width: number) =>
@@ -262,7 +264,7 @@ export function build3dLayers({ source, data, terrain, orthoFile, envelope, miss
     )
   }
 
-  if (alert?.path && alert.path.length > 1 && isVisible('thread')) {
+  if (alert?.path && alert.path.length > 1 && include('thread') && isVisible('thread')) {
     const thread = lift3(alert.path, 1)
     const t = (id: string, color: Rgba, width: number) =>
       new PathLayer<[number, number, number][]>({
@@ -278,7 +280,7 @@ export function build3dLayers({ source, data, terrain, orthoFile, envelope, miss
     out.push(t('thread3d-glow-wide', [255, 93, 108, 45], 30), t('thread3d-glow', [255, 93, 108, 100], 14), t('thread3d', THREAD, 5))
   }
 
-  if (isVisible('places')) {
+  if (include('places') && isVisible('places')) {
     const haven = aoi.safe_haven.xy as unknown as XY
     const numbers = mission?.numbers ?? {}
     const stops = aoi.stops.map((s) => ({ xy: s.xy as unknown as XY, name: s.name, n: numbers[s.id] ?? null }))
@@ -344,7 +346,7 @@ export function build3dLayers({ source, data, terrain, orthoFile, envelope, miss
     )
   }
 
-  if (mission?.marker && isVisible('astronaut')) {
+  if (mission?.marker && include('astronaut') && isVisible('astronaut')) {
     const m = mission.marker
     const top = ground(m) + 0.07 * W
     const beam = (id: string, color: Rgba, width: number) =>
