@@ -1,0 +1,457 @@
+/* Console as a mission display: the map fills the screen, everything else floats over it on glass.
+   Loaded after console.css and console-theme.css. Panel sizes must match useInset() in Console.tsx. */
+
+.cx.cx--hud {
+  --hud-top: 136px;
+  --hud-left-w: 252px;
+  --hud-right-w: 392px;
+  --hud-dock: 100px;
+  --glass-bg: rgba(7, 10, 12, 0.74);
+  --glass-line: rgba(255, 255, 255, 0.09);
+  --alarm: #d6303f; /* storm chrome; not the thread colour, which e2e counts on the map */
+  position: relative;
+  display: block;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: #000;
+}
+@media (min-width: 1800px) {
+  .cx.cx--hud {
+    --hud-top: 150px;
+    --hud-left-w: 300px;
+    --hud-right-w: 470px;
+    --hud-dock: 108px;
+  }
+}
+
+/* ---------- the map, full bleed ---------- */
+.cx--hud .cx-map {
+  position: absolute;
+  inset: 0;
+  background: #000;
+}
+.cx--hud .cx-map .am-map {
+  background: radial-gradient(90% 80% at 50% 50%, #0b1114, #000 75%);
+}
+
+/* Cinematic depth: dark edges, a faint grid and a slow scan line. Never catches the pointer. */
+.cx-vignette,
+.cx-scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.cx-vignette {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0, rgba(0, 0, 0, 0) 190px),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.7) 0, rgba(0, 0, 0, 0) 150px),
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+  transition: background 600ms;
+}
+.cx-scan {
+  background-image:
+    linear-gradient(rgba(143, 211, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143, 211, 255, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  overflow: hidden;
+}
+.cx-scan::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 120px;
+  background: linear-gradient(180deg, transparent, rgba(143, 211, 255, 0.05) 85%, rgba(143, 211, 255, 0.12));
+  animation: cx-scan 9s linear infinite;
+}
+@keyframes cx-scan {
+  from {
+    transform: translateY(-140px);
+  }
+  to {
+    transform: translateY(100vh);
+  }
+}
+
+/* ---------- glass ---------- */
+.cx--hud .cx-left,
+.cx--hud .cx-right,
+.cx--hud .cx-bar,
+.hud-tile {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-line);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ---------- top-left identity ---------- */
+.cx--hud .cx-head {
+  position: absolute;
+  z-index: 5;
+  top: 18px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  height: auto;
+  width: var(--hud-left-w);
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+.cx--hud .cx-title {
+  font-size: 30px;
+  letter-spacing: 0.24em;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.8);
+}
+.cx--hud .cx-sub {
+  display: none;
+}
+.cx--hud .cx-place {
+  font-size: 15px;
+}
+
+/* ---------- headline instrument (MissionHud) ---------- */
+.hud {
+  position: absolute;
+  z-index: 5;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  pointer-events: none;
+}
+.hud-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 200px;
+  padding: 10px 18px 11px;
+  border-radius: 16px;
+}
+.hud-k {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.hud-v {
+  color: var(--ink-1);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.hud-mono {
+  font-family: var(--mono);
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.hud-big {
+  font-family: var(--display);
+  font-size: 58px;
+  font-weight: 700;
+  text-shadow: 0 0 28px currentColor;
+  transition: color 500ms;
+}
+.hud-unit {
+  margin-left: 6px;
+  font-size: 0.34em;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  text-shadow: none;
+}
+.hud-name {
+  font-family: var(--display);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hud-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.hud-margin {
+  min-width: 290px;
+  border-color: rgba(70, 197, 139, 0.35);
+}
+.hud--tight .hud-margin {
+  border-color: rgba(242, 169, 59, 0.55);
+}
+.hud--out .hud-margin {
+  border-color: rgba(214, 48, 63, 0.7);
+  animation: hud-alarm 1.4s ease-in-out infinite;
+}
+@keyframes hud-alarm {
+  50% {
+    box-shadow: 0 0 40px rgba(214, 48, 63, 0.55);
+  }
+}
+.hud-meter {
+  display: block;
+  height: 4px;
+  margin: 4px 0 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.hud-meter span {
+  display: block;
+  height: 100%;
+  transform-origin: left;
+  transition: transform 600ms var(--ease-out);
+}
+.hud-bearing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--sand);
+}
+.hud-arrow {
+  display: inline-block;
+  font-size: 11px;
+  transition: transform 500ms var(--ease-out);
+}
+
+/* ---------- side panels ---------- */
+.cx--hud .cx-left,
+.cx--hud .cx-right {
+  position: absolute;
+  z-index: 4;
+  top: var(--hud-top);
+  bottom: calc(var(--hud-dock) + 12px);
+  border-radius: 18px;
+}
+.cx--hud .cx-left {
+  left: 16px;
+  width: var(--hud-left-w);
+  padding: 16px 14px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+.cx--hud .cx-left legend {
+  font-size: 15px;
+}
+.cx--hud .cx-right {
+  right: 16px;
+  width: var(--hud-right-w);
+  overflow: hidden;
+}
+.cx--hud .cx-left::-webkit-scrollbar,
+.cx--hud .cx-tabpanel::-webkit-scrollbar {
+  width: 6px;
+}
+.cx--hud .cx-left::-webkit-scrollbar-thumb,
+.cx--hud .cx-tabpanel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+/* Tabs as a segmented control. */
+.cx--hud .cx-tablist {
+  margin: 12px 12px 0;
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid var(--glass-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.cx--hud .cx-tab {
+  min-height: 40px;
+  border: 0;
+  border-radius: 9px;
+  font-size: 16px;
+  box-shadow: none;
+}
+.cx--hud .cx-tab-on {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--ink-1);
+  box-shadow: inset 0 -2px 0 var(--thread);
+}
+.cx--hud .cx-tabpanel {
+  padding: 14px 16px 18px;
+}
+.cx--hud .pn-card,
+.cx--hud .pn-elev-box {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: var(--glass-line);
+  border-radius: 12px;
+}
+.cx--hud .cx-right .stop-card {
+  --stop-bg: rgba(255, 255, 255, 0.035);
+  border-radius: 14px;
+}
+
+/* ---------- session dock ---------- */
+.cx--hud .cx-bar {
+  position: absolute;
+  z-index: 6;
+  left: 16px;
+  right: 16px;
+  bottom: 12px;
+  border-radius: 18px;
+  padding: 10px 16px 6px;
+}
+.cx--hud .cx-bar-status .cx-storm {
+  background: var(--alarm);
+  color: #fff;
+  border-radius: 6px;
+}
+
+/* ---------- map furniture inside the free area ---------- */
+.cx--hud .am-top-left {
+  top: calc(var(--am-inset-top) + 0px);
+  left: calc(var(--am-inset-left) + 12px);
+}
+.cx--hud .am-top-right {
+  top: calc(var(--am-inset-top) + 0px);
+  right: calc(var(--am-inset-right) + 12px);
+}
+.cx--hud .am-bottom-left {
+  left: calc(var(--am-inset-left) + 12px);
+  bottom: calc(var(--am-inset-bottom) + 12px);
+}
+.cx--hud .am-has-timebar .am-bottom-left {
+  bottom: calc(var(--am-inset-bottom) + 108px);
+}
+.cx--hud .am-bottom-center {
+  left: calc(var(--am-inset-left) + 12px);
+  right: calc(var(--am-inset-right) + 12px);
+  bottom: calc(var(--am-inset-bottom) + 12px);
+}
+.cx--hud .am-replan {
+  top: calc(var(--am-inset-top) + 64px);
+  left: calc(var(--am-inset-left) + 12px);
+}
+.cx--hud .am-compare-caption {
+  top: calc(var(--am-inset-top) + 64px);
+  left: calc(var(--am-inset-left) + (100% - var(--am-inset-left) - var(--am-inset-right)) / 2);
+  max-width: calc(100% - var(--am-inset-left) - var(--am-inset-right) - 24px);
+}
+.cx--hud .am-top-right {
+  flex-direction: row;
+  gap: 10px;
+}
+.cx--hud .am-overlay,
+.cx--hud .am-replan {
+  border-radius: 14px;
+  background: var(--glass-bg);
+  border-color: var(--glass-line);
+}
+
+/* ---------- storm: the whole display reacts ---------- */
+.cx--hud.cx--storm .cx-vignette {
+  background:
+    linear-gradient(180deg, rgba(40, 0, 6, 0.9) 0, rgba(40, 0, 6, 0) 220px),
+    linear-gradient(0deg, rgba(40, 0, 6, 0.8) 0, rgba(40, 0, 6, 0) 170px),
+    radial-gradient(110% 85% at 50% 50%, transparent 45%, rgba(150, 18, 32, 0.55) 100%);
+  animation: cx-storm-breathe 2.2s ease-in-out infinite;
+}
+@keyframes cx-storm-breathe {
+  50% {
+    opacity: 0.75;
+  }
+}
+.cx--hud.cx--storm::before {
+  content: '';
+  position: absolute;
+  z-index: 7;
+  top: 0;
+  left: -60px;
+  right: 0;
+  height: 8px;
+  background: repeating-linear-gradient(-45deg, var(--alarm) 0 14px, #120204 14px 28px);
+  animation: cf-hazard 1s linear infinite;
+  pointer-events: none;
+}
+@keyframes cf-hazard {
+  to {
+    transform: translateX(39.6px);
+  }
+}
+.cx--hud.cx--storm .cx-map::after {
+  display: none;
+}
+.cx--hud .cx-storm-banner {
+  top: calc(var(--hud-top) + 6px);
+  z-index: 6;
+}
+.cx--hud.cx--storm .hud-tile {
+  border-color: rgba(214, 48, 63, 0.5);
+}
+.cx--hud.cx--storm .cx-head {
+  background: none;
+}
+
+@media (max-width: 1400px) {
+  .hud-tile {
+    min-width: 170px;
+    padding: 8px 14px 9px;
+  }
+  .hud-mono {
+    font-size: 26px;
+  }
+  .hud-big {
+    font-size: 44px;
+  }
+  .hud-name {
+    font-size: 24px;
+    max-width: 240px;
+  }
+  .hud-margin {
+    min-width: 230px;
+  }
+  .cx--hud .cx-title {
+    font-size: 24px;
+  }
+  .cx--hud .cx-place {
+    font-size: 13px;
+  }
+}
+
+/* The map's time bar: a slim strip at the foot of the free area (the dock has the full controls). */
+.cx--hud .am-timebar {
+  gap: 2px;
+}
+.cx--hud .am-bottom-center {
+  padding: 6px 14px 4px;
+  max-width: 760px;
+}
+.cx--hud .am-timebar-head {
+  font-size: 13px;
+}
+.cx--hud .am-timebar-clock {
+  font-size: 17px;
+}
+.cx--hud .am-has-timebar .am-bottom-left {
+  bottom: calc(var(--am-inset-bottom) + 92px);
+}
+@media (max-width: 1400px) {
+  .cx--hud .cx-storm-banner {
+    padding: 6px 16px 8px;
+  }
+  .cx--hud .cx-storm-banner-s {
+    display: none;
+  }
+}

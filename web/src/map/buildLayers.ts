@@ -420,6 +420,8 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
             opacity,
           })
         out.push(
+          // A soft halo under the walked part: the thread the astronaut has already laid.
+          path('route-walked-glow', walked, [231, 239, 236, 55], 16),
           path('route-ahead-casing', dashed, CASING_RGB, 5),
           path('route-ahead', dashed, ROUTE_RGB, 2.5),
           path('route-walked-casing', walked, CASING_RGB, 6.5),
@@ -460,7 +462,12 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
             capRounded: true,
             jointRounded: true,
           })
-        out.push(thread('thread-casing', CASING_RGB, 8), thread('thread', THREAD_RGB, 5))
+        out.push(
+          thread('thread-glow-wide', [255, 93, 108, 40], 26),
+          thread('thread-glow', [255, 93, 108, 90], 14),
+          thread('thread-casing', CASING_RGB, 8),
+          thread('thread', THREAD_RGB, 5),
+        )
         break
       }
       case 'places': {
@@ -544,6 +551,18 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
         if (!mission?.marker) break
         const me = [{ xy: mission.marker, name: 'Astronaut · Simulation' }]
         out.push(
+          new ScatterplotLayer<Label>({
+            id: 'astronaut-halo',
+            data: me,
+            getPosition: (d) => d.xy,
+            getRadius: 20,
+            radiusUnits: 'pixels',
+            getFillColor: [217, 168, 119, 55],
+            stroked: true,
+            getLineColor: [217, 168, 119, 140],
+            lineWidthUnits: 'pixels',
+            getLineWidth: 1.5,
+          }),
           new ScatterplotLayer<Label>({
             id: 'astronaut',
             data: me,

@@ -3,7 +3,7 @@
 
 import { OrthographicView, type OrthographicViewState, type PickingInfo } from '@deck.gl/core'
 import { DeckGL } from '@deck.gl/react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useMission } from '../app/store'
 import { fixtures } from '../lib/fixtures'
 import type { Provenance, WsState } from '../lib/types'
@@ -44,7 +44,7 @@ const VIEW = new OrthographicView({ id: 'map', flipY: false, controller: true })
 const MAX_ZOOM = 4 // 16 screen px per metre
 const DASH_PX = 10 // dash length of the route ahead, screen pixels
 
-type Props = { source: AssetSource; className?: string }
+type Props = { source: AssetSource; className?: string; inset?: MapInset }
 
 const PULSE_MS = 1200
 
@@ -62,17 +62,25 @@ function usePulse(active: boolean): number {
   return active ? phase : 0
 }
 
-function fittedState(width: number, height: number, size_m: SizeM): OrthographicViewState {
-  const zoom = fitZoom(width, height, size_m)
+/** Screen pixels covered by floating panels on each side; the AOI is fitted into what is left. */
+export type MapInset = { top: number; right: number; bottom: number; left: number }
+const NO_INSET: MapInset = { top: 0, right: 0, bottom: 0, left: 0 }
+
+function fittedState(width: number, height: number, size_m: SizeM, inset: MapInset = NO_INSET): OrthographicViewState {
+  const zoom = fitZoom(width - inset.left - inset.right, height - inset.top - inset.bottom, size_m)
+  // Centre the AOI in the free area: shift the view target by half the inset difference (y is up).
+  const mpp = metresPerPixel(zoom)
+  const dx = ((inset.left - inset.right) / 2) * mpp
+  const dy = ((inset.top - inset.bottom) / 2) * mpp
   return {
-    target: [size_m[0] / 2, size_m[1] / 2, 0],
+    target: [size_m[0] / 2 - dx, size_m[1] / 2 + dy, 0],
     zoom,
     minZoom: zoom - 2,
     maxZoom: MAX_ZOOM,
   }
 }
 
-export function MapView({ source, className }: Props) {
+export function MapView({ source, className, inset = NO_INSET }: Props) {
   const { aoi } = source
   const [w, h] = aoi.size_m
 
@@ -185,16 +193,16 @@ export function MapView({ source, className }: Props) {
   const fit = useCallback(() => {
     if (!viewSize) return
     userMoved.current = false
-    setViewState(fittedState(viewSize.width, viewSize.height, [w, h]))
-  }, [viewSize, w, h])
+    setViewState(fittedState(viewSize.width, viewSize.height, [w, h], inset))
+  }, [viewSize, w, h, inset])
 
   const onResize = useCallback(
     ({ width, height }: { width: number; height: number }) => {
       if (width <= 0 || height <= 0) return
       setViewSize({ width, height })
-      if (!userMoved.current) setViewState(fittedState(width, height, [w, h]))
+      if (!userMoved.current) setViewState(fittedState(width, height, [w, h], inset))
     },
-    [w, h],
+    [w, h, inset],
   )
 
   const onHover = useCallback(
@@ -239,7 +247,17 @@ export function MapView({ source, className }: Props) {
   )
 
   return (
-    <div className={`am-map ${route ? 'am-has-timebar' : ''} ${className ?? ''}`}>
+    <div
+      className={`am-map ${route ? 'am-has-timebar' : ''} ${className ?? ''}`}
+      style={
+        {
+          '--am-inset-top': `${inset.top}px`,
+          '--am-inset-right': `${inset.right}px`,
+          '--am-inset-bottom': `${inset.bottom}px`,
+          '--am-inset-left': `${inset.left}px`,
+        } as CSSProperties
+      }
+    >
       <DeckGL
         views={VIEW}
         viewState={viewState}
