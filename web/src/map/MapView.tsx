@@ -77,6 +77,26 @@ const DASH_PX = 10 // dash length of the route ahead, screen pixels
 type Props = { source: AssetSource; className?: string; inset?: MapInset }
 
 const PULSE_MS = 1200
+/** Device pixel ratio for the 3D view: sharp enough on a projector, cheap on a laptop GPU. */
+const DPR_3D = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 1.25)
+/** The envelope image is redrawn at most this often (wall time): at 12 min/s it changed 24 times a second. */
+const ENVELOPE_MIN_MS = 400
+
+/** The value, updated at most every `ms` milliseconds (the latest value always lands). */
+function useThrottled<T>(value: T, ms: number): T {
+  const [shown, setShown] = useState(value)
+  const last = useRef(0)
+  useEffect(() => {
+    if (Object.is(value, shown)) return
+    const wait = Math.max(0, last.current + ms - performance.now())
+    const t = setTimeout(() => {
+      last.current = performance.now()
+      setShown(value)
+    }, wait)
+    return () => clearTimeout(t)
+  }, [value, shown, ms])
+  return shown
+}
 
 /** Phase in [0, 1) of the safe-haven pulse, ticking at 10 Hz only while active; 0 otherwise. */
 function usePulse(active: boolean): number {
@@ -124,6 +144,10 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
   const [mode3d, setMode3d] = useState(() => typeof navigator === 'undefined' || !navigator.webdriver)
   const terrain = useTerrain(source)
   const show3d = mode3d && terrain !== null
+  const show3dRef = useRef(show3d)
+  useEffect(() => {
+    show3dRef.current = show3d
+  }, [show3d])
   const [orbit, setOrbit] = useState<OrbitViewState | null>(null)
   const lastTouch = useRef(0)
 
@@ -168,7 +192,7 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
   const flatOn = flat && costFlat !== null
   const cost = flatOn ? costFlat : costTerrain
   const tNow = state ? state.t_min : planT
-  const tq = quantizeT(tNow)
+  const tq = useThrottled(quantizeT(tNow), ENVELOPE_MIN_MS)
   // Read as primitives from the store, so the React Compiler can keep the memos below.
   const lead = useMission((s) => s.session.state?.alert?.lead_min)
   const since = useMission((s) => s.session.state?.alert?.since_t)
@@ -244,6 +268,8 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
 
   const onHover = useCallback(
     (info: PickingInfo) => {
+      // In 3D there is no cursor readout: no state update (and no re-render) per mouse move.
+      if (show3dRef.current) return
       const c = info.coordinate
       setCursor(c && inAoi([c[0], c[1]], [w, h]) ? [c[0], c[1]] : null)
     },
@@ -356,6 +382,8 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
       <DeckGL
         views={show3d ? ORBIT : VIEW}
         effects={show3d ? THREE_D_EFFECTS : NO_EFFECTS}
+        // A lit 3D mesh at full device pixels (2-4x on laptops) is what makes zoom and pan stutter.
+        useDevicePixels={show3d ? DPR_3D : true}
         viewState={show3d && orbit ? orbit : viewState}
         onViewStateChange={({ viewState: next, interactionState }) => {
           const touched =
