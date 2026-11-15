@@ -6,6 +6,8 @@
 // locked to the wall clock: storm alert at t = 30, home at t = 38, clear at t = 50.
 // E2E_MODE=live: a real session on mission-control; alert and clear are sent with the console
 // buttons.
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { expect, test, type Browser, type BrowserContext, type Page, type TestInfo } from '@playwright/test'
 import {
   mode,
@@ -31,6 +33,23 @@ const FX = { session: 'fx-session', alert: 30, home: 38, clear: 50, last: 59, ha
  * phase first waits for the replay to reach it, in this loop or the next.
  */
 const LOOP_MS = 33_000
+
+/** Fixture position by fixture minute, to check that a screen shows one coherent replay frame. */
+const FX_POS = new Map<number, [number, number]>(
+  readFileSync(fileURLToPath(new URL('../../contracts/fixtures/ws-state.jsonl', import.meta.url)), 'utf-8')
+    .split('\n')
+    .filter((l) => l.trim() !== '')
+    .map((l) => JSON.parse(l))
+    .filter((f) => f.type === 'state')
+    .map((f) => [f.t_min, [f.pos[0], f.pos[1]]] as [number, [number, number]]),
+)
+
+/**
+ * How many replay frames (0.5 s each) the console may trail the cuff in DEMO. A GPU-less CI runner
+ * draws the console's WebGL map on the CPU, so the console's main thread applies each frame up to
+ * ~1 s late, while the light cuff keeps up. On a real screen both show the same frame.
+ */
+const DEMO_LAG_FRAMES = 3
 
 /** E2E_CPU_THROTTLE=4 slows both pages 4x (Chrome DevTools CPU throttling) to reproduce CI locally. */
 const CPU_THROTTLE = Number(process.env.E2E_CPU_THROTTLE || 0)
@@ -81,9 +100,10 @@ async function expectClocksAdvance(con: Page, cuff: Page, waitMs: number) {
 }
 
 /**
- * At one moment, console and cuff show the same simulated time and the same position. The values
- * are read in parallel: read one after another on a slow runner they span more than one 0.5 s frame
- * and compare two different frames. Retried until one sample agrees.
+ * At one moment, console and cuff show the same simulated time and the same position. Live: exactly
+ * the same state. DEMO: each screen shows a coherent fixture frame, at most DEMO_LAG_FRAMES apart.
+ * The values are read in parallel (read one after another on a slow runner they span more than one
+ * 0.5 s frame) and retried until one sample agrees.
  */
 async function expectSameState(con: Page, reader: StateReader, cuff: Page) {
   await expect(async () => {
@@ -95,12 +115,29 @@ async function expectSameState(con: Page, reader: StateReader, cuff: Page) {
     ])
     expect(s, 'console has a state').not.toBeNull()
     const cuffPos = parsePos(cuffPosText)
-    // The cuff clock has seconds; the console bar shows whole minutes (floored).
-    expect(Math.abs(cuffT - s!.t_min), 'cuff clock = console state').toBeLessThan(1 / 60)
-    expect(conT, 'console clock = console state').toBe(Math.floor(s!.t_min))
-    // The cuff rounds the position to whole metres.
-    expect(Math.abs(cuffPos[0] - s!.pos[0]), 'x matches').toBeLessThanOrEqual(1)
-    expect(Math.abs(cuffPos[1] - s!.pos[1]), 'y matches').toBeLessThanOrEqual(1)
+    if (DEMO) {
+      // Each screen shows one coherent fixture frame (its time and its position together) ...
+      const conFx = FX_POS.get(s!.t_min)
+      expect(conFx, `console state t = ${s!.t_min} is a fixture frame`).toBeDefined()
+      expect(Math.abs(s!.pos[0] - conFx![0]) + Math.abs(s!.pos[1] - conFx![1]), 'console position = fixture').toBeLessThanOrEqual(1)
+      const cuffFrame = Math.round(cuffT)
+      expect(Math.abs(cuffT - cuffFrame), 'cuff clock is on a fixture minute').toBeLessThan(1 / 60)
+      const cuffFx = FX_POS.get(cuffFrame)
+      expect(cuffFx, `cuff clock t = ${cuffFrame} is a fixture frame`).toBeDefined()
+      // The cuff rounds the position to whole metres.
+      expect(Math.abs(cuffPos[0] - cuffFx![0]), 'cuff x = fixture').toBeLessThanOrEqual(1)
+      expect(Math.abs(cuffPos[1] - cuffFx![1]), 'cuff y = fixture').toBeLessThanOrEqual(1)
+      // ... of the same replay, within the console's render lag on a slow runner (DEMO_LAG_FRAMES).
+      expect(Math.abs(cuffT - s!.t_min), 'cuff and console on the same replay').toBeLessThanOrEqual(DEMO_LAG_FRAMES)
+      expect(Math.abs(conT - Math.floor(s!.t_min)), 'console clock = console state').toBeLessThanOrEqual(1)
+    } else {
+      // The cuff clock has seconds; the console bar shows whole minutes (floored).
+      expect(Math.abs(cuffT - s!.t_min), 'cuff clock = console state').toBeLessThan(1 / 60)
+      expect(conT, 'console clock = console state').toBe(Math.floor(s!.t_min))
+      // The cuff rounds the position to whole metres.
+      expect(Math.abs(cuffPos[0] - s!.pos[0]), 'x matches').toBeLessThanOrEqual(1)
+      expect(Math.abs(cuffPos[1] - s!.pos[1]), 'y matches').toBeLessThanOrEqual(1)
+    }
   }).toPass({ timeout: 20_000, intervals: [50, 100, 200] })
 }
 
