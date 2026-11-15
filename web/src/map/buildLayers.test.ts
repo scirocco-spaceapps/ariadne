@@ -146,6 +146,7 @@ describe('route, numbered stops and astronaut (Y4)', () => {
   it('draws the route under the stops and the astronaut on top', () => {
     const ids = layers.map((l) => l.id)
     expect(ids.slice(ids.indexOf('waypoints') + 1)).toEqual([
+      'route-walked-glow',
       'route-ahead-casing',
       'route-ahead',
       'route-walked-casing',
@@ -153,6 +154,7 @@ describe('route, numbered stops and astronaut (Y4)', () => {
       'places',
       'places-numbers',
       'places-labels',
+      'astronaut-halo',
       'astronaut',
       'astronaut-label',
     ])

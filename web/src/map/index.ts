@@ -1,5 +1,5 @@
 // deck.gl map layers in local metres (non-geospatial OrthographicView), never Web Mercator. Owner: Yusuf.
-export { MapView } from './MapView'
+export { MapView, type MapInset } from './MapView'
 export { LayerToggle } from './LayerToggle'
 export { bundledSource, remoteSource, type AssetSource } from './assets'
 export { fixtureSource } from './fixtures'

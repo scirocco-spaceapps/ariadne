@@ -1,0 +1,149 @@
+/* Map furniture on glass, projector-readable ("thread on basalt"). Loaded after map.css. */
+.am-map {
+  background: #000;
+}
+.am-overlay {
+  border: 1px solid var(--hairline, rgba(255, 255, 255, 0.1));
+  border-radius: var(--r-2, 8px);
+  background: var(--glass, rgba(10, 14, 17, 0.78));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--ink-1, #eef3f1);
+  font: 15px/1.35 var(--body, system-ui, sans-serif);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+.am-title {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.am-button {
+  font-family: var(--display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.am-readout {
+  font-family: var(--mono);
+  font-size: 14px;
+}
+.am-readout-margin {
+  font-family: var(--body);
+}
+.am-prov {
+  font-family: var(--body);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.am-toggle {
+  gap: 8px;
+}
+.am-toggle-row {
+  min-height: 30px;
+}
+.am-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+/* "Without the terrain model": a real switch, the one control a judge should try. */
+.am-compare-toggle {
+  padding: 6px 12px;
+  border: 1px solid var(--warn, #f2a93b);
+  border-radius: 999px;
+  color: var(--warn, #f2a93b);
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.am-compare-toggle:has(input:checked) {
+  background: var(--warn, #f2a93b);
+  color: #1a1208;
+}
+.am-compare-caption {
+  font-size: 18px;
+  padding: 10px 18px;
+  border-color: rgba(242, 169, 59, 0.6);
+}
+.am-compare-caption b {
+  font-family: var(--display);
+  font-size: 26px;
+  letter-spacing: 0.02em;
+}
+
+/* Time bar: a mission timeline. */
+.am-bottom-center {
+  max-width: 860px;
+}
+.am-has-timebar .am-bottom-left {
+  bottom: 116px;
+}
+.am-timebar-head {
+  font-family: var(--display);
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.am-timebar-clock,
+.am-timebar-end {
+  font-family: var(--mono);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.am-timebar-clock {
+  font-size: 22px;
+  font-weight: 500;
+}
+.am-timebar-track {
+  padding-bottom: 20px;
+}
+.am-timebar-track input[type='range'] {
+  accent-color: var(--thread, #ff5d6c);
+}
+.am-timebar-ticks li {
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  line-height: 18px;
+  font-size: 12px;
+  background: var(--sand, #d9a877);
+}
+.am-storm-chip {
+  font-size: 14px;
+  padding: 2px 10px;
+  letter-spacing: 0.06em;
+}
+
+/* Replanning panel on glass. */
+.am-replan {
+  top: 76px;
+  width: 330px;
+  border: 1px solid var(--hairline, rgba(255, 255, 255, 0.1));
+  border-radius: var(--r-2, 8px);
+  background: var(--glass, rgba(10, 14, 17, 0.78));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font: 14px/1.35 var(--body, system-ui, sans-serif);
+}
+.am-replan-head {
+  font-family: var(--display);
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.am-replan-action {
+  font-size: 15px;
+}
+
+/* 3D terrain view: no flat-map furniture that would lie (a scale bar means nothing in perspective). */
+.am-3d .am-scale {
+  display: none;
+}
+.am-mode {
+  border-color: var(--sand, #d9a877);
+  color: var(--sand, #d9a877);
+}

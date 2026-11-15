@@ -17,6 +17,8 @@
 
 /* Console: over the top of the map, just under the 52 px header. */
 .link-banner--console {
+  /* Below the console HUD (MissionHud), over the map. */
+  margin-top: 96px;
   top: 60px;
   width: max-content;
   max-width: min(640px, calc(100vw - 16px));

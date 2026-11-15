@@ -89,3 +89,15 @@ describe('numbers', () => {
     expect(routeStops(back)).toEqual({ stops: ['s1', 's2'], home: true })
   })
 })
+
+describe('bearing', () => {
+  it('measures clockwise from north (map up)', async () => {
+    const { bearingDeg, compassPoint } = await import('./cuffModel')
+    expect(bearingDeg([0, 0], [0, 10])).toBeCloseTo(0)
+    expect(bearingDeg([0, 0], [10, 0])).toBeCloseTo(90)
+    expect(bearingDeg([0, 0], [0, -10])).toBeCloseTo(180)
+    expect(bearingDeg([0, 0], [-10, 0])).toBeCloseTo(270)
+    expect(compassPoint(44)).toBe('NE')
+    expect(compassPoint(350)).toBe('N')
+  })
+})

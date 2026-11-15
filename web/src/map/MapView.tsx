@@ -1,9 +1,9 @@
 // The map canvas: deck.gl in a non-geospatial orthographic view.
 // World units are metres in the AOI plane, x east, y north, north up on screen. No basemap, no Mercator.
 
-import { OrthographicView, type OrthographicViewState, type PickingInfo } from '@deck.gl/core'
+import { OrbitView, OrthographicView, type OrbitViewState, type OrthographicViewState, type PickingInfo } from '@deck.gl/core'
 import { DeckGL } from '@deck.gl/react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useMission } from '../app/store'
 import { fixtures } from '../lib/fixtures'
 import type { Provenance, WsState } from '../lib/types'
@@ -33,17 +33,40 @@ import {
   type RouteGeometry,
 } from './route'
 import { fitZoom, metresPerPixel } from './scale'
+import { MARS_LIGHT, build3dLayers, useTerrain } from './terrain3d'
+import { orthoFile } from './buildLayers'
 import { TimeBar } from './TimeBar'
 import { ReplanPanel } from './ReplanPanel'
 import { useReplan } from './useReplan'
 import { useSiteData } from './useSiteData'
 import './map.css'
+import './map-theme.css'
 
 const VIEW = new OrthographicView({ id: 'map', flipY: false, controller: true })
+const THREE_D_EFFECTS = [MARS_LIGHT]
+const NO_EFFECTS: never[] = []
+const ORBIT = new OrbitView({ id: 'map', orbitAxis: 'Z', fovy: 32, controller: true })
+/** Degrees per second of the slow idle orbit in 3D, and the pause after the user touches the view. */
+const ORBIT_DEG_S = 2.2
+const ORBIT_IDLE_MS = 8000
+
+function orbitState(width: number, height: number, size_m: SizeM, inset: MapInset, zMid: number): OrbitViewState {
+  const zoom = fitZoom(width - inset.left - inset.right, height - inset.top - inset.bottom, size_m) + 0.2
+  return {
+    target: [size_m[0] / 2, size_m[1] * 0.46, zMid],
+    zoom,
+    rotationX: 50,
+    rotationOrbit: -18,
+    minZoom: zoom - 2,
+    maxZoom: MAX_ZOOM,
+    minRotationX: 5,
+    maxRotationX: 89,
+  }
+}
 const MAX_ZOOM = 4 // 16 screen px per metre
 const DASH_PX = 10 // dash length of the route ahead, screen pixels
 
-type Props = { source: AssetSource; className?: string }
+type Props = { source: AssetSource; className?: string; inset?: MapInset }
 
 const PULSE_MS = 1200
 
@@ -61,17 +84,25 @@ function usePulse(active: boolean): number {
   return active ? phase : 0
 }
 
-function fittedState(width: number, height: number, size_m: SizeM): OrthographicViewState {
-  const zoom = fitZoom(width, height, size_m)
+/** Screen pixels covered by floating panels on each side; the AOI is fitted into what is left. */
+export type MapInset = { top: number; right: number; bottom: number; left: number }
+const NO_INSET: MapInset = { top: 0, right: 0, bottom: 0, left: 0 }
+
+function fittedState(width: number, height: number, size_m: SizeM, inset: MapInset = NO_INSET): OrthographicViewState {
+  const zoom = fitZoom(width - inset.left - inset.right, height - inset.top - inset.bottom, size_m)
+  // Centre the AOI in the free area: shift the view target by half the inset difference (y is up).
+  const mpp = metresPerPixel(zoom)
+  const dx = ((inset.left - inset.right) / 2) * mpp
+  const dy = ((inset.top - inset.bottom) / 2) * mpp
   return {
-    target: [size_m[0] / 2, size_m[1] / 2, 0],
+    target: [size_m[0] / 2 - dx, size_m[1] / 2 + dy, 0],
     zoom,
     minZoom: zoom - 2,
     maxZoom: MAX_ZOOM,
   }
 }
 
-export function MapView({ source, className }: Props) {
+export function MapView({ source, className, inset = NO_INSET }: Props) {
   const { aoi } = source
   const [w, h] = aoi.size_m
 
@@ -80,6 +111,13 @@ export function MapView({ source, className }: Props) {
   const [cursor, setCursor] = useState<XY | null>(null)
 
   const data = useSiteData(source)
+  // 3D terrain is the default view; 2D stays one click away for analysis. Under automation (e2e on a
+  // CI runner without a GPU) the map opens in 2D: software-rendered 3D is too slow for its timing.
+  const [mode3d, setMode3d] = useState(() => typeof navigator === 'undefined' || !navigator.webdriver)
+  const terrain = useTerrain(source)
+  const show3d = mode3d && terrain !== null
+  const [orbit, setOrbit] = useState<OrbitViewState | null>(null)
+  const lastTouch = useRef(0)
 
   // Mission state (Y4): the planned route, the session state, the selected stop and the plan clock.
   const route = useMission((s) => s.route)
@@ -184,16 +222,16 @@ export function MapView({ source, className }: Props) {
   const fit = useCallback(() => {
     if (!viewSize) return
     userMoved.current = false
-    setViewState(fittedState(viewSize.width, viewSize.height, [w, h]))
-  }, [viewSize, w, h])
+    setViewState(fittedState(viewSize.width, viewSize.height, [w, h], inset))
+  }, [viewSize, w, h, inset])
 
   const onResize = useCallback(
     ({ width, height }: { width: number; height: number }) => {
       if (width <= 0 || height <= 0) return
       setViewSize({ width, height })
-      if (!userMoved.current) setViewState(fittedState(width, height, [w, h]))
+      if (!userMoved.current) setViewState(fittedState(width, height, [w, h], inset))
     },
-    [w, h],
+    [w, h, inset],
   )
 
   const onHover = useCallback(
@@ -226,8 +264,41 @@ export function MapView({ source, className }: Props) {
       selectedTarget,
       suggestion: replan.path,
     }
-    return buildLayers({ source, data, narrow, mission, envelope, ppm, isVisible: (id: LayerId) => visible.has(id) })
-  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers, selectedTarget, ppm, replan.path])
+    const isVisible = (id: LayerId) => visible.has(id)
+    if (show3d && terrain) {
+      return build3dLayers({ source, data, terrain, orthoFile: orthoFile(source.aoi, narrow), envelope, mission, isVisible, pulse: 0 })
+    }
+    return buildLayers({ source, data, narrow, mission, envelope, ppm, isVisible })
+  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers, selectedTarget, ppm, replan.path, show3d, terrain])
+
+  // 3D camera: fitted once the terrain and the canvas size are known, then a slow idle orbit.
+  const zMid = terrain ? terrain.zMax / 2 : 0
+  const orbitFit = useCallback(
+    () => (viewSize ? orbitState(viewSize.width, viewSize.height, [w, h], inset, zMid) : null),
+    [viewSize, w, h, inset, zMid],
+  )
+  if (show3d && orbit === null && viewSize) setOrbit(orbitFit())
+  useEffect(() => {
+    // No idle orbit under automation (e2e): it only costs frames there.
+    if (!show3d || navigator.webdriver) return
+    let raf = 0
+    let last = performance.now()
+    const tick = (now: number) => {
+      const dt = now - last
+      // About 30 fps is plenty for a 2°/s drift and halves the work.
+      if (dt < 30) {
+        raf = requestAnimationFrame(tick)
+        return
+      }
+      last = now
+      if (now - lastTouch.current > ORBIT_IDLE_MS && !document.hidden) {
+        setOrbit((o) => (o ? { ...o, rotationOrbit: (o.rotationOrbit ?? 0) + (ORBIT_DEG_S * dt) / 1000 } : o))
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [show3d])
 
   // The stop card shows a selected target before a selected stop, so picking a stop clears the target.
   const onClick = useCallback(
@@ -238,14 +309,30 @@ export function MapView({ source, className }: Props) {
   )
 
   return (
-    <div className={`am-map ${route ? 'am-has-timebar' : ''} ${className ?? ''}`}>
+    <div
+      className={`am-map ${route ? 'am-has-timebar' : ''} ${show3d ? 'am-3d' : ''} ${className ?? ''}`}
+      style={
+        {
+          '--am-inset-top': `${inset.top}px`,
+          '--am-inset-right': `${inset.right}px`,
+          '--am-inset-bottom': `${inset.bottom}px`,
+          '--am-inset-left': `${inset.left}px`,
+        } as CSSProperties
+      }
+    >
       <DeckGL
-        views={VIEW}
-        viewState={viewState}
+        views={show3d ? ORBIT : VIEW}
+        effects={show3d ? THREE_D_EFFECTS : NO_EFFECTS}
+        viewState={show3d && orbit ? orbit : viewState}
         onViewStateChange={({ viewState: next, interactionState }) => {
-          if (interactionState.isDragging || interactionState.isZooming || interactionState.isPanning) {
-            userMoved.current = true
+          const touched =
+            interactionState.isDragging || interactionState.isZooming || interactionState.isPanning || interactionState.isRotating
+          if (show3d) {
+            if (touched) lastTouch.current = performance.now()
+            setOrbit(next as OrbitViewState)
+            return
           }
+          if (touched) userMoved.current = true
           setViewState(next as OrthographicViewState)
         }}
         layers={layers}
@@ -261,9 +348,28 @@ export function MapView({ source, className }: Props) {
       </div>
       <div className="am-overlay am-top-right">
         <NorthArrow />
-        <button type="button" className="am-button" onClick={fit}>
+        <button
+          type="button"
+          className="am-button"
+          onClick={() => {
+            if (show3d) {
+              lastTouch.current = performance.now()
+              setOrbit(orbitFit())
+            } else fit()
+          }}
+        >
           Fit AOI
         </button>
+        {terrain && (
+          <button
+            type="button"
+            className={`am-button am-mode${show3d ? ' am-mode-on' : ''}`}
+            onClick={() => setMode3d((v) => !v)}
+            title={show3d ? 'Switch to the flat analysis map' : 'Show the HiRISE terrain in 3D'}
+          >
+            {show3d ? '2D map' : '3D terrain'}
+          </button>
+        )}
         {costFlat && (
           <label className="am-compare-toggle" htmlFor="am-compare">
             <input id="am-compare" type="checkbox" checked={flat} onChange={(e) => setFlat(e.target.checked)} />
