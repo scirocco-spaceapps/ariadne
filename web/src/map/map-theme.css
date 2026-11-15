@@ -143,3 +143,48 @@
   border-color: var(--sand, #d9a877);
   color: var(--sand, #d9a877);
 }
+
+/* 3D loading card, centred in the free area, until the first frames are smooth (MapView useSettled). */
+.am-loading {
+  position: absolute;
+  z-index: 3;
+  top: calc(var(--am-inset-top, 0px) + (100% - var(--am-inset-top, 0px) - var(--am-inset-bottom, 0px)) / 2);
+  left: calc(var(--am-inset-left, 0px) + (100% - var(--am-inset-left, 0px) - var(--am-inset-right, 0px)) / 2);
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 28px;
+  border: 1px solid var(--hairline, rgba(255, 255, 255, 0.1));
+  border-radius: 14px;
+  background: rgba(7, 10, 12, 0.88);
+  color: var(--ink-2, #a9b8b9);
+  font-family: var(--display, sans-serif);
+  font-size: 16px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.am-loading path {
+  fill: none;
+  stroke: var(--thread, #ff5d6c);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 140;
+  animation: am-loading-draw 1.6s ease-in-out infinite;
+}
+.am-loading circle {
+  fill: none;
+  stroke: var(--safe, #46c58b);
+  stroke-width: 2.5;
+}
+@keyframes am-loading-draw {
+  0% {
+    stroke-dashoffset: 140;
+  }
+  60%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
