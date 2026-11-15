@@ -51,7 +51,11 @@ const ORBIT_DEG_S = 2.2
 const ORBIT_IDLE_MS = 8000
 
 function orbitState(width: number, height: number, size_m: SizeM, inset: MapInset, zMid: number): OrbitViewState {
-  const zoom = fitZoom(width - inset.left - inset.right, height - inset.top - inset.bottom, size_m) + 0.2
+  // Fit into the free area; if the panels leave too little (a small window), fit the whole canvas.
+  const freeW = width - inset.left - inset.right
+  const freeH = height - inset.top - inset.bottom
+  const ok = freeW > 200 && freeH > 150
+  const zoom = fitZoom(ok ? freeW : width, ok ? freeH : height, size_m) + 0.2
   return {
     target: [size_m[0] / 2, size_m[1] * 0.46, zMid],
     zoom,
@@ -277,7 +281,13 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
     () => (viewSize ? orbitState(viewSize.width, viewSize.height, [w, h], inset, zMid) : null),
     [viewSize, w, h, inset, zMid],
   )
-  if (show3d && orbit === null && viewSize) setOrbit(orbitFit())
+  // Refit whenever the canvas size, the panels or the terrain change, until the user moves the camera
+  // (the first size deck reports is the canvas default, before layout).
+  useEffect(() => {
+    if (!show3d || lastTouch.current !== 0) return
+    const next = orbitFit()
+    if (next) setOrbit((o) => ({ ...next, rotationOrbit: o?.rotationOrbit ?? next.rotationOrbit }))
+  }, [show3d, orbitFit])
   useEffect(() => {
     // No idle orbit under automation (e2e): it only costs frames there.
     if (!show3d || navigator.webdriver) return
