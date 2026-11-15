@@ -266,10 +266,12 @@ export type BuildInput = {
   envelope?: { image: HTMLCanvasElement } | null
   /** Screen pixels per metre; when given, place-name labels are moved so they do not overlap (Y9). */
   ppm?: number
+  /** Only build these layers (the map builds the moving astronaut apart from the rest); default all. */
+  include?: (id: LayerId) => boolean
 }
 
 /** deck.gl layers, bottom to top, for the visible layers whose data is present. */
-export function buildLayers({ source, data, isVisible, narrow, mission, envelope, ppm }: BuildInput): Layer[] {
+export function buildLayers({ source, data, isVisible, narrow, mission, envelope, ppm, include }: BuildInput): Layer[] {
   const { aoi } = source
   const [w, h] = aoi.size_m
   const bounds: [number, number, number, number] = [0, 0, w, h]
@@ -279,6 +281,7 @@ export function buildLayers({ source, data, isVisible, narrow, mission, envelope
     new BitmapLayer({ id, image: source.url(file), bounds, opacity })
 
   for (const id of LAYER_ORDER) {
+    if (include && !include(id)) continue
     if (!isVisible(TOGGLED_BY[id] ?? id)) continue
     switch (id) {
       case 'ortho':
