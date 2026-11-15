@@ -142,27 +142,32 @@ async function expectSameState(con: Page, reader: StateReader, cuff: Page) {
 }
 
 /**
- * Thread-coloured pixels on the console map, from a screenshot taken while the console's alert
- * state is `alert` both before and after the capture (DEMO: retried into the next loop if the
- * replay moves on during a slow screenshot).
+ * Thread-coloured pixels on the console map, from a screenshot started while the console's alert
+ * state is `alert` (the image shows the moment the capture starts). DEMO: retried into later loops,
+ * since the alert lasts only 10 s of wall time and a CI screenshot can take several seconds.
+ * The PNG is decoded on `decoder` (the light cuff page), not on the busy console.
  */
-async function threadPixelsWhile(con: Page, reader: StateReader, alert: boolean, check: (px: number) => void) {
+async function threadPixelsWhile(
+  con: Page,
+  decoder: Page,
+  reader: StateReader,
+  alert: boolean,
+  check: (px: number) => void,
+) {
   await expect(async () => {
-    expect((await reader.read())?.alert, 'alert state before the screenshot').toBe(alert)
-    const px = await mapThreadPixels(con)
-    expect((await reader.read())?.alert, 'alert state after the screenshot').toBe(alert)
-    check(px)
-  }).toPass({ timeout: DEMO ? 2 * LOOP_MS : 15_000 })
+    expect((await reader.read())?.alert, 'alert state when the screenshot starts').toBe(alert)
+    check(await mapThreadPixels(con, decoder))
+  }).toPass({ timeout: DEMO ? 3 * LOOP_MS : 15_000, intervals: [200, 500] })
 }
 
-async function mapThreadPixels(con: Page): Promise<number> {
-  return threadPixels(con, await con.locator('.cx-map').screenshot())
+async function mapThreadPixels(con: Page, decoder: Page): Promise<number> {
+  return threadPixels(decoder, await con.locator('.cx-map').screenshot())
 }
 
 test('demo90: console and cuff through a storm alert', async ({ browser }, testInfo) => {
   testInfo.annotations.push({ type: 'mode', description: MODE })
   // DEMO may wait into the next 33 s loop at a few phases on a slow runner.
-  if (DEMO) test.setTimeout(240_000)
+  if (DEMO) test.setTimeout(300_000)
   const screens: { context: BrowserContext; page: Page }[] = []
 
   try {
@@ -222,7 +227,7 @@ test('demo90: console and cuff through a storm alert', async ({ browser }, testI
     await expect(con.page.getByTestId('storm-strip')).toBeHidden()
     await expect(cuff.page.getByTestId('cuff-alert')).toBeHidden()
     let calm = 0
-    await threadPixelsWhile(con.page, reader, false, (px) => (calm = px))
+    await threadPixelsWhile(con.page, cuff.page, reader, false, (px) => (calm = px))
     await snap(testInfo, '01-running', { console: con.page, cuff: cuff.page })
 
     // 5. Storm alert: from the fixture replay (DEMO, at t = 30 of this loop or the next) or the
@@ -238,7 +243,7 @@ test('demo90: console and cuff through a storm alert', async ({ browser }, testI
     await expect(con.page.getByRole('checkbox', { name: /Way home before the storm/ })).toBeChecked()
     let stormy = 0
     // A CI runner without a GPU screenshots a full-screen WebGL map slowly.
-    await threadPixelsWhile(con.page, reader, true, (px) => {
+    await threadPixelsWhile(con.page, cuff.page, reader, true, (px) => {
       stormy = px
       expect(px, `thread pixels (before the alert: ${calm})`).toBeGreaterThan(calm + 300)
     })
@@ -269,7 +274,7 @@ test('demo90: console and cuff through a storm alert', async ({ browser }, testI
     await expect(cuff.page.getByTestId('cuff-margin')).toBeVisible()
     await expect(cuff.page.getByTestId('cuff-next')).not.toContainText('Heading to')
     await expect(con.page.getByRole('checkbox', { name: /Way home before the storm/ })).toHaveCount(0)
-    await threadPixelsWhile(con.page, reader, false, (px) =>
+    await threadPixelsWhile(con.page, cuff.page, reader, false, (px) =>
       expect(px, `thread pixels after clear (before ${calm}, during ${stormy})`).toBeLessThan(calm + 100),
     )
     // Clocks keep going: DEMO replays on (checked away from the loop's wrap); live resumes the plan

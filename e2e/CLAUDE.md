@@ -24,11 +24,11 @@ fixture loop, so a run takes 30-60 s.
 **Timing (DEMO):** the replay is locked to the wall clock (0.5 s per fixture minute, a 33 s loop).
 A GPU-less CI runner can take seconds per map screenshot, so the test never assumes where in the
 loop it is: before each phase it waits for the replay to reach it (`waitForReplay`), in this loop or
-the next, and screenshots count only if the alert state is the same before and after the capture.
+the next, and a map screenshot counts only if it starts in the expected alert state.
 Console and cuff are read in parallel when compared. In DEMO each screen must show a coherent
 fixture frame (time and position from `ws-state.jsonl`), and the two may be up to 3 frames (1.5 s)
 apart: on CI the console draws the WebGL map on the CPU and applies frames about 1 s late. Live mode
-still requires the exact same state. A slow run can take 2-3 loops (up to 240 s).
+still requires the exact same state. A slow run can take 3-4 loops (DEMO timeout 300 s). Map screenshots are decoded on the cuff page.
 `E2E_CPU_THROTTLE=4 npm test` slows both pages 4x to reproduce a slow runner locally.
 
 **Env:**
