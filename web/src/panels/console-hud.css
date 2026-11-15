@@ -6,7 +6,7 @@
   --hud-left-w: 252px;
   --hud-right-w: 392px;
   --hud-dock: 100px;
-  --glass-bg: rgba(7, 10, 12, 0.74);
+  --glass-bg: rgba(7, 10, 12, 0.88); /* opaque enough without a backdrop blur (perf) */
   --glass-line: rgba(255, 255, 255, 0.09);
   --alarm: #d6303f; /* storm chrome; not the thread colour, which e2e counts on the map */
   position: relative;
@@ -98,8 +98,6 @@
 .hud-tile {
   background: var(--glass-bg);
   border: 1px solid var(--glass-line);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
   box-shadow:
     0 18px 50px rgba(0, 0, 0, 0.55),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -501,8 +499,6 @@
   border: 1px solid var(--glass-line);
   border-radius: 999px;
   background: var(--glass-bg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   color: var(--ink-1);
   font-family: var(--display);
   font-size: 16px;
@@ -546,7 +542,5 @@
 [data-automation] .cx--hud *,
 [data-automation] .cx--hud *::before,
 [data-automation] .cx--hud *::after {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
   animation: none !important;
 }

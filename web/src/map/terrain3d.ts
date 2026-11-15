@@ -191,7 +191,8 @@ export function build3dLayers({ source, data, terrain, orthoFile, envelope, miss
       getColor: [120, 110, 100, 255],
       getPosition: (d: { position: number[] }) => d.position as [number, number, number],
       material: { ambient: 0.45, diffuse: 0.75, shininess: 8, specularColor: [40, 36, 32] },
-      pickable: true,
+      // Not pickable: a picking pass over the whole mesh on every mouse move made zoom and pan stutter.
+      pickable: false,
     }),
   )
 

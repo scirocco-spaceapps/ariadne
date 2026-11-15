@@ -6,8 +6,6 @@
   border: 1px solid var(--hairline, rgba(255, 255, 255, 0.1));
   border-radius: var(--r-2, 8px);
   background: var(--glass, rgba(10, 14, 17, 0.78));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   color: var(--ink-1, #eef3f1);
   font: 15px/1.35 var(--body, system-ui, sans-serif);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
@@ -125,8 +123,6 @@
   border: 1px solid var(--hairline, rgba(255, 255, 255, 0.1));
   border-radius: var(--r-2, 8px);
   background: var(--glass, rgba(10, 14, 17, 0.78));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   font: 14px/1.35 var(--body, system-ui, sans-serif);
 }
 .am-replan-head {
