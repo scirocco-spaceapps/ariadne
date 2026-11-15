@@ -47,7 +47,9 @@ const THREE_D_EFFECTS = [MARS_LIGHT]
 const NO_EFFECTS: never[] = []
 const ORBIT = new OrbitView({ id: 'map', orbitAxis: 'Z', fovy: 32, controller: true })
 /** Degrees per second of the slow idle orbit in 3D, and the pause after the user touches the view. */
-const ORBIT_DEG_S = 2.2
+/** Idle sway of the 3D camera: ±ORBIT_SWAY_DEG around where it was left, one cycle per ORBIT_PERIOD_MS. */
+const ORBIT_SWAY_DEG = 22
+const ORBIT_PERIOD_MS = 48_000
 const ORBIT_IDLE_MS = 8000
 
 function orbitState(width: number, height: number, size_m: SizeM, inset: MapInset, zMid: number): OrbitViewState {
@@ -55,7 +57,9 @@ function orbitState(width: number, height: number, size_m: SizeM, inset: MapInse
   const freeW = width - inset.left - inset.right
   const freeH = height - inset.top - inset.bottom
   const ok = freeW > 200 && freeH > 150
-  const zoom = fitZoom(ok ? freeW : width, ok ? freeH : height, size_m) + 0.2
+  // The camera orbits: fit the larger side both ways, so the site stays whole at any rotation.
+  const side = Math.max(size_m[0], size_m[1])
+  const zoom = fitZoom(ok ? freeW : width, ok ? freeH : height, [side, side]) + 0.45
   return {
     target: [size_m[0] / 2, size_m[1] * 0.46, zMid],
     zoom,
@@ -277,11 +281,17 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
 
   // 3D camera: fitted once the terrain and the canvas size are known, then a slow idle orbit.
   const zMid = terrain ? terrain.zMax / 2 : 0
+  // Opening or closing a drawer must not move the 3D camera: the fit reads the current inset from a
+  // ref and runs only when the canvas size or the terrain changes (and on Fit AOI).
+  const insetRef = useRef(inset)
+  useEffect(() => {
+    insetRef.current = inset
+  }, [inset])
   const orbitFit = useCallback(
-    () => (viewSize ? orbitState(viewSize.width, viewSize.height, [w, h], inset, zMid) : null),
-    [viewSize, w, h, inset, zMid],
+    () => (viewSize ? orbitState(viewSize.width, viewSize.height, [w, h], insetRef.current, zMid) : null),
+    [viewSize, w, h, zMid],
   )
-  // Refit whenever the canvas size, the panels or the terrain change, until the user moves the camera
+  // Refit whenever the canvas size or the terrain changes, until the user moves the camera
   // (the first size deck reports is the canvas default, before layout).
   useEffect(() => {
     if (!show3d || lastTouch.current !== 0) return
@@ -291,18 +301,31 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
   useEffect(() => {
     // No idle orbit under automation (e2e): it only costs frames there.
     if (!show3d || navigator.webdriver) return
+    // A slow sway rather than a full turn: the composition stays the same (a full turn brings the long
+    // side of the site towards the camera and the perspective fills the screen).
     let raf = 0
     let last = performance.now()
+    let base: number | null = null
+    let t0 = 0
     const tick = (now: number) => {
-      const dt = now - last
-      // About 30 fps is plenty for a 2°/s drift and halves the work.
-      if (dt < 30) {
+      // About 30 fps is plenty for a slow sway and halves the work.
+      if (now - last < 30) {
         raf = requestAnimationFrame(tick)
         return
       }
       last = now
-      if (now - lastTouch.current > ORBIT_IDLE_MS && !document.hidden) {
-        setOrbit((o) => (o ? { ...o, rotationOrbit: (o.rotationOrbit ?? 0) + (ORBIT_DEG_S * dt) / 1000 } : o))
+      const idle = now - lastTouch.current > ORBIT_IDLE_MS && !document.hidden
+      if (!idle) base = null
+      else {
+        setOrbit((o) => {
+          if (!o) return o
+          if (base === null) {
+            base = o.rotationOrbit ?? 0
+            t0 = now
+          }
+          const angle = base + ORBIT_SWAY_DEG * Math.sin((2 * Math.PI * (now - t0)) / ORBIT_PERIOD_MS)
+          return { ...o, rotationOrbit: angle }
+        })
       }
       raf = requestAnimationFrame(tick)
     }
