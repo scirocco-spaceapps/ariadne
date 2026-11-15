@@ -32,7 +32,10 @@
   background: #000;
 }
 .cx--hud .cx-map .am-map {
-  background: radial-gradient(90% 80% at 50% 50%, #0b1114, #000 75%);
+  background:
+    radial-gradient(70% 45% at 50% 62%, rgba(150, 72, 38, 0.32), transparent 70%),
+    radial-gradient(120% 70% at 50% 0%, #0b1418, transparent 70%),
+    #030405;
 }
 
 /* Cinematic depth: dark edges, a faint grid and a slow scan line. Never catches the pointer. */
@@ -57,6 +60,7 @@
   overflow: hidden;
 }
 .cx-scan::after {
+  display: none;
   content: '';
   position: absolute;
   left: 0;
@@ -454,4 +458,70 @@
   .cx--hud .cx-storm-banner-s {
     display: none;
   }
+}
+
+/* ---------- drawers: closed by default, so the terrain and the HUD speak first ---------- */
+.cx--hud .cx-left,
+.cx--hud .cx-right {
+  transition:
+    transform 420ms var(--ease-out),
+    opacity 300ms;
+}
+.cx--hud:not(.cx--left-open) .cx-left {
+  transform: translateX(calc(-100% - 40px));
+  opacity: 0;
+  pointer-events: none;
+}
+.cx--hud:not(.cx--right-open) .cx-right {
+  transform: translateX(calc(100% + 40px));
+  opacity: 0;
+  pointer-events: none;
+}
+.cx-rail {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid var(--glass-line);
+  border-radius: 999px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--ink-1);
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition:
+    left 420ms var(--ease-out),
+    right 420ms var(--ease-out),
+    border-color var(--t-fast);
+}
+.cx-rail:hover {
+  border-color: var(--sand);
+}
+.cx-rail span {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--sand);
+}
+.cx-rail--left {
+  left: 16px;
+  transform: translateY(-50%);
+}
+.cx-rail--right {
+  right: 16px;
+  transform: translateY(-50%);
+}
+.cx--left-open .cx-rail--left {
+  left: calc(var(--hud-left-w) + 28px);
+}
+.cx--right-open .cx-rail--right {
+  right: calc(var(--hud-right-w) + 28px);
 }

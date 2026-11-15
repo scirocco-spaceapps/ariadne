@@ -138,3 +138,12 @@
 .am-replan-action {
   font-size: 15px;
 }
+
+/* 3D terrain view: no flat-map furniture that would lie (a scale bar means nothing in perspective). */
+.am-3d .am-scale {
+  display: none;
+}
+.am-mode {
+  border-color: var(--sand, #d9a877);
+  color: var(--sand, #d9a877);
+}

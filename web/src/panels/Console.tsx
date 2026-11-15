@@ -24,17 +24,23 @@ const STATUS: Record<string, string> = {
  * Where the floating panels sit, so the map fits the AOI into the free middle. Must match
  * console-hud.css (panel widths, HUD height, dock height).
  */
-function useInset(): MapInset {
+function useInset(left: boolean, right: boolean): MapInset {
   const [w, setW] = useState(() => (typeof window === 'undefined' ? 1920 : window.innerWidth))
   useEffect(() => {
     const on = () => setW(window.innerWidth)
     window.addEventListener('resize', on)
     return () => window.removeEventListener('resize', on)
   }, [])
-  return useMemo(
-    () => (w >= 1800 ? { top: 150, right: 500, bottom: 120, left: 330 } : { top: 136, right: 420, bottom: 112, left: 280 }),
-    [w],
-  )
+  return useMemo(() => {
+    const big = w >= 1800
+    const rail = 76
+    return {
+      top: big ? 150 : 136,
+      bottom: big ? 120 : 112,
+      left: left ? (big ? 330 : 280) : rail,
+      right: right ? (big ? 500 : 420) : rail,
+    }
+  }, [w, left, right])
 }
 
 /** Mission console: the map fills the screen; HUD, layers, tabs and the session dock float over it. */
@@ -47,11 +53,18 @@ export function Console() {
   const source = useMemo(() => (demo ? fixtureSource() : remoteSource(aoi, assetsUrl)), [demo])
   const state = useMission((s) => s.session.state)
   const storm = timeToStorm(state)
-  const inset = useInset()
+  // Clean by default: the terrain and the headline instrument; layers and mission data open on demand.
+  const [leftOpen, setLeftOpen] = useState(false)
+  const [rightOpen, setRightOpen] = useState(false)
+  const inset = useInset(leftOpen, rightOpen)
   const tone = status === 'open' ? 'ok' : status === 'connecting' || status === 'reconnecting' ? 'warn' : 'off'
 
   return (
-    <div className={storm !== null ? 'cx cx--hud cx--storm' : 'cx cx--hud'}>
+    <div
+      className={['cx cx--hud', storm !== null && 'cx--storm', leftOpen && 'cx--left-open', rightOpen && 'cx--right-open']
+        .filter(Boolean)
+        .join(' ')}
+    >
       <main className="cx-map">
         <MapView source={source} inset={inset} />
         {storm !== null && (
@@ -80,10 +93,28 @@ export function Console() {
         </span>
       </header>
       <MissionHud source={source} />
-      <aside className="cx-left" aria-label="Map layers">
+      <button
+        type="button"
+        className="cx-rail cx-rail--left"
+        aria-expanded={leftOpen}
+        aria-controls="cx-layers"
+        onClick={() => setLeftOpen((v) => !v)}
+      >
+        <span aria-hidden="true">{leftOpen ? '‹' : '›'}</span> Layers
+      </button>
+      <button
+        type="button"
+        className="cx-rail cx-rail--right"
+        aria-expanded={rightOpen}
+        aria-controls="cx-data"
+        onClick={() => setRightOpen((v) => !v)}
+      >
+        Mission data <span aria-hidden="true">{rightOpen ? '›' : '‹'}</span>
+      </button>
+      <aside className="cx-left" id="cx-layers" aria-label="Map layers">
         <LayerToggle />
       </aside>
-      <aside className="cx-right" aria-label="Route, conditions and stop">
+      <aside className="cx-right" id="cx-data" aria-label="Route, conditions and stop">
         <RightTabs />
       </aside>
       <SessionBar />
