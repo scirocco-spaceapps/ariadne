@@ -300,7 +300,9 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
     }
     const isVisible = (id: LayerId) => visible.has(id)
     if (show3d && terrain) {
-      return build3dLayers({ source, data, terrain, orthoFile: orthoFile(source.aoi, narrow), envelope, mission, isVisible, pulse: 0 })
+      // 3D drapes the 1 m ortho: a quarter of the 50 cm image's pixels to decode and upload, and no
+      // visible difference at a projector's viewing distance (the upload froze the view on a cold load).
+      return build3dLayers({ source, data, terrain, orthoFile: orthoFile(source.aoi, true), envelope, mission, isVisible, pulse: 0 })
     }
     return buildLayers({ source, data, narrow, mission, envelope, ppm, isVisible })
   }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers, selectedTarget, ppm, replan.path, show3d, terrain])
