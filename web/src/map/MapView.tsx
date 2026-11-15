@@ -38,6 +38,7 @@ import { ReplanPanel } from './ReplanPanel'
 import { useReplan } from './useReplan'
 import { useSiteData } from './useSiteData'
 import './map.css'
+import './map-theme.css'
 
 const VIEW = new OrthographicView({ id: 'map', flipY: false, controller: true })
 const MAX_ZOOM = 4 // 16 screen px per metre

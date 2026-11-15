@@ -1,0 +1,265 @@
+/* Console redesign: "thread on basalt", projector-first. Loaded after console.css and overrides it.
+   Readable from 3 m at 1920 x 1080 (base type 15-16 px, labels in condensed caps), fits 1280. */
+.cx {
+  font-size: 15px;
+  background: var(--basalt-0);
+  grid-template:
+    'head head head' 64px
+    'left map right' minmax(0, 1fr)
+    'bar bar bar' auto
+    / 260px minmax(0, 1fr) 420px;
+}
+@media (min-width: 1800px) {
+  .cx {
+    font-size: 16px;
+    grid-template-columns: 300px minmax(0, 1fr) 480px;
+  }
+}
+.cx-head {
+  gap: 20px;
+  padding: 0 20px;
+  padding-right: 150px;
+  background: linear-gradient(180deg, var(--basalt-2), var(--basalt-1));
+  border-bottom: 1px solid var(--hairline);
+  transition: background-color var(--t-med);
+}
+.cx-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 30px;
+  letter-spacing: 0.2em;
+}
+.cx-glyph path {
+  fill: none;
+  stroke: var(--thread);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.cx-glyph circle {
+  fill: none;
+  stroke: var(--safe);
+  stroke-width: 2.2;
+}
+.cx-sub {
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  color: var(--ink-3);
+}
+.cx-place {
+  font-family: var(--display);
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sand);
+}
+.cx-pill {
+  gap: 6px;
+  padding: 4px 14px;
+  font-family: var(--display);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.03);
+}
+.cx-pill::before {
+  content: '';
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+.cx-pill-id {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+}
+
+.cx-left,
+.cx-right {
+  background: var(--basalt-1);
+  border-color: var(--hairline);
+}
+.cx-left {
+  padding: 18px 16px 24px;
+  font-size: 14px;
+}
+.cx-left legend {
+  font-size: 17px;
+  letter-spacing: var(--tracking-caps);
+  color: var(--ink-2);
+}
+.cx-map {
+  background: #000;
+}
+
+.cx-tablist {
+  border-bottom: 1px solid var(--hairline);
+}
+.cx-tab {
+  min-height: 52px;
+  font-size: 18px;
+  letter-spacing: var(--tracking-caps);
+  border-bottom-width: 3px;
+  transition: color var(--t-fast);
+}
+.cx-tab-on {
+  border-bottom-color: var(--thread);
+  box-shadow: inset 0 -12px 18px -14px var(--thread-glow);
+}
+.cx-tabpanel {
+  padding: 18px 20px 24px;
+}
+
+/* Session bar: the operator's deck. */
+.cx-bar {
+  padding: 10px 20px 8px;
+  background: linear-gradient(0deg, var(--basalt-2), var(--basalt-1));
+  border-top: 1px solid var(--hairline);
+}
+.cx-bar button {
+  min-height: 42px;
+  padding: 4px 16px;
+  font-size: 15px;
+}
+.cx-bar select {
+  min-height: 42px;
+}
+.cx-field {
+  font-family: var(--display);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.cx-clock {
+  font-size: 20px;
+  font-weight: 500;
+}
+.cx-bar .cx-primary,
+.cx-bar .cx-alert {
+  font-family: var(--display);
+  font-size: 17px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.cx-bar .cx-primary {
+  min-width: 120px;
+  box-shadow: 0 0 18px var(--safe-glow);
+}
+.cx-bar .cx-alert {
+  box-shadow: 0 0 18px var(--thread-glow);
+}
+.cx-bar-status {
+  height: 26px;
+}
+.cx-bar-status p {
+  line-height: 26px;
+  font-size: 14px;
+}
+.cx-bar-status .cx-storm {
+  font-size: 18px !important;
+}
+
+/* ---------- storm mode: the whole console turns ---------- */
+.cx--storm .cx-head {
+  background: linear-gradient(180deg, #3a0a10, #1c0508);
+  border-bottom-color: var(--thread);
+}
+.cx--storm .cx-map::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 3px var(--thread),
+    inset 0 0 120px rgba(255, 93, 108, 0.45);
+  animation: cx-storm-edge 2.4s ease-in-out infinite;
+}
+@keyframes cx-storm-edge {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.cx-storm-banner {
+  position: absolute;
+  z-index: 3;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  column-gap: 16px;
+  padding: 10px 24px 12px;
+  border: 1px solid var(--thread);
+  border-radius: var(--r-3);
+  background: rgba(23, 3, 6, 0.9);
+  box-shadow: 0 0 40px var(--thread-glow);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: cx-banner-in 420ms var(--ease-out);
+}
+@keyframes cx-banner-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -16px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+.cx-storm-banner-k {
+  font-family: var(--display);
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--thread);
+}
+.cx-storm-banner-t {
+  font-family: var(--mono);
+  font-size: 40px;
+  font-weight: 600;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.cx-storm-banner-s {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  color: #ffd5d9;
+  letter-spacing: 0.04em;
+}
+/* While the banner is up, the comparison caption steps below it. */
+.cx--storm .am-compare-caption {
+  top: 112px;
+}
+
+@media (max-width: 1400px) {
+  .cx {
+    grid-template-columns: 240px minmax(0, 1fr) 380px;
+    font-size: 14px;
+  }
+  .cx-head {
+    padding-right: 140px;
+  }
+  .cx-title {
+    font-size: 24px;
+  }
+  .cx-place {
+    font-size: 15px;
+  }
+  .cx-storm-banner-k {
+    font-size: 26px;
+  }
+  .cx-storm-banner-t {
+    font-size: 30px;
+  }
+}
