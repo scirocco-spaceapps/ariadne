@@ -152,7 +152,7 @@ test('demo90: console and cuff through a storm alert', async ({ browser }, testI
     await expect(async () => {
       stormy = await mapThreadPixels(con.page)
       expect(stormy, `thread pixels (before the alert: ${calm})`).toBeGreaterThan(calm + 300)
-    }).toPass({ timeout: 5_000 })
+    }).toPass({ timeout: 15_000 }) // a CI runner without a GPU screenshots a full-screen WebGL map slowly
     testInfo.annotations.push({ type: 'thread pixels', description: `before ${calm}, during alert ${stormy}` })
     await snap(testInfo, '02-alert', { console: con.page, cuff: cuff.page })
 
@@ -181,7 +181,7 @@ test('demo90: console and cuff through a storm alert', async ({ browser }, testI
     await expect(async () => {
       const after = await mapThreadPixels(con.page)
       expect(after, `thread pixels after clear (before ${calm}, during ${stormy})`).toBeLessThan(calm + 100)
-    }).toPass({ timeout: 5_000 })
+    }).toPass({ timeout: 15_000 }) // a CI runner without a GPU screenshots a full-screen WebGL map slowly
     // Clocks keep going: DEMO replays on; live resumes the plan from where the alert left off.
     await expectClocksAdvance(con.page, cuff.page, 1_500)
     await expectSameState(con.page, reader, cuff.page)
