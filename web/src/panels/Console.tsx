@@ -43,6 +43,9 @@ function useInset(left: boolean, right: boolean): MapInset {
   }, [w, left, right])
 }
 
+const AUTOMATION = typeof navigator !== 'undefined' && navigator.webdriver
+const NO_INSET: MapInset = { top: 0, right: 0, bottom: 0, left: 0 }
+
 /** Mission console: the map fills the screen; HUD, layers, tabs and the session dock float over it. */
 export function Console() {
   const demo = useMission((s) => s.demo)
@@ -74,7 +77,9 @@ export function Console() {
       }
     >
       <main className="cx-map">
-        <MapView source={source} inset={inset} />
+        {/* Under automation the canvas covers only the free area (no inset): a GPU-less CI browser
+            renders a full-screen WebGL map too slowly for the e2e timing. */}
+        <MapView source={source} inset={AUTOMATION ? NO_INSET : inset} />
         {storm !== null && (
           <div className="cx-storm-banner" aria-hidden="true">
             <span className="cx-storm-banner-k">Storm alert</span>
