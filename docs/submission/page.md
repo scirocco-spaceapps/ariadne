@@ -232,7 +232,7 @@ Claude to summarise the rules, survey public projects for this challenge, list t
 available and draft a work plan; it also proposed concept options, which the team discussed before
 choosing the science target, the site and the features. During the event we used it to plan each
 task, to find and quote sources, to write code, tests, data-processing scripts and notebooks, to
-debug, and to draft the docs, the stop cards, this page and the video script. The demo video is a screen recording of the running app; its edit, captions and title cards, and the layout of the images on this page, were made with Claude Code and carry a visible note saying so. The UI theme and our
+debug, and to draft the docs, the stop cards, this page and the video script. The demo video is a screen recording of the running app; its edit, captions, title cards and background music (synthesised in code, no samples), and the layout of the images on this page, were made with Claude Code; the video and images carry a visible note saying so. The voice-over is a team member. The UI theme and our
 visual brief were drafted with it. A team member approved each plan and checked each result. We
 logged one line per task, and every AI-assisted commit names Claude as co-author. We used no AI-generated images. AI produced no measurements: every value comes from a
 cited source or is marked Assumed.
@@ -251,7 +251,7 @@ paragraph in Project Details. Evidence: docs/ai-use/*.md (one line per task). --
 | Coding, Debugging, or Troubleshooting | ✔ | Every service and the web app (all six files); CI failures diagnosed (yusuf.md #25, alikoray.md #24) |
 | Writing, Editing, or Translation | ✔ | docs/model.md, validation.md, stop and target cards, this page (bunyamin.md, furkan.md) |
 | Visual Design or Image Creation | ✔ | UI theme and visual brief drafted with Claude; no AI-generated images (nuri.md, web/n6-console); demo video edit, captions and page-image layout made with Claude Code from screenshots of the running app (yusuf.md) |
-| Presentation, Video, or Audio | ✔ | 30 s video script and shot list (furkan.md, F5); demo video edit, captions and page-image layout made with Claude Code from screenshots of the running app (yusuf.md) |
+| Presentation, Video, or Audio | ✔ | 30 s video script and shot list (furkan.md, F5); demo video edit, captions and background music made with Claude Code (music synthesised in code; voice-over by a team member) (yusuf.md) |
 | Other Project-Related SI Use | ✔ | Planning each task in plan mode before any code; contract reviews and PR checks (yusuf.md, pr-ac) |
 | None / Did not use SI or SI tools | — | We used SI |
 
