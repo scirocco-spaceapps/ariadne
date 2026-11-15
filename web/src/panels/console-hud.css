@@ -525,3 +525,13 @@
 .cx--right-open .cx-rail--right {
   right: calc(var(--hud-right-w) + 28px);
 }
+
+/* Under automation (src/main.tsx): no backdrop blur or idle animation. A software-rendered CI browser
+   would re-blur every glass panel on each map frame and miss the e2e timing. */
+[data-automation] .cx--hud *,
+[data-automation] .cx--hud *::before,
+[data-automation] .cx--hud *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  animation: none !important;
+}
