@@ -89,7 +89,15 @@ export function AlertScreen({
           </div>
         </dl>
 
-        {homeBearing !== null && (
+        {homeDistance !== null && homeDistance < 5 ? (
+          <div className="cf-alert-home">
+            <span>
+              <strong>Home: inside the rover</strong>
+              <br />
+              <span className="cf-alert-verdict">Safe before the storm.</span> <Prov p="Simulation" />
+            </span>
+          </div>
+        ) : homeBearing !== null && (
           <div className="cf-alert-home">
             <BearingArrow deg={homeBearing} size={64} />
             <span>

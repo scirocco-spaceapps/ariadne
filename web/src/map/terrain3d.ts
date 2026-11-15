@@ -34,6 +34,8 @@ export const MARS_LIGHT = new LightingEffect({
   sky: new AmbientLight({ color: [120, 140, 165], intensity: 0.55 }),
   sun: new DirectionalLight({ color: [255, 186, 132], intensity: 1.9, direction: [1, 0.35, -0.55] }),
 })
+/** Labels and markers are drawn over the terrain and the light pillars, never hidden by them. */
+const ON_TOP = { depthCompare: 'always' as const }
 const THREAD: Rgba = [255, 93, 108, 255]
 const ROUTE: Rgba = [238, 243, 241, 255]
 const SAND: Rgba = [217, 168, 119, 255]
@@ -295,6 +297,7 @@ export function build3dLayers({ source, data, terrain, orthoFile, envelope, miss
         lineWidthUnits: 'pixels',
         getLineWidth: 2,
         updateTriggers: { getRadius: numbers },
+        parameters: ON_TOP,
       }),
       new TextLayer<{ xy: XY; n: number | null }>({
         id: 'stops3d-numbers',
@@ -307,6 +310,7 @@ export function build3dLayers({ source, data, terrain, orthoFile, envelope, miss
         getTextAnchor: 'middle',
         getAlignmentBaseline: 'center',
         fontFamily: '"IBM Plex Sans", system-ui, sans-serif',
+        parameters: ON_TOP,
       }),
       new TextLayer<{ xy: XY; name: string }>({
         id: 'stops3d-labels',
@@ -323,6 +327,7 @@ export function build3dLayers({ source, data, terrain, orthoFile, envelope, miss
         fontFamily: '"IBM Plex Sans", system-ui, sans-serif',
         fontWeight: 600,
         characterSet: 'auto',
+        parameters: ON_TOP,
       }),
     )
   }
@@ -384,6 +389,8 @@ export function build3dLayers({ source, data, terrain, orthoFile, envelope, miss
         backgroundPadding: [6, 3],
         fontFamily: '"IBM Plex Sans", system-ui, sans-serif',
         fontWeight: 600,
+        characterSet: 'auto',
+        parameters: ON_TOP,
       }),
     )
   }

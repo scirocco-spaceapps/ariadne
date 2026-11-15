@@ -83,7 +83,7 @@ export function MissionHud({ source }: { source: AssetSource }) {
               {target.eta_min !== null && <> · {Math.round(target.eta_min)} min</>}
             </>
           ) : target?.here ? (
-            'Dwelling: science tasks on the cuff'
+            target.kind === 'haven' || target.id === aoi?.safe_haven.id ? 'Home: inside the rover' : 'Dwelling: science tasks on the cuff'
           ) : (
             'Plan a route to start'
           )}{' '}
