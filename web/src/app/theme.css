@@ -1,21 +1,66 @@
-/* Ariadne theme: the visual brief's dark tokens and type. The cuff keeps its own black
-   stylesheet (src/cuff/cuff.css); everything else reads these variables. */
+/* Ariadne theme: "thread on basalt" (docs/DECISIONS.md, 2026-11-15).
+   Dark basalt surfaces, quiet chrome, and one signature colour: the coral thread home. Every screen
+   reads these tokens; the old brief names (--bg, --panel, --ink, ...) stay as aliases so nothing
+   that already uses them changes. */
 :root {
-  --bg: #0a1114;
-  --panel: #111b20;
-  --panel2: #17252c;
-  --line: #273a42;
-  --ink: #e7efec;
-  --muted: #8fa3a8;
+  /* Surfaces, darkest first. Slightly warm blacks: Mars at night, not a code editor. */
+  --basalt-0: #07090b;
+  --basalt-1: #0c1013;
+  --basalt-2: #12181c;
+  --basalt-3: #1a2227;
+  --basalt-4: #243037;
+  --hairline: rgba(214, 228, 224, 0.1);
+  --hairline-strong: rgba(214, 228, 224, 0.2);
+  --glass: rgba(10, 14, 17, 0.78);
+
+  /* Ink. */
+  --ink-1: #eef3f1;
+  --ink-2: #a9b8b9;
+  --ink-3: #6f8084;
+
+  /* Meaning. The thread is the only saturated warm colour on screen in normal operation. */
   --thread: #ff5d6c;
+  --thread-glow: rgba(255, 93, 108, 0.45);
   --safe: #46c58b;
+  --safe-glow: rgba(70, 197, 139, 0.35);
   --warn: #f2a93b;
   --sand: #d9a877;
+  --sky: #8fd3ff;
+
+  /* Legacy names from the visual brief (kept as aliases). */
+  --bg: var(--basalt-1);
+  --panel: var(--basalt-2);
+  --panel2: var(--basalt-3);
+  --line: var(--hairline-strong);
+  --ink: var(--ink-1);
+  --muted: var(--ink-2);
   --tint: rgba(231, 239, 236, 0.06);
 
+  /* Type. Display = condensed caps for labels and big numbers; mono = clocks and coordinates. */
   --display: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
   --body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --tracking-caps: 0.12em;
+
+  /* Type scale (rem at 16 px). */
+  --fs-micro: 0.6875rem;
+  --fs-small: 0.8125rem;
+  --fs-body: 0.9375rem;
+  --fs-lead: 1.125rem;
+  --fs-h: 1.5rem;
+
+  /* Radii, spacing, motion. */
+  --r-1: 4px;
+  --r-2: 8px;
+  --r-3: 14px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --t-fast: 140ms;
+  --t-med: 320ms;
 
   /* Provenance colours, readable on the dark panels. */
   --prov-observed: #46c58b;
@@ -35,6 +80,7 @@ body {
   font-family: var(--body);
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'tnum' 0;
 }
 
 *,
@@ -44,7 +90,7 @@ body {
 }
 
 a {
-  color: #8fd3ff;
+  color: var(--sky);
 }
 
 button,
@@ -58,10 +104,13 @@ button,
 select {
   background: var(--panel2);
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--r-1);
   padding: 4px 10px;
   min-height: 30px;
   cursor: pointer;
+  transition:
+    border-color var(--t-fast) var(--ease-out),
+    background-color var(--t-fast) var(--ease-out);
 }
 button:hover:not(:disabled),
 select:hover:not(:disabled) {
@@ -73,10 +122,30 @@ select:disabled {
   cursor: not-allowed;
 }
 :focus-visible {
-  outline: 2px solid #8fd3ff;
+  outline: 2px solid var(--sky);
   outline-offset: 1px;
 }
 input[type='checkbox'],
 input[type='range'] {
   accent-color: var(--ink);
+}
+
+/* Shared helpers. */
+.t-caps {
+  font-family: var(--display);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+.t-num {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
 }
