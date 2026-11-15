@@ -111,8 +111,9 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
   const [cursor, setCursor] = useState<XY | null>(null)
 
   const data = useSiteData(source)
-  // 3D terrain is the default view; 2D stays one click away for analysis.
-  const [mode3d, setMode3d] = useState(true)
+  // 3D terrain is the default view; 2D stays one click away for analysis. Under automation (e2e on a
+  // CI runner without a GPU) the map opens in 2D: software-rendered 3D is too slow for its timing.
+  const [mode3d, setMode3d] = useState(() => typeof navigator === 'undefined' || !navigator.webdriver)
   const terrain = useTerrain(source)
   const show3d = mode3d && terrain !== null
   const [orbit, setOrbit] = useState<OrbitViewState | null>(null)
