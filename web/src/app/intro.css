@@ -1,0 +1,92 @@
+/* First-load title card (Intro.tsx). Pointer events pass through; it only fades. */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: radial-gradient(80% 70% at 50% 60%, #12181c, #050708 70%);
+  pointer-events: none;
+  transition: opacity 700ms ease-out;
+}
+.intro--out {
+  opacity: 0;
+}
+.intro-thread {
+  width: min(84vw, 1100px);
+  height: auto;
+  overflow: visible;
+}
+.intro-path {
+  fill: none;
+  stroke: var(--thread, #ff5d6c);
+  stroke-width: 5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 10px rgba(255, 93, 108, 0.7));
+  stroke-dasharray: 1600;
+  stroke-dashoffset: 1600;
+  animation: intro-draw 1.6s cubic-bezier(0.6, 0, 0.2, 1) 0.15s forwards;
+}
+@keyframes intro-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.intro-home {
+  fill: none;
+  stroke: var(--safe, #46c58b);
+  stroke-width: 5;
+  opacity: 0;
+  transform-origin: 1120px 140px;
+  filter: drop-shadow(0 0 10px rgba(70, 197, 139, 0.8));
+  animation: intro-home 0.5s var(--ease-out, ease-out) 1.6s forwards;
+}
+@keyframes intro-home {
+  from {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.intro-text {
+  text-align: center;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: intro-text 0.7s var(--ease-out, ease-out) 1.2s forwards;
+}
+@keyframes intro-text {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.intro-name {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(48px, 7vw, 110px);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-1, #eef3f1);
+}
+.intro-line {
+  margin: 4px 0 0;
+  font-family: var(--display);
+  font-size: clamp(22px, 2.4vw, 38px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--ink-1, #eef3f1);
+}
+.intro-place {
+  margin: 10px 0 0;
+  font-size: clamp(13px, 1.1vw, 18px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sand, #d9a877);
+}

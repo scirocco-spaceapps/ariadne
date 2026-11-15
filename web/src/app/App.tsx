@@ -4,6 +4,7 @@ import { Console } from '../panels'
 import { DevStopsPage } from '../stops'
 import { useMissionBootstrap, useSessionRecovery, useSessionSocket } from './bootstrap'
 import { DemoBadge } from './DemoBadge'
+import { Intro } from './Intro'
 import { LinkBanner } from './LinkBanner'
 
 export function App() {
@@ -16,6 +17,8 @@ export function App() {
     <>
       {/* The cuff shows its DEMO DATA badge in its own header, so the layout does not move. */}
       {role === 'console' && <DemoBadge />}
+      {/* First-load title card on the console only (Intro.tsx): never blocks, once per tab. */}
+      {pathname === '/' && <Intro />}
       <LinkBanner role={role} />
       <Routes>
         <Route path="/" element={<Console />} />
