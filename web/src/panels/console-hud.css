@@ -26,10 +26,25 @@
 }
 
 /* ---------- the map, full bleed ---------- */
+/* The map element is the free area between the panels (what the e2e thread check captures); the
+   canvas inside still covers the whole screen, so the terrain runs on behind the glass. */
 .cx--hud .cx-map {
   position: absolute;
-  inset: 0;
-  background: #000;
+  top: var(--free-top);
+  right: var(--free-right);
+  bottom: var(--free-bottom);
+  left: var(--free-left);
+  overflow: visible;
+  background: transparent;
+}
+.cx--hud .cx-map > .am-map {
+  position: absolute;
+  top: calc(-1 * var(--free-top));
+  right: calc(-1 * var(--free-right));
+  bottom: calc(-1 * var(--free-bottom));
+  left: calc(-1 * var(--free-left));
+  width: auto;
+  height: auto;
 }
 .cx--hud .cx-map .am-map {
   background:
@@ -395,7 +410,7 @@
   display: none;
 }
 .cx--hud .cx-storm-banner {
-  top: calc(var(--hud-top) + 6px);
+  top: 6px;
   z-index: 6;
 }
 .cx--hud.cx--storm .hud-tile {

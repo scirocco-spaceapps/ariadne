@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { useMission } from '../app/store'
 import { assetsUrl } from '../lib/config'
 import { aoi } from '../lib/fixtures'
@@ -64,6 +64,14 @@ export function Console() {
       className={['cx cx--hud', storm !== null && 'cx--storm', leftOpen && 'cx--left-open', rightOpen && 'cx--right-open']
         .filter(Boolean)
         .join(' ')}
+      style={
+        {
+          '--free-top': `${inset.top}px`,
+          '--free-right': `${inset.right}px`,
+          '--free-bottom': `${inset.bottom}px`,
+          '--free-left': `${inset.left}px`,
+        } as CSSProperties
+      }
     >
       <main className="cx-map">
         <MapView source={source} inset={inset} />
