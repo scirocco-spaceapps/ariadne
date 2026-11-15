@@ -11,11 +11,11 @@
   "photos": [
     {
       "file": "photos/target-mount-washburn_1.jpg",
-      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_1170_0770822521_176ECM_N0525844NCAM02170_04_195J",
+      "page_url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_1170_0770814434_784ECM_N0525844NCAM03170_01_195J",
       "sol": 1170,
       "camera": "Navcam Left",
       "credit": "NASA/JPL-Caltech",
-      "caption": "View across the channel floor, with the rover in the foreground; the target area is at the upper centre of the frame (projected from rover position and camera pointing).",
+      "caption": "View up the slope beside the channel; the target area is at the upper centre of the frame (projected from rover position and camera pointing).",
       "distance_m": 64.9
     },
     {
