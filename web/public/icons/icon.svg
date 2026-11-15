@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Ariadne app icon, drawn in code: the thread home (coral) ending in the safe haven (green loop)
+       over a Martian dusk. Full bleed, content inside the maskable safe circle. No logos, no AI art. -->
+  <defs>
+    <radialGradient id="sky" cx="50%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#1b2429"/>
+      <stop offset="1" stop-color="#06080a"/>
+    </radialGradient>
+    <radialGradient id="dusk" cx="50%" cy="100%" r="70%">
+      <stop offset="0" stop-color="#b4572c" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#b4572c" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <rect width="512" height="512" fill="url(#dusk)"/>
+  <!-- a low ridge line: the terrain the thread crosses -->
+  <path d="M0 402 C 80 376, 140 392, 210 370 S 340 352, 404 372 S 480 384, 512 376 L 512 512 L 0 512 Z" fill="#0b0f12" opacity="0.85"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M118 352 C 160 214, 222 372, 282 258 S 368 150, 372 232" stroke="#ff5d6c" stroke-width="34" opacity="0.55" filter="url(#glow)"/>
+    <path d="M118 352 C 160 214, 222 372, 282 258 S 368 150, 372 232" stroke="#ff5d6c" stroke-width="26"/>
+    <circle cx="380" cy="268" r="32" stroke="#46c58b" stroke-width="22" opacity="0.5" filter="url(#glow)"/>
+    <circle cx="380" cy="268" r="32" stroke="#46c58b" stroke-width="20"/>
+  </g>
+</svg>

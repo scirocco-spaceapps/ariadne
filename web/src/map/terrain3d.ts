@@ -128,6 +128,12 @@ export function buildTerrain(dem: Float32Array, cols: number, rows: number, px_m
 
 /** Loads the AOI's DEM and builds the terrain once per source; null while loading or on failure. */
 export function useTerrain(source: AssetSource): Terrain | null {
+  return useTerrainState(source).terrain
+}
+
+/** The terrain plus whether it is still loading (false once it is ready or has failed). */
+export function useTerrainState(source: AssetSource): { terrain: Terrain | null; loading: boolean } {
+  const [failed, setFailed] = useState<AssetSource | null>(null)
   const [t, setT] = useState<{ source: AssetSource; terrain: Terrain } | null>(null)
   useEffect(() => {
     let cancelled = false
@@ -139,18 +145,23 @@ export function useTerrain(source: AssetSource): Terrain | null {
     fetch(source.url(ref.file))
       .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
       .then((buf) => {
-        if (cancelled || buf.byteLength !== cols * rows * 4) return
+        if (cancelled) return
+        if (buf.byteLength !== cols * rows * 4) {
+          setFailed(source)
+          return
+        }
         // ~80k vertices at most: smooth on a laptop GPU, fine detail at projector distance.
         const step = Math.max(1, Math.ceil(Math.sqrt((cols * rows) / 80_000)))
         const terrain = buildTerrain(new Float32Array(buf), cols, rows, px, [aoi.size_m[0], aoi.size_m[1]], step)
         setT({ source, terrain })
       })
-      .catch(() => {})
+      .catch(() => !cancelled && setFailed(source))
     return () => {
       cancelled = true
     }
   }, [source])
-  return t && t.source === source ? t.terrain : null
+  const terrain = t && t.source === source ? t.terrain : null
+  return { terrain, loading: terrain === null && failed !== source }
 }
 
 type Build3d = {
