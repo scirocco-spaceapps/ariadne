@@ -7,10 +7,13 @@ import { fixtureSource, makeMarginAt, marginClass, remoteSource, useCostToHome }
 import { placeName } from '../panels/route'
 import { StopCard } from '../stops'
 import { AlertScreen } from './AlertScreen'
+import { BearingArrow, MarginRing } from './Gauge'
 import './cuff.css'
 import {
   MARGIN_LABEL,
+  bearingDeg,
   budgetLeft,
+  compassPoint,
   costAt,
   marginColour,
   nextTarget,
@@ -45,6 +48,19 @@ function usePwaHead() {
       meta.remove()
     }
   }, [])
+}
+
+/** The wordmark: a thread drawn in code that ends in a loop (home), then the name. */
+function Wordmark() {
+  return (
+    <span className="cuff-title cf-wordmark">
+      <svg viewBox="0 0 32 20" width="30" height="19" aria-hidden="true" className="cf-wordmark-glyph">
+        <path d="M2 16 C 8 2, 14 18, 20 8 S 27 4, 26 10" />
+        <circle cx="27" cy="12" r="3.2" />
+      </svg>
+      Ariadne
+    </span>
+  )
 }
 
 const WAKE_TEXT = {
@@ -85,6 +101,17 @@ export function Cuff() {
   const storm = state?.alert ? Math.max(0, state.alert.lead_min - (state.t_min - state.alert.since_t)) : null
   const returnMin = margin !== null && state && budget ? costAt(margin, state.t_min, budget) : null
 
+  // Where the next target is, for the bearing arrow: the safe haven during an alert, else the stop.
+  const targetXY = (() => {
+    if (!state || !aoi || !target || target.here) return null
+    if (target.kind === 'haven' || target.id === aoi.safe_haven.id) return aoi.safe_haven.xy
+    return aoi.stops.find((s) => s.id === target.id)?.xy ?? null
+  })()
+  const bearing = targetXY && state ? bearingDeg(state.pos, targetXY) : null
+  const homeBearing = state && aoi ? bearingDeg(state.pos, aoi.safe_haven.xy) : null
+  const ringFrac = margin !== null && budget ? margin / Math.max(1, budget.budget_min - budget.reserve_min) : null
+  const tone = margin === null ? 'none' : cls
+
   const marginWhy = !state
     ? 'Waiting for the first state.'
     : !cost
@@ -95,7 +122,7 @@ export function Cuff() {
     return (
       <main className="cuff">
         <header className="cuff-top">
-          <span className="cuff-title">Ariadne</span>
+          <Wordmark />
           <span className={`cuff-pill cuff-pill--${statusTone(status)}`} data-testid="cuff-status" role="status">
             {STATUS_LABEL[status]}
           </span>
@@ -117,7 +144,7 @@ export function Cuff() {
             DEMO DATA
           </span>
         ) : (
-          <span className="cuff-title">Ariadne</span>
+          <Wordmark />
         )}
         <span className={`cuff-pill cuff-pill--${demo ? 'warn' : statusTone(status)}`} data-testid="cuff-status" role="status">
           {demo ? 'DEMO replay' : STATUS_LABEL[status]}
@@ -130,14 +157,26 @@ export function Cuff() {
         <span className="cf-clock" data-testid="cuff-clock" aria-label="Mission clock">
           {state ? formatClock(state.t_min) : 'T+ --:--:--'}
         </span>
-        <span className="cuff-run">{state ? (state.running ? 'Running' : 'Paused') : 'Waiting'}</span>
+        <span className="cf-run-wrap">
+          <span className={`cf-beat${state?.running ? ' cf-beat--on' : ''}`} aria-hidden="true" />
+          <span className="cuff-run">{state ? (state.running ? 'Running' : 'Paused') : 'Waiting'}</span>
+        </span>
       </div>
 
-      <section className="cf-margin" aria-label="Margin to home" data-testid="cuff-margin">
-        <span className="cf-label">Margin to home</span>
-        <span className="cf-margin-value" style={{ color: margin === null ? undefined : marginColour(cls) }}>
-          {margin === null ? '—' : signedMin(margin)}
-        </span>
+      <section className={`cf-margin cf-tone--${tone}`} aria-label="Margin to home" data-testid="cuff-margin">
+        <MarginRing frac={ringFrac} colour={margin === null ? 'var(--ink-3)' : marginColour(cls)}>
+          <span className="cf-label">Margin to home</span>
+          <span className="cf-margin-value" style={{ color: margin === null ? undefined : marginColour(cls) }}>
+            {margin === null ? (
+              '—'
+            ) : (
+              <>
+                {signedMin(margin).replace(/ min$/, '')}
+                <span className="cf-margin-unit"> min</span>
+              </>
+            )}
+          </span>
+        </MarginRing>
         <span className="cf-margin-class" style={{ color: margin === null ? undefined : marginColour(cls) }}>
           {margin === null ? marginWhy : MARGIN_LABEL[cls]} <Prov p={modelProv} />
         </span>
@@ -167,9 +206,17 @@ export function Cuff() {
         <span className="cf-label">{state?.alert ? 'Heading to' : target?.here ? 'At' : 'Next stop'}</span>
         {target ? (
           <>
-            <span className="cf-next-name">{placeName(aoi, target.id)}</span>
+            <div className="cf-next-row">
+              {bearing !== null && <BearingArrow deg={bearing} />}
+              <span className="cf-next-name">{placeName(aoi, target.id)}</span>
+            </div>
             {!target.here && (
               <span className="cf-line">
+                {bearing !== null && (
+                  <span className="cf-bearing-text">
+                    {compassPoint(bearing)} {String(Math.round(bearing)).padStart(3, '0')}° ·{' '}
+                  </span>
+                )}
                 {walkDistance(target.distance_m)}
                 {target.eta_min !== null && <> · {Math.round(target.eta_min)} min</>} <Prov p={modelProv} />
               </span>
@@ -209,7 +256,16 @@ export function Cuff() {
       </section>
 
       {storm !== null && (
-        <AlertScreen timeToStorm={storm} returnMin={returnMin} margin={margin} modelProv={modelProv} demo={demo} />
+        <AlertScreen
+          timeToStorm={storm}
+          lead={state?.alert?.lead_min ?? null}
+          returnMin={returnMin}
+          margin={margin}
+          modelProv={modelProv}
+          demo={demo}
+          homeBearing={homeBearing}
+          homeDistance={state?.alert && target ? target.distance_m : null}
+        />
       )}
     </main>
   )

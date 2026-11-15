@@ -127,3 +127,15 @@ export function routeStops(route: RouteResponse): { stops: string[]; home: boole
   const home = route.legs.length > 0 && route.legs[route.legs.length - 1].to === haven
   return { stops, home }
 }
+
+const POINTS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const
+
+/** Bearing in degrees clockwise from north (map north = up), from [x, y] to [tx, ty] in AOI metres. */
+export function bearingDeg(from: readonly number[], to: readonly number[]): number {
+  const deg = (Math.atan2(to[0] - from[0], to[1] - from[1]) * 180) / Math.PI
+  return (deg + 360) % 360
+}
+
+export function compassPoint(deg: number): string {
+  return POINTS[Math.round(deg / 45) % 8]
+}
