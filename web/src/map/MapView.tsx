@@ -33,7 +33,7 @@ import {
   type RouteGeometry,
 } from './route'
 import { fitZoom, metresPerPixel } from './scale'
-import { MARS_LIGHT, build3dLayers, useTerrain } from './terrain3d'
+import { MARS_LIGHT, build3dLayers, useTerrainState } from './terrain3d'
 import { orthoFile } from './buildLayers'
 import { TimeBar } from './TimeBar'
 import { ReplanPanel } from './ReplanPanel'
@@ -81,6 +81,31 @@ const PULSE_MS = 1200
 const DPR_3D = typeof window === 'undefined' ? 1 : Math.min(window.devicePixelRatio || 1, 1.25)
 /** The envelope image is redrawn at most this often (wall time): at 12 min/s it changed 24 times a second. */
 const ENVELOPE_MIN_MS = 400
+
+/**
+ * False while the 3D view is still loading or warming up: data pending, or the first frames still slow
+ * (shader compilation and texture upload block a laptop GPU for a few seconds). True once 12 frames in
+ * a row arrive under 50 ms, or after 15 s whatever happens. Always true when 3D is not in use.
+ */
+function useSettled(pending: boolean, active: boolean): boolean {
+  const [settled, setSettled] = useState(false)
+  useEffect(() => {
+    if (settled || pending || !active) return
+    let raf = 0
+    let last = performance.now()
+    let smooth = 0
+    const t0 = last
+    const tick = (now: number) => {
+      smooth = now - last < 50 ? smooth + 1 : 0
+      last = now
+      if (smooth >= 12 || now - t0 > 15_000) setSettled(true)
+      else raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [settled, pending, active])
+  return settled || (!pending && !active)
+}
 
 /** The value, updated at most every `ms` milliseconds (the latest value always lands). */
 function useThrottled<T>(value: T, ms: number): T {
@@ -142,14 +167,23 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
   // 3D terrain is the default view; 2D stays one click away for analysis. Under automation (e2e on a
   // CI runner without a GPU) the map opens in 2D: software-rendered 3D is too slow for its timing.
   const [mode3d, setMode3d] = useState(() => typeof navigator === 'undefined' || !navigator.webdriver)
-  const terrain = useTerrain(source)
+  const { terrain, loading: terrainLoading } = useTerrainState(source)
   const show3d = mode3d && terrain !== null
+  const settled = useSettled(mode3d && terrainLoading, show3d)
   const show3dRef = useRef(show3d)
   useEffect(() => {
     show3dRef.current = show3d
   }, [show3d])
   const [orbit, setOrbit] = useState<OrbitViewState | null>(null)
   const lastTouch = useRef(0)
+  // Once the user moves the 3D camera it is theirs: no idle sway and no automatic refit until Fit AOI.
+  // (The sway wrote the camera every frame; wheel zooms were not counted as a touch, so it snapped a
+  // zoom or a rotation back the moment the user let go.)
+  const userCamera = useRef(false)
+  const takeCamera = useCallback(() => {
+    userCamera.current = true
+    lastTouch.current = performance.now()
+  }, [])
 
   // Mission state (Y4): the planned route, the session state, the selected stop and the plan clock.
   const route = useMission((s) => s.route)
@@ -299,13 +333,15 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
       suggestion: replan.path,
     }
     const isVisible = (id: LayerId) => visible.has(id)
+    // 3D chosen but the terrain still loading: draw nothing yet. Drawing the 2D map first compiled its
+    // shaders and uploaded the 20-megapixel 50 cm image, a multi-second freeze on a laptop GPU.
+    if (mode3d && terrainLoading) return []
     if (show3d && terrain) {
-      // 3D drapes the 1 m ortho: a quarter of the 50 cm image's pixels to decode and upload, and no
-      // visible difference at a projector's viewing distance (the upload froze the view on a cold load).
+      // 3D drapes the 1 m ortho: a quarter of the 50 cm image's pixels to upload, same look on a projector.
       return build3dLayers({ source, data, terrain, orthoFile: orthoFile(source.aoi, true), envelope, mission, isVisible, pulse: 0 })
     }
     return buildLayers({ source, data, narrow, mission, envelope, ppm, isVisible })
-  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers, selectedTarget, ppm, replan.path, show3d, terrain])
+  }, [registered, source, data, narrow, geom, progress_m, marker, numbers, selectedStop, dash_m, envelope, alertLayers, selectedTarget, ppm, replan.path, show3d, terrain, mode3d, terrainLoading])
 
   // 3D camera: fitted once the terrain and the canvas size are known, then a slow idle orbit.
   const zMid = terrain ? terrain.zMax / 2 : 0
@@ -322,7 +358,7 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
   // Refit whenever the canvas size or the terrain changes, until the user moves the camera
   // (the first size deck reports is the canvas default, before layout).
   useEffect(() => {
-    if (!show3d || lastTouch.current !== 0) return
+    if (!show3d || userCamera.current) return
     const next = orbitFit()
     if (next) setOrbit((o) => ({ ...next, rotationOrbit: o?.rotationOrbit ?? next.rotationOrbit }))
   }, [show3d, orbitFit])
@@ -342,7 +378,7 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
         return
       }
       last = now
-      const idle = now - lastTouch.current > ORBIT_IDLE_MS && !document.hidden
+      const idle = !userCamera.current && now - lastTouch.current > ORBIT_IDLE_MS && !document.hidden
       if (!idle) base = null
       else {
         setOrbit((o) => {
@@ -372,6 +408,9 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
   return (
     <div
       className={`am-map ${route ? 'am-has-timebar' : ''} ${show3d ? 'am-3d' : ''} ${className ?? ''}`}
+      // The first pointer or wheel event on the map takes the camera, before deck reports any change.
+      onPointerDownCapture={show3d ? takeCamera : undefined}
+      onWheelCapture={show3d ? takeCamera : undefined}
       style={
         {
           '--am-inset-top': `${inset.top}px`,
@@ -391,7 +430,9 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
           const touched =
             interactionState.isDragging || interactionState.isZooming || interactionState.isPanning || interactionState.isRotating
           if (show3d) {
-            if (touched) lastTouch.current = performance.now()
+            // Only deck calls this (the sway sets the state directly), so any call is the user or a
+            // transition they started, e.g. a smooth wheel zoom whose interactionState flags are all false.
+            takeCamera()
             setOrbit(next as OrbitViewState)
             return
           }
@@ -404,6 +445,15 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
         onResize={onResize}
         getCursor={({ isDragging, isHovering }) => (isDragging ? 'grabbing' : isHovering ? 'pointer' : 'crosshair')}
       />
+      {!settled && (
+        <div className="am-loading" role="status" data-testid="map-loading">
+          <svg viewBox="0 0 120 24" width="120" height="24" aria-hidden="true">
+            <path d="M4 18 C 24 2, 40 22, 60 12 S 92 4, 104 12" />
+            <circle cx="110" cy="13" r="5" />
+          </svg>
+          <span>Loading the HiRISE terrain</span>
+        </div>
+      )}
       <ReplanPanel replan={replan} aoi={aoi} />
       <div className="am-overlay am-top-left">
         <span className="am-title">{aoi.name}</span>
@@ -416,6 +466,8 @@ export function MapView({ source, className, inset = NO_INSET }: Props) {
           className="am-button"
           onClick={() => {
             if (show3d) {
+              // Hand the camera back: refit now, and the idle sway resumes after a quiet spell.
+              userCamera.current = false
               lastTouch.current = performance.now()
               setOrbit(orbitFit())
             } else fit()
